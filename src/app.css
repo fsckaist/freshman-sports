@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-orange: #fe9a00;
+  --color-brand-red: #fb2c36;
+  --color-brand-yellow: #ffb900;
+  --color-brand-zinc-100: #f4f4f5;
+  --color-brand-zinc-200: #e4e4e7;
+  --color-brand-zinc-600: #52525c;
+  --color-brand-black-soft: #1f1f22;
+  --color-brand-black-hard: #262626;
+
+  --font-pretendard: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif;
+  --font-inter: "Inter", "Noto Sans KR", sans-serif;
+}
+
+/* Base resets & fonts */
+@layer base {
+  body {
+    font-family: var(--font-pretendard);
+    background-color: var(--color-brand-zinc-100);
+    color: var(--color-brand-black-soft);
+  }
+}
