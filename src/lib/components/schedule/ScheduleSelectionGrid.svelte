@@ -1,0 +1,133 @@
+<script lang="ts">
+    import TimeSlotCard from "./TimeSlotCard.svelte";
+    import { enhance } from "$app/forms";
+
+    interface Participant {
+        name: string;
+        userId: string;
+        classId: string | null;
+    }
+
+    interface ScheduleSlot {
+        id: string;
+        startTime: string;
+        isSlotAvailable: boolean;
+        registrations: Participant[];
+        totalVotes: number;
+        isVoted: boolean;
+    }
+
+    let {
+        gridData = {},
+        currentUserClassId = null,
+        minPlayers = 5,
+    } = $props<{
+        gridData: Record<string, ScheduleSlot[]>;
+        currentUserClassId?: string | null;
+        minPlayers?: number;
+    }>();
+
+    // Svelte derives sorted dates for rows
+    let dates = $derived(Object.keys(gridData).sort());
+
+    // Determines grid column span dynamically based on maximum slots per day
+    let maxSlots = $derived(
+        dates.length > 0
+            ? Math.max(...dates.map((d) => gridData[d].length))
+            : 7,
+    );
+
+    // Time headers? Find the time labels using the first populated row.
+    let timeHeaders = $derived(
+        dates.length > 0 && gridData[dates[0]]
+            ? gridData[dates[0]].map((s: ScheduleSlot) => {
+                  const d = new Date(s.startTime);
+                  // "14:00" format natively via JS
+                  return d.toLocaleTimeString("ko-KR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                  });
+              })
+            : [],
+    );
+
+    function formatDateDisplay(dateStr: string) {
+        // e.g., '2026-03-05' -> '3/5 (목)'
+        const d = new Date(dateStr);
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        const days = ["일", "월", "화", "수", "목", "금", "토"];
+        const dayName = days[d.getDay()];
+        return `${month}/${day} (${dayName})`;
+    }
+</script>
+
+{#if dates.length > 0}
+    <div
+        class="grid h-fit w-fit mx-auto gap-x-[0.625rem] gap-y-[0.5rem] min-h-0"
+        style="grid-template-columns: 5rem repeat({maxSlots}, max-content); grid-template-rows: auto repeat({dates.length}, max-content);"
+    >
+        <!-- Header Row -->
+        <div
+            class="flex items-center justify-center text-zinc-400 font-pretendard text-[0.875rem] font-semibold text-center"
+        >
+            날짜 / 시간
+        </div>
+        {#each timeHeaders as time}
+            <div
+                class="flex items-center justify-center text-zinc-800 font-pretendard text-[0.9375rem] font-bold text-center py-[0.625rem]"
+            >
+                {time}
+            </div>
+        {/each}
+
+        <!-- Grids -->
+        {#each dates as date}
+            <!-- Date column -->
+            <div
+                class="flex items-center justify-center text-zinc-600 font-pretendard text-[1rem] font-semibold text-center w-full h-full px-[0.625rem]"
+            >
+                {formatDateDisplay(date)}
+            </div>
+
+            <!-- Time columns -->
+            {#each gridData[date] as slot}
+                <!-- TimeSlotCard rendered mapped directly to real Database models and logic -->
+                <form
+                    method="POST"
+                    action="?/toggleVote"
+                    use:enhance
+                    class="m-0 p-0 block"
+                >
+                    <input type="hidden" name="slotId" value={slot.id} />
+                    <TimeSlotCard
+                        isAvailable={slot.isSlotAvailable}
+                        isVoted={slot.isVoted}
+                        ourCount={slot.registrations.filter(
+                            (r: Participant) =>
+                                r.classId === currentUserClassId,
+                        ).length}
+                        oppCount={slot.registrations.filter(
+                            (r: Participant) =>
+                                r.classId !== currentUserClassId,
+                        ).length}
+                        ourMax={minPlayers}
+                        oppMax={minPlayers}
+                        participantNames={slot.registrations.map(
+                            (r: Participant) => r.name,
+                        )}
+                    />
+                </form>
+            {/each}
+        {/each}
+    </div>
+{:else}
+    <div class="flex items-center justify-center w-full h-full py-12">
+        <p
+            class="font-pretendard font-normal text-zinc-400 text-[0.875rem] m-0"
+        >
+            해당 종목의 일정이 아직 등록되지 않았어요.
+        </p>
+    </div>
+{/if}
