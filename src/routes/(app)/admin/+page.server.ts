@@ -611,7 +611,7 @@ export const actions: Actions = {
                                         .values({
                                             sportId: sportId,
                                             status: 'PENDING_SCHEDULE',
-                                            name: `${sportName} Round ${nextRound} - Match ${pIdx + 1}`,
+                                            name: `Round ${nextRound} - Match ${pIdx + 1}`,
                                             classAId,
                                             classBId,
                                         })

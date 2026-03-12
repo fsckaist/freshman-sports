@@ -112,7 +112,7 @@
         <div
             class="flex items-center justify-center shrink-0 w-full px-[0.625rem]"
         >
-            {#if data.isEligible && data.hasPendingMatch}
+            {#if data.isEligible && data.hasPendingMatch && data.deadlineAt}
                 <p
                     class="font-pretendard font-normal text-[0.875rem] text-zinc-600 m-0"
                 >

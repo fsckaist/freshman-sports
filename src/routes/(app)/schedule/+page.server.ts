@@ -58,6 +58,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             scheduleWindowEnd: Date | null;
             scheduleWindowDeadline: Date | null;
             round: number;
+            classAId: string | null;
+            classBId: string | null;
         } | null = null;
         if (user.classId) {
             const pendingMatchCheck = await db.select({
@@ -65,6 +67,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 scheduleWindowStart: matches.scheduleWindowStart,
                 scheduleWindowEnd: matches.scheduleWindowEnd,
                 scheduleWindowDeadline: matches.scheduleWindowDeadline,
+                classAId: matches.classAId,
+                classBId: matches.classBId,
                 round: tournament_brackets.round
             })
                 .from(matches)
@@ -94,14 +98,14 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         let endDate: Date | null = null;
         let deadlineDate: Date | null = null;
 
-        const isRound1 = pendingMatchData?.round === 1;
+        const matchHasWindow = pendingMatchData?.scheduleWindowStart && (pendingMatchData?.scheduleWindowEnd || pendingMatchData?.scheduleWindowDeadline);
 
-        if (!isRound1 && pendingMatchData?.scheduleWindowStart && (pendingMatchData?.scheduleWindowEnd || pendingMatchData?.scheduleWindowDeadline)) {
-            startDate = new Date(pendingMatchData.scheduleWindowStart);
-            endDate = new Date(pendingMatchData.scheduleWindowEnd ?? pendingMatchData.scheduleWindowDeadline!);
+        if (matchHasWindow) {
+            startDate = new Date(pendingMatchData!.scheduleWindowStart!);
+            endDate = new Date(pendingMatchData!.scheduleWindowEnd ?? pendingMatchData!.scheduleWindowDeadline!);
             endDate.setHours(23, 59, 59, 999);
-            deadlineDate = new Date(pendingMatchData.scheduleWindowDeadline!);
-        } else if (activeSport.round1SelectionStart && activeSport.round1SelectionEnd && activeSport.round1Deadline) {
+            deadlineDate = new Date(pendingMatchData!.scheduleWindowDeadline!);
+        } else if (hasPendingMatch && activeSport.round1SelectionStart && activeSport.round1SelectionEnd && activeSport.round1Deadline) {
             startDate = new Date(activeSport.round1SelectionStart);
             endDate = new Date(activeSport.round1SelectionEnd);
             endDate.setHours(23, 59, 59, 999);
@@ -235,6 +239,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             currentUserClassId: user.classId,
             isEligible,
             hasPendingMatch,
+            isOpponentUndecided: hasPendingMatch && (!pendingMatchData?.classAId || !pendingMatchData?.classBId),
             minPlayers: activeSport.minPlayers
         };
     } catch (e) {
@@ -303,7 +308,7 @@ export const actions: Actions = {
                 .limit(1);
 
             let activeDeadline = sport[0].round1Deadline;
-            if (matchCheck.length > 0 && matchCheck[0].round !== 1 && matchCheck[0].deadline) {
+            if (matchCheck.length > 0 && matchCheck[0].deadline) {
                 activeDeadline = matchCheck[0].deadline;
             }
 

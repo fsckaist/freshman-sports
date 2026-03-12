@@ -1,14 +1,19 @@
 import { db } from './src/lib/server/db';
-import { sports, schedules } from './src/lib/server/db/schema';
+import { sports, matches, tournament_brackets, rosters } from './src/lib/server/db/schema';
+import { eq, and, or } from 'drizzle-orm';
 
 async function check() {
     const allSports = await db.select().from(sports);
-    console.log('Sports:', allSports.map(s => ({ id: s.id, name: s.name, start: s.periodStart, end: s.periodEnd })));
+    console.log('--- SPORTS ---');
+    console.log(JSON.stringify(allSports, null, 2));
 
-    const allSchedules = await db.select().from(schedules);
-    console.log('Total Schedules:', allSchedules.length);
+    const allMatches = await db.select().from(matches).where(eq(matches.status, 'PENDING_SCHEDULE'));
+    console.log('\n--- PENDING MATCHES ---');
+    console.log(JSON.stringify(allMatches, null, 2));
 
-    process.exit(0);
+    const brackets = await db.select().from(tournament_brackets);
+    console.log('\n--- BRACKETS ---');
+    console.log(JSON.stringify(brackets, null, 2));
 }
 
-check();
+check().catch(console.error);
