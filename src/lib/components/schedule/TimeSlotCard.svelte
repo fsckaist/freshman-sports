@@ -14,6 +14,8 @@
         isAdmin = false,
         scheduledMatchesCount = 0,
         maxParallelMatches = 1,
+        isOpponentUndecided = false,
+        isConfirmMode = false,
         onSlotClick = undefined,
     } = $props<{
         isAvailable?: boolean;
@@ -25,6 +27,8 @@
         participantNames?: string[];
         isDisabled?: boolean;
         isAdmin?: boolean;
+        isOpponentUndecided?: boolean;
+        isConfirmMode?: boolean;
         scheduledMatchesCount?: number;
         maxParallelMatches?: number;
         onSlotClick?: (e: MouseEvent) => void;
@@ -132,13 +136,15 @@
                 <div
                     class="flex flex-[1_0_0] flex-col items-center justify-center gap-px h-full relative border-r border-solid border-zinc-300"
                 >
-                    <div
-                        class="flex items-center justify-center leading-none w-[0.75rem] h-[0.75rem]"
-                        class:text-amber-500={isOurTeamAvailable}
-                        class:text-zinc-400={!isOurTeamAvailable}
-                    >
-                        {@html resizeSvg(personSvg)}
-                    </div>
+                    {#if !isConfirmMode}
+                        <div
+                            class="flex items-center justify-center leading-none w-[0.75rem] h-[0.75rem]"
+                            class:text-amber-500={isOurTeamAvailable}
+                            class:text-zinc-400={!isOurTeamAvailable}
+                        >
+                            {@html resizeSvg(personSvg)}
+                        </div>
+                    {/if}
                     <div
                         class="flex items-center font-pretendard leading-none gap-px font-semibold text-[1rem]"
                     >
@@ -151,24 +157,30 @@
                 <div
                     class="flex flex-[1_0_0] flex-col items-center justify-center gap-px h-full relative"
                 >
-                    <div
-                        class="flex items-center justify-center leading-none w-[0.75rem] h-[0.75rem]"
-                        class:text-amber-500={isOppTeamAvailable}
-                        class:text-zinc-400={!isOppTeamAvailable}
-                    >
-                        {@html resizeSvg(skullSvg)}
-                    </div>
+                    {#if !isConfirmMode}
+                        <div
+                            class="flex items-center justify-center leading-none w-[0.75rem] h-[0.75rem]"
+                            class:text-amber-500={isOppTeamAvailable}
+                            class:text-zinc-400={!isOppTeamAvailable}
+                        >
+                            {@html resizeSvg(skullSvg)}
+                        </div>
+                    {/if}
                     <div
                         class="flex items-center font-pretendard leading-none gap-px font-semibold text-[1rem]"
                     >
-                        <span class="text-zinc-800">{oppCount}</span>
+                        {#if isOpponentUndecided}
+                            <span class="text-zinc-600">?</span>
+                        {:else}
+                            <span class="text-zinc-800">{oppCount}</span>
+                        {/if}
                         <span class="text-zinc-400">/{oppMax}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Action / Status Background Footer -->
-            {#if !isDisabled}
+            {#if !isDisabled && !isConfirmMode}
                 <div
                     class="flex items-center justify-center w-full py-[0.25rem] shrink-0 border-t border-solid transition-colors duration-200"
                     class:bg-amber-100={isParticipating}
@@ -187,20 +199,7 @@
             {/if}
         {:else}
             <!-- EMPTY USER MODE -->
-            <div
-                class="flex flex-col items-center justify-center gap-0.5 w-full h-full bg-zinc-50"
-            >
-                <div
-                    class="font-pretendard font-bold text-[0.875rem] text-zinc-400"
-                >
-                    비활성
-                </div>
-                <div
-                    class="font-pretendard font-medium text-[0.625rem] text-zinc-400"
-                >
-                    ({scheduledMatchesCount}/{maxParallelMatches})
-                </div>
-            </div>
+            <div class="w-full h-full bg-white"></div>
         {/if}
     {/if}
 </button>

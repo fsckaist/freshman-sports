@@ -228,6 +228,11 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             name: s.name
         }));
 
+        let opponentClassId: string | null = null;
+        if (pendingMatchData) {
+            opponentClassId = pendingMatchData.classAId === user.classId ? pendingMatchData.classBId : pendingMatchData.classAId;
+        }
+
         return {
             deadlineDate: deadlineLabel,
             deadlineAt,
@@ -235,10 +240,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             deadlinePassed,
             sports: sportTabs,
             activeSportId: activeSport.id,
-            gridData: deadlinePassed ? {} : formattedGrid,
+            gridData: (deadlinePassed || !startDate) ? {} : formattedGrid,
             currentUserClassId: user.classId,
+            opponentClassId,
             isEligible,
             hasPendingMatch,
+            isWindowUndetermined: hasPendingMatch && !matchHasWindow && pendingMatchData?.round !== 1,
             isOpponentUndecided: hasPendingMatch && (!pendingMatchData?.classAId || !pendingMatchData?.classBId),
             minPlayers: activeSport.minPlayers
         };

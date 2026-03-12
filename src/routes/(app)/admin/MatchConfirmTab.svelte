@@ -90,9 +90,16 @@
                         : 'border-zinc-200 bg-white hover:bg-zinc-50 hover:shadow-sm'}"
                 >
                     <div
-                        class="font-bold tracking-wide bg-zinc-800 text-white px-2 py-0.5 rounded text-[0.625rem]"
+                        class="flex gap-1 items-center font-bold tracking-wide px-2 py-0.5 rounded text-[0.7rem]
+                        {activeMatch?.id === matchPair.id
+                            ? 'bg-amber-100 text-amber-900'
+                            : 'bg-zinc-100 text-zinc-800'}"
                     >
-                        {matchPair.sportName}
+                        <span>{matchPair.sportName}</span>
+                        {#if matchPair.matchName}
+                            <span class="opacity-50">•</span>
+                            <span>{matchPair.matchName}</span>
+                        {/if}
                     </div>
                     <div
                         class="flex gap-2 items-center font-bold text-lg text-zinc-800"
@@ -138,11 +145,13 @@
                         <ScheduleSelectionGrid
                             gridData={confirmGridData}
                             currentUserClassId={activeMatch?.classAId}
+                            opponentClassId={activeMatch?.classBId}
                             minPlayers={sports.find(
                                 (s) => s.id === activeSportId,
                             )?.minPlayers ?? 5}
                             isDisabled={false}
                             isAdmin={false}
+                            isConfirmMode={true}
                             onSlotClick={openFinalizeModal}
                         />
                     </div>
@@ -185,7 +194,12 @@
             <form
                 method="POST"
                 action="?/finalizeMatch"
-                use:enhance
+                use:enhance={() => {
+                    closeModal();
+                    return async ({ update }) => {
+                        update();
+                    };
+                }}
                 class="w-full flex flex-col gap-4"
             >
                 <input type="hidden" name="matchId" value={activeMatch?.id} />

@@ -22,16 +22,22 @@
     let {
         gridData = {},
         currentUserClassId = null,
+        opponentClassId = null,
+        isOpponentUndecided = false,
         minPlayers = 5,
         isDisabled = false,
         isAdmin = false,
+        isConfirmMode = false,
         onSlotClick = undefined,
     } = $props<{
         gridData: Record<string, ScheduleSlot[]>;
         currentUserClassId?: string | null;
+        opponentClassId?: string | null;
+        isOpponentUndecided?: boolean;
         minPlayers?: number;
         isDisabled?: boolean;
         isAdmin?: boolean;
+        isConfirmMode?: boolean;
         onSlotClick?: (slotId: string) => void;
     }>();
 
@@ -45,18 +51,22 @@
             : 7,
     );
 
-    // Time headers? Find the time labels using the first populated row.
+    // Time headers? Find the time labels using the day with the most slots to ensure coverage.
     let timeHeaders = $derived(
-        dates.length > 0 && gridData[dates[0]]
-            ? gridData[dates[0]].map((s: ScheduleSlot) => {
-                  const d = new Date(s.startTime);
-                  // "14:00" format natively via JS
-                  return d.toLocaleTimeString("ko-KR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
+        dates.length > 0
+            ? (() => {
+                  const dayWithMostSlots = dates.reduce((a, b) =>
+                      gridData[a].length > gridData[b].length ? a : b,
+                  );
+                  return gridData[dayWithMostSlots].map((s: ScheduleSlot) => {
+                      const d = new Date(s.startTime);
+                      return d.toLocaleTimeString("ko-KR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                      });
                   });
-              })
+              })()
             : [],
     );
 
@@ -79,6 +89,7 @@
         <!-- Header Row -->
         <div
             class="flex items-center justify-center text-zinc-400 font-pretendard text-[0.875rem] font-semibold text-center"
+            style="grid-column-start: 1;"
         >
             날짜 / 시간
         </div>
@@ -95,6 +106,7 @@
             <!-- Date column -->
             <div
                 class="flex items-center justify-center text-zinc-600 font-pretendard text-[1rem] font-semibold text-center w-full h-full px-[0.625rem] whitespace-nowrap"
+                style="grid-column-start: 1;"
             >
                 {formatDateDisplay(date)}
             </div>
@@ -119,16 +131,17 @@
                                 r.classId === currentUserClassId,
                         ).length}
                         oppCount={slot.registrations.filter(
-                            (r: Participant) =>
-                                r.classId !== currentUserClassId,
+                            (r: Participant) => r.classId === opponentClassId,
                         ).length}
                         ourMax={minPlayers}
                         oppMax={minPlayers}
+                        {isOpponentUndecided}
                         participantNames={slot.registrations.map(
                             (r: Participant) => r.name,
                         )}
                         isDisabled={isAdmin ? false : isDisabled}
                         {isAdmin}
+                        {isConfirmMode}
                         scheduledMatchesCount={slot.scheduledMatchesCount}
                         maxParallelMatches={slot.maxParallelMatches}
                         onSlotClick={onSlotClick

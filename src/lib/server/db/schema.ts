@@ -77,6 +77,7 @@ export const registers = pgTable("registers", {
     userId: uuid("user_id").references(() => users.id).notNull(),
     classId: uuid("class_id").references(() => classes.id).notNull(),
     isAvailable: boolean("is_available").default(true),
+    checkedInAt: timestamp("checked_in_at"),
 });
 
 export const matches = pgTable("matches", {

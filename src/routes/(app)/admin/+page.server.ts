@@ -81,7 +81,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
         // Calculate start and end bounds based on periodStart and periodEnd
         const startDate = activeSport.periodStart ? new Date(activeSport.periodStart) : new Date();
-        const endDate = activeSport.periodEnd ? new Date(activeSport.periodEnd) : new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const endDate = activeSport.periodEnd ? new Date(activeSport.periodEnd) : new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000);
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(23, 59, 59, 999);
 
@@ -132,6 +132,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         const pendingMatches = pendingMatchesRaw.map(r => ({
             id: r.match.id,
             sportName: r.sport.name,
+            matchName: r.match.name,
             classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
             classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
             classAId: r.match.classAId,
@@ -217,6 +218,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         const finishedMatches = finishedMatchesRaw.map(r => ({
             id: r.match.id,
             sportName: r.sport.name,
+            matchName: r.match.name,
             classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
             classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
             classAId: r.match.classAId,
@@ -520,6 +522,9 @@ export const actions: Actions = {
                 managerId: managerId || null
             }).where(eq(matches.id, matchId));
 
+            // Trigger schedule window updates for the next round
+            await computeOrUpdateNextMatchWindow(matchId);
+
             // 3. Check if limit reached and disable slot
             const scheduledCount = await db.select({ id: matches.id })
                 .from(matches)
@@ -557,14 +562,153 @@ export const actions: Actions = {
                 isVerified: true
             }).where(eq(matches.id, matchId));
 
-            // Bracket progression logic
             const currentNodes = await db.select().from(tournament_brackets).where(eq(tournament_brackets.matchId, matchId));
 
             if (currentNodes.length > 0) {
                 const anyNode = currentNodes[0];
                 const sportId = anyNode.sportId;
-                const sportRow = await db.select({ name: sports.name }).from(sports).where(eq(sports.id, sportId)).limit(1);
-                const sportName = sportRow[0]?.name || "종목";
+
+                // Bracket progression logic helper
+                const propagateBracketProgress = async (round: number, position: number) => {
+                    const nextRound = round + 1;
+                    const nextPosition = Math.floor(position / 2);
+
+                    // 1. Get the target node for the next round
+                    const [targetNode] = await db.select().from(tournament_brackets).where(and(
+                        eq(tournament_brackets.sportId, sportId),
+                        eq(tournament_brackets.round, nextRound),
+                        eq(tournament_brackets.position, nextPosition)
+                    )).limit(1);
+
+                    if (!targetNode) return; // Top of bracket reached
+
+                    // 2. Find both slots for the targetNode's level (to see if match can be formed)
+                    const pIdx = Math.floor(nextPosition / 2);
+                    const s1Pos = pIdx * 2;
+                    const s2Pos = pIdx * 2 + 1;
+
+                    const matchSlots = await db.select().from(tournament_brackets).where(and(
+                        eq(tournament_brackets.sportId, sportId),
+                        eq(tournament_brackets.round, nextRound),
+                        or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
+                    ));
+
+                    if (matchSlots.length !== 2) return;
+
+                    const s1 = matchSlots.find(s => s.position === s1Pos)!;
+                    const s2 = matchSlots.find(s => s.position === s2Pos)!;
+
+                    // 3. Check for special cases: Auto-win or Double-elimination
+                    const classA = s1.classId;
+                    const classB = s2.classId;
+                    const isAExcl = s1.isEliminatedSlot;
+                    const isBExcl = s2.isEliminatedSlot;
+
+                    let autoWinnerId: string | null = null;
+                    let bothEliminated = false;
+                    let hasInertOpponent = false;
+
+                    if (classA && isBExcl) {
+                        autoWinnerId = classA;
+                        hasInertOpponent = true;
+                    } else if (classB && isAExcl) {
+                        autoWinnerId = classB;
+                        hasInertOpponent = true;
+                    } else if (isAExcl && isBExcl) {
+                        bothEliminated = true;
+                        hasInertOpponent = true;
+                    }
+
+                    // Handle the match record for this round
+                    let mId = s1.matchId || s2.matchId;
+
+                    if (hasInertOpponent) {
+                        // This match is "Automated"
+                        const winnerId = bothEliminated ? null : autoWinnerId;
+
+                        if (!mId) {
+                            const [newMatch] = await db.insert(matches).values({
+                                sportId,
+                                status: 'FINISHED',
+                                isVerified: true,
+                                name: `Round ${nextRound} - Match ${pIdx + 1}`,
+                                classAId: classA,
+                                classBId: classB,
+                                winnerClassId: winnerId,
+                                matchNotes: bothEliminated ? '양측 우승자 없음으로 인한 동시 탈락' : '상대측 우승자 없음으로 인한 부전승/자동승리'
+                            }).returning({ id: matches.id });
+                            mId = newMatch.id;
+
+                            await db.update(tournament_brackets)
+                                .set({ matchId: mId })
+                                .where(and(
+                                    eq(tournament_brackets.sportId, sportId),
+                                    eq(tournament_brackets.round, nextRound),
+                                    or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
+                                ));
+                        } else {
+                            await db.update(matches).set({
+                                status: 'FINISHED',
+                                isVerified: true,
+                                classAId: classA,
+                                classBId: classB,
+                                winnerClassId: winnerId,
+                                matchNotes: bothEliminated ? '양측 우승자 없음으로 인한 동시 탈락' : '상대측 우승자 없음으로 인한 부전승/자동승리'
+                            }).where(eq(matches.id, mId));
+                        }
+
+                        // Advance to next round recursively
+                        const nextTargetRound = nextRound + 1;
+                        const nextTargetPosition = Math.floor(nextPosition / 2);
+                        const [grandTargetNode] = await db.select().from(tournament_brackets).where(and(
+                            eq(tournament_brackets.sportId, sportId),
+                            eq(tournament_brackets.round, nextTargetRound),
+                            eq(tournament_brackets.position, nextTargetPosition)
+                        )).limit(1);
+
+                        if (grandTargetNode) {
+                            await db.update(tournament_brackets).set({
+                                classId: winnerId,
+                                isEliminatedSlot: bothEliminated,
+                                status: bothEliminated ? 'lose' : 'default'
+                            }).where(eq(tournament_brackets.id, grandTargetNode.id));
+
+                            // Set win/lose status for current nodes
+                            await db.update(tournament_brackets).set({ status: classA === winnerId && winnerId ? 'win' : 'lose' }).where(eq(tournament_brackets.id, s1.id));
+                            await db.update(tournament_brackets).set({ status: classB === winnerId && winnerId ? 'win' : 'lose' }).where(eq(tournament_brackets.id, s2.id));
+
+                            await propagateBracketProgress(nextRound, nextPosition);
+                        }
+                        // Trigger schedule window updates for the newly finished/updated automated match
+                        if (mId) await computeOrUpdateNextMatchWindow(mId);
+                    } else if (classA || classB) {
+                        // Create match even if only one side is decided
+                        if (!mId) {
+                            const [newMatch] = await db.insert(matches).values({
+                                sportId,
+                                status: 'PENDING_SCHEDULE',
+                                name: `Round ${nextRound} - Match ${pIdx + 1}`,
+                                classAId: classA,
+                                classBId: classB,
+                            }).returning({ id: matches.id });
+                            mId = newMatch.id;
+
+                            await db.update(tournament_brackets)
+                                .set({ matchId: mId })
+                                .where(and(
+                                    eq(tournament_brackets.sportId, sportId),
+                                    eq(tournament_brackets.round, nextRound),
+                                    or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
+                                ));
+                        } else {
+                            await db.update(matches)
+                                .set({ classAId: classA, classBId: classB })
+                                .where(eq(matches.id, mId));
+                        }
+                        // Trigger schedule window updates for the newly created partial match
+                        if (mId) await computeOrUpdateNextMatchWindow(mId);
+                    }
+                };
 
                 for (const node of currentNodes) {
                     let newStatus: "win" | "lose" | "default" = "lose";
@@ -572,7 +716,7 @@ export const actions: Actions = {
                     if (winnerClassId && node.classId === winnerClassId) {
                         newStatus = "win";
 
-                        // Advance the winner to the next round slot
+                        // Advance to the next round slot
                         const nextRound = node.round + 1;
                         const nextPosition = Math.floor(node.position / 2);
 
@@ -584,65 +728,17 @@ export const actions: Actions = {
 
                         if (nextNodeResult.length > 0) {
                             await db.update(tournament_brackets)
-                                .set({ classId: winnerClassId })
+                                .set({ classId: winnerClassId, isEliminatedSlot: false })
                                 .where(eq(tournament_brackets.id, nextNodeResult[0].id));
-
-                            // Match creation/update for next round
-                            // Matches in next round involve positions 2*k and 2*k + 1
-                            const pIdx = Math.floor(nextPosition / 2);
-                            const s1Pos = pIdx * 2;
-                            const s2Pos = pIdx * 2 + 1;
-
-                            const matchSlots = await db.select().from(tournament_brackets).where(and(
-                                eq(tournament_brackets.sportId, sportId),
-                                eq(tournament_brackets.round, nextRound),
-                                or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
-                            ));
-
-                            // A match should be created/updated if we have both slots (binary tree)
-                            if (matchSlots.length === 2) {
-                                let mId = matchSlots.find(s => s.matchId !== null)?.matchId;
-                                const classAId = matchSlots.find(s => s.position === s1Pos)?.classId || null;
-                                const classBId = matchSlots.find(s => s.position === s2Pos)?.classId || null;
-
-                                if (!mId) {
-                                    // Create new match for this round/position
-                                    const [newMatch] = await db.insert(matches)
-                                        .values({
-                                            sportId: sportId,
-                                            status: 'PENDING_SCHEDULE',
-                                            name: `Round ${nextRound} - Match ${pIdx + 1}`,
-                                            classAId,
-                                            classBId,
-                                        })
-                                        .returning({ id: matches.id });
-                                    mId = newMatch.id;
-
-                                    // Link BOTH bracket slots to the new match
-                                    await db.update(tournament_brackets)
-                                        .set({ matchId: mId })
-                                        .where(and(
-                                            eq(tournament_brackets.sportId, sportId),
-                                            eq(tournament_brackets.round, nextRound),
-                                            or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
-                                        ));
-                                } else {
-                                    // Update existing match classes
-                                    await db.update(matches)
-                                        .set({ classAId, classBId })
-                                        .where(eq(matches.id, mId));
-                                }
-                            }
                         }
                     }
 
-                    // Save status for this round's bracket node
                     await db.update(tournament_brackets)
                         .set({ status: newStatus })
                         .where(eq(tournament_brackets.id, node.id));
                 }
 
-                // Both-lose case: mark the next round slot as eliminated so it never advances
+                // If both lose
                 if (!winnerClassId) {
                     const nextRound = anyNode.round + 1;
                     const nextPosition = Math.floor(anyNode.position / 2);
@@ -659,6 +755,9 @@ export const actions: Actions = {
                             .where(eq(tournament_brackets.id, nextNodeResult[0].id));
                     }
                 }
+
+                // Kick off the propagation check for the next level
+                await propagateBracketProgress(anyNode.round, anyNode.position);
             }
 
             // Auto-compute schedule window for the next-round match

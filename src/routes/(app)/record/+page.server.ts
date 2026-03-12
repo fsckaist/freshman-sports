@@ -1,12 +1,14 @@
 import { db } from '$lib/server/db';
 import { matches, schedules, sports, classes, registers, rosters, users } from '$lib/server/db/schema';
-import { eq, and, or, sql, asc } from 'drizzle-orm';
+import { eq, and, or, sql, asc, isNotNull } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
 const classA = alias(classes, 'classA');
 const classB = alias(classes, 'classB');
+const referee = alias(users, 'referee');
+const manager = alias(users, 'manager');
 
 export const load: PageServerLoad = async ({ url, locals }) => {
     // Role guard: only managers and admins can access the record page
@@ -26,12 +28,18 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             startTime: schedules.startTime,
             classA: classA.classNumber,
             classB: classB.classNumber,
+            classAId: matches.classAId,
+            classBId: matches.classBId,
+            refereeName: referee.name,
+            managerName: manager.name,
         })
         .from(matches)
         .innerJoin(schedules, eq(matches.scheduleId, schedules.id))
         .innerJoin(sports, eq(matches.sportId, sports.id))
         .leftJoin(classA, eq(matches.classAId, classA.id))
         .leftJoin(classB, eq(matches.classBId, classB.id))
+        .leftJoin(referee, eq(matches.refereeId, referee.id))
+        .leftJoin(manager, eq(matches.managerId, manager.id))
         .orderBy(
             asc(sql`CASE 
                 WHEN ${matches.status} = 'ONGOING' THEN 1 
@@ -42,6 +50,44 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             END`),
             asc(schedules.startTime)
         );
+
+    // Fetch attendance for ALL matches to show in sidebar
+    const allMatchIds = allMatches.map(m => m.id);
+    const allRegisters = await db
+        .select({
+            matchId: matches.id,
+            userId: users.id,
+            userName: users.name,
+            classId: users.classId,
+            checkedInAt: registers.checkedInAt
+        })
+        .from(registers)
+        .innerJoin(users, eq(registers.userId, users.id))
+        .innerJoin(schedules, eq(registers.scheduleId, schedules.id))
+        .innerJoin(matches, eq(matches.scheduleId, schedules.id))
+        .where(
+            and(
+                or(...allMatchIds.map(id => eq(matches.id, id))),
+                isNotNull(matches.scheduleId)
+            )
+        );
+
+    // Map registers back to matches
+    const matchesWithAttendance = allMatches.map(m => {
+        const matchRegs = allRegisters.filter(r => r.matchId === m.id);
+        const teamARegs = matchRegs.filter(r => r.classId === m.classAId);
+        const teamBRegs = matchRegs.filter(r => r.classId === m.classBId);
+
+        return {
+            ...m,
+            attendance: {
+                teamA: teamARegs.filter(r => r.checkedInAt).map(r => ({ name: r.userName })),
+                plannedTeamA: teamARegs.filter(r => !r.checkedInAt).map(r => ({ name: r.userName })),
+                teamB: teamBRegs.filter(r => r.checkedInAt).map(r => ({ name: r.userName })),
+                plannedTeamB: teamBRegs.filter(r => !r.checkedInAt).map(r => ({ name: r.userName }))
+            }
+        };
+    });
 
     const activeMatchId = url.searchParams.get('matchId');
 
@@ -62,11 +108,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 classA: classA.classNumber,
                 classB: classB.classNumber,
                 minPlayers: sports.minPlayers,
+                refereeName: referee.name,
+                managerName: manager.name,
             })
             .from(matches)
             .innerJoin(sports, eq(matches.sportId, sports.id))
             .leftJoin(classA, eq(matches.classAId, classA.id))
             .leftJoin(classB, eq(matches.classBId, classB.id))
+            .leftJoin(referee, eq(matches.refereeId, referee.id))
+            .leftJoin(manager, eq(matches.managerId, manager.id))
             .where(eq(matches.id, activeMatchId))
             .limit(1)
             .then(res => res[0]);
@@ -93,7 +143,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     userId: users.id,
                     name: users.name,
                     studentNumber: users.studentNumber,
-                    classId: users.classId
+                    classId: users.classId,
+                    checkedInAt: registers.checkedInAt
                 })
                 .from(registers)
                 .innerJoin(users, eq(registers.userId, users.id))
@@ -101,20 +152,27 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
             // Categorize registers into Team A, Team B, Cheering
             const teamACheckedIn = [];
+            const teamAOfflinePlanned = []; // Those who voted but haven't checked in
             const teamBCheckedIn = [];
+            const teamBOfflinePlanned = [];
             const cheeringCheckedIn = [];
 
             for (const reg of matchRegisters) {
-                if (teamAUserIds.has(reg.userId)) {
-                    teamACheckedIn.push(reg);
-                } else if (teamBUserIds.has(reg.userId)) {
-                    teamBCheckedIn.push(reg);
-                } else if (reg.classId === activeMatch.classAId || reg.classId === activeMatch.classBId) {
-                    // Belong to the class but not in roster -> Cheering
-                    cheeringCheckedIn.push(reg);
+                if (reg.checkedInAt) {
+                    if (teamAUserIds.has(reg.userId)) {
+                        teamACheckedIn.push(reg);
+                    } else if (teamBUserIds.has(reg.userId)) {
+                        teamBCheckedIn.push(reg);
+                    } else {
+                        cheeringCheckedIn.push(reg);
+                    }
                 } else {
-                    // Other class members cheering?
-                    cheeringCheckedIn.push(reg);
+                    // Not checked in yet (voted only)
+                    if (teamAUserIds.has(reg.userId)) {
+                        teamAOfflinePlanned.push(reg);
+                    } else if (teamBUserIds.has(reg.userId)) {
+                        teamBOfflinePlanned.push(reg);
+                    }
                 }
             }
 
@@ -125,14 +183,16 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     teamBTotal: activeMatch.minPlayers,
                     teamA: teamACheckedIn,
                     teamB: teamBCheckedIn,
-                    cheering: cheeringCheckedIn
+                    cheering: cheeringCheckedIn,
+                    plannedTeamA: teamAOfflinePlanned,
+                    plannedTeamB: teamBOfflinePlanned
                 }
             };
         }
     }
 
     return {
-        allMatches,
+        allMatches: matchesWithAttendance,
         activeMatchDetails
     };
 };
@@ -200,15 +260,22 @@ export const actions: Actions = {
                 )
         });
 
-        if (existing) {
+        if (existing && existing.checkedInAt) {
             return fail(400, { message: '이미 체크인 된 선수입니다.' });
         }
 
-        await db.insert(registers).values({
-            scheduleId: match.scheduleId,
-            userId: user.id,
-            classId: user.classId!
-        });
+        if (existing) {
+            await db.update(registers)
+                .set({ checkedInAt: new Date() })
+                .where(eq(registers.id, existing.id));
+        } else {
+            await db.insert(registers).values({
+                scheduleId: match.scheduleId,
+                userId: user.id,
+                classId: user.classId!,
+                checkedInAt: new Date()
+            });
+        }
 
         return { success: true };
     },

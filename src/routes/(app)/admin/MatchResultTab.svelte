@@ -108,9 +108,16 @@
                         : 'border-zinc-200 bg-white hover:bg-zinc-50 hover:shadow-sm'}"
                 >
                     <div
-                        class="font-bold tracking-wide bg-zinc-800 text-white px-2 py-0.5 rounded text-[0.625rem]"
+                        class="flex gap-1 items-center font-bold tracking-wide px-2 py-0.5 rounded text-[0.7rem]
+                        {activeResultMatch?.id === matchPair.id
+                            ? 'bg-amber-100 text-amber-900'
+                            : 'bg-zinc-100 text-zinc-800'}"
                     >
-                        {matchPair.sportName}
+                        <span>{matchPair.sportName}</span>
+                        {#if matchPair.matchName}
+                            <span class="opacity-50">•</span>
+                            <span>{matchPair.matchName}</span>
+                        {/if}
                     </div>
                     <div
                         class="flex gap-2 items-center font-bold text-lg text-zinc-800"

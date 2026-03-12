@@ -23,13 +23,7 @@
             badgeTextClass: "text-amber-50",
             opacityClass: "opacity-100",
         },
-        승리: {
-            borderClass: "border border-zinc-100",
-            badgeBgClass: "bg-emerald-500",
-            badgeTextClass: "text-emerald-100",
-            opacityClass: "opacity-30",
-        },
-        패배: {
+        종료: {
             borderClass: "border border-zinc-100",
             badgeBgClass: "bg-zinc-400",
             badgeTextClass: "text-zinc-100",

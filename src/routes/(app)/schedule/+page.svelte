@@ -82,6 +82,17 @@
                         현재 조율 가능한 매치가 없습니다.
                     </p>
                 </div>
+            {:else if data.isWindowUndetermined}
+                <div
+                    class="flex items-center justify-center w-full h-full py-12"
+                >
+                    <p
+                        class="font-pretendard font-normal text-zinc-400 text-[0.875rem] m-0 text-center"
+                    >
+                        상대편 매치 일정이 아직 확정되지 않아<br />
+                        일정 선택 마감 기한이 정해지지 않았습니다.
+                    </p>
+                </div>
             {:else if Object.keys(data.gridData).length === 0}
                 <div
                     class="flex items-center justify-center w-full h-full py-12"
@@ -100,6 +111,8 @@
                         <ScheduleSelectionGrid
                             gridData={data.gridData}
                             currentUserClassId={data.currentUserClassId}
+                            opponentClassId={data.opponentClassId}
+                            isOpponentUndecided={data.isOpponentUndecided}
                             minPlayers={data.minPlayers}
                             isDisabled={data.deadlinePassed}
                         />
@@ -112,7 +125,7 @@
         <div
             class="flex items-center justify-center shrink-0 w-full px-[0.625rem]"
         >
-            {#if data.isEligible && data.hasPendingMatch && data.deadlineAt}
+            {#if data.isEligible && data.hasPendingMatch && data.deadlineAt && !data.isWindowUndetermined}
                 <p
                     class="font-pretendard font-normal text-[0.875rem] text-zinc-600 m-0"
                 >

@@ -1,8 +1,36 @@
 <script lang="ts">
     import { page } from "$app/stores";
-
-    export let matches: any[] = [];
     export let activeMatchId: string | null = null;
+
+    interface Player {
+        name: string | null;
+    }
+
+    interface Attendance {
+        teamA: Player[];
+        plannedTeamA: Player[];
+        teamB: Player[];
+        plannedTeamB: Player[];
+    }
+
+    interface Match {
+        id: string;
+        status: string | null;
+        name: string | null;
+        location: string | null;
+        matchNotes: string | null;
+        sportName: string;
+        startTime: Date;
+        classA: number | null;
+        classB: number | null;
+        classAId: string | null;
+        classBId: string | null;
+        refereeName: string | null;
+        managerName: string | null;
+        attendance?: Attendance;
+    }
+
+    export let matches: Match[] = [];
 
     import rawClockIcon from "@gravity-ui/icons/svgs/clock.svg?raw";
     import rawMapPinIcon from "@gravity-ui/icons/svgs/map-pin.svg?raw";
@@ -38,7 +66,7 @@
         return `${mm}월 ${dd}일 ${hh}시 ${min}분`;
     }
 
-    function getCardStyles(status: string, isSelected: boolean) {
+    function getCardStyles(status: string | null, isSelected: boolean) {
         if (isSelected) {
             return "bg-zinc-100 border border-amber-500 border-solid";
         }
@@ -48,7 +76,7 @@
         return "bg-white border border-transparent";
     }
 
-    function getBadgeStyles(status: string) {
+    function getBadgeStyles(status: string | null) {
         switch (status) {
             case "ONGOING":
                 return "bg-red-500 text-red-100";
@@ -61,7 +89,7 @@
         }
     }
 
-    function getBadgeText(status: string) {
+    function getBadgeText(status: string | null) {
         switch (status) {
             case "ONGOING":
                 return "진행";
@@ -70,7 +98,7 @@
             case "FINISHED":
                 return "종료";
             default:
-                return status;
+                return status || "미정";
         }
     }
 </script>
@@ -138,7 +166,7 @@
                     <p
                         class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-800 text-[0.875rem] whitespace-nowrap"
                     >
-                        담당자 : 홍길동
+                        담당자 : {match.managerName || "미정"}
                     </p>
                 </div>
             </div>
@@ -199,16 +227,24 @@
                         class="relative shrink-0 whitespace-nowrap truncate w-full max-w-[30rem]"
                     >
                         {match.classA ? `${match.classA}반` : "미정"} 선수 (예정)
-                        : {match.attendance?.teamA
-                            ?.map((t: any) => t.name)
+                        : {match.attendance?.plannedTeamA
+                            ?.map((t) => t.name)
+                            .concat(
+                                match.attendance?.teamA?.map((t) => t.name) ||
+                                    [],
+                            )
                             .join(", ") || "미정"}
                     </p>
                     <p
                         class="relative shrink-0 whitespace-nowrap truncate w-full max-w-[30rem]"
                     >
                         {match.classB ? `${match.classB}반` : "미정"} 선수 (예정)
-                        : {match.attendance?.teamB
-                            ?.map((t: any) => t.name)
+                        : {match.attendance?.plannedTeamB
+                            ?.map((t) => t.name)
+                            .concat(
+                                match.attendance?.teamB?.map((t) => t.name) ||
+                                    [],
+                            )
                             .join(", ") || "미정"}
                     </p>
                 </div>
