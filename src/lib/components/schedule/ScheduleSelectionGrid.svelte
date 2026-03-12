@@ -15,16 +15,24 @@
         registrations: Participant[];
         totalVotes: number;
         isVoted: boolean;
+        scheduledMatchesCount: number;
+        maxParallelMatches: number;
     }
 
     let {
         gridData = {},
         currentUserClassId = null,
         minPlayers = 5,
+        isDisabled = false,
+        isAdmin = false,
+        onSlotClick = undefined,
     } = $props<{
         gridData: Record<string, ScheduleSlot[]>;
         currentUserClassId?: string | null;
         minPlayers?: number;
+        isDisabled?: boolean;
+        isAdmin?: boolean;
+        onSlotClick?: (slotId: string) => void;
     }>();
 
     // Svelte derives sorted dates for rows
@@ -65,7 +73,7 @@
 
 {#if dates.length > 0}
     <div
-        class="grid h-fit w-fit mx-auto gap-x-[0.625rem] gap-y-[0.5rem] min-h-0"
+        class="grid h-fit w-fit gap-x-[0.625rem] gap-y-[0.5rem] min-h-0 ml-0"
         style="grid-template-columns: 5rem repeat({maxSlots}, max-content); grid-template-rows: auto repeat({dates.length}, max-content);"
     >
         <!-- Header Row -->
@@ -86,7 +94,7 @@
         {#each dates as date}
             <!-- Date column -->
             <div
-                class="flex items-center justify-center text-zinc-600 font-pretendard text-[1rem] font-semibold text-center w-full h-full px-[0.625rem]"
+                class="flex items-center justify-center text-zinc-600 font-pretendard text-[1rem] font-semibold text-center w-full h-full px-[0.625rem] whitespace-nowrap"
             >
                 {formatDateDisplay(date)}
             </div>
@@ -96,7 +104,9 @@
                 <!-- TimeSlotCard rendered mapped directly to real Database models and logic -->
                 <form
                     method="POST"
-                    action="?/toggleVote"
+                    action={isAdmin
+                        ? "?/toggleSlotAvailability"
+                        : "?/toggleVote"}
                     use:enhance
                     class="m-0 p-0 block"
                 >
@@ -117,6 +127,13 @@
                         participantNames={slot.registrations.map(
                             (r: Participant) => r.name,
                         )}
+                        isDisabled={isAdmin ? false : isDisabled}
+                        {isAdmin}
+                        scheduledMatchesCount={slot.scheduledMatchesCount}
+                        maxParallelMatches={slot.maxParallelMatches}
+                        onSlotClick={onSlotClick
+                            ? () => onSlotClick?.(slot.id)
+                            : undefined}
                     />
                 </form>
             {/each}

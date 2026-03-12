@@ -59,15 +59,9 @@
 
         <!-- Grid Container -->
         <div
-            class="flex flex-[1_0_0] flex-col overflow-y-auto w-full px-[1.875rem] py-[0px] min-h-0"
+            class="flex flex-[1_0_0] flex-col overflow-y-auto w-full px-[1.875rem] py-[0px] min-h-0 justify-center"
         >
-            {#if data.isEligible}
-                <ScheduleSelectionGrid
-                    gridData={data.gridData}
-                    currentUserClassId={data.currentUserClassId}
-                    minPlayers={data.minPlayers}
-                />
-            {:else}
+            {#if !data.isEligible}
                 <div
                     class="flex items-center justify-center w-full h-full py-12"
                 >
@@ -78,6 +72,39 @@
                         출전 선수만 일정을 선택할 수 있어요.
                     </p>
                 </div>
+            {:else if !data.hasPendingMatch}
+                <div
+                    class="flex items-center justify-center w-full h-full py-12"
+                >
+                    <p
+                        class="font-pretendard font-normal text-zinc-400 text-[0.875rem] m-0 text-center"
+                    >
+                        현재 조율 가능한 매치가 없습니다.
+                    </p>
+                </div>
+            {:else if Object.keys(data.gridData).length === 0}
+                <div
+                    class="flex items-center justify-center w-full h-full py-12"
+                >
+                    <p
+                        class="font-pretendard font-normal text-zinc-400 text-[0.875rem] m-0 text-center"
+                    >
+                        {data.deadlinePassed
+                            ? "투표 기간이 종료되었습니다."
+                            : "등록된 일정 슬롯이 없습니다."}
+                    </p>
+                </div>
+            {:else}
+                <div class="py-6">
+                    <div class="mx-auto w-fit">
+                        <ScheduleSelectionGrid
+                            gridData={data.gridData}
+                            currentUserClassId={data.currentUserClassId}
+                            minPlayers={data.minPlayers}
+                            isDisabled={data.deadlinePassed}
+                        />
+                    </div>
+                </div>
             {/if}
         </div>
 
@@ -85,15 +112,18 @@
         <div
             class="flex items-center justify-center shrink-0 w-full px-[0.625rem]"
         >
-            {#if data.isEligible}
+            {#if data.isEligible && data.hasPendingMatch}
                 <p
                     class="font-pretendard font-normal text-[0.875rem] text-zinc-600 m-0"
                 >
-                    '{data.sports.find(
-                        (s: { id: string; name: string }) =>
-                            s.id === data.activeSportId,
-                    )?.name ?? "해당 종목"}' 일정 정하기는 {data.deadlineDate} 23:59까지
-                    할 수 있어요. 마감까지 {data.hoursRemaining}시간 남았어요.
+                    '{data.sports.find((s: any) => s.id === data.activeSportId)
+                        ?.name ?? "해당 종목"}' 일정 정하기는 {data.deadlineAt}까지
+                    할 수 있어요.
+                    {#if !data.deadlinePassed}
+                        마감까지 {data.hoursRemaining}시간 남았어요.
+                    {:else}
+                        <span class="text-red-500 font-bold">(종료됨)</span>
+                    {/if}
                 </p>
             {/if}
         </div>

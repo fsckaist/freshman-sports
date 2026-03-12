@@ -46,7 +46,7 @@
     class="bg-white flex flex-[1_0_0] flex-col gap-[0.9375rem] h-full items-center justify-start overflow-clip p-[1.875rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] {borderClass} transition-all duration-200"
 >
     <div
-        class="flex flex-col gap-[0.625rem] items-start justify-center leading-[normal] relative shrink-0 w-full"
+        class="flex flex-col gap-[0.625rem] items-start justify-center leading-tight relative shrink-0 w-full"
     >
         <div class="flex items-start justify-between relative shrink-0 w-full">
             <h2
@@ -85,7 +85,7 @@
                         class:border-zinc-300={!player.isCurrentUser}
                     >
                         <p
-                            class="font-pretendard font-normal leading-[normal] relative shrink-0 text-zinc-800 text-[0.875rem] m-0"
+                            class="font-pretendard font-normal leading-tight relative shrink-0 text-zinc-800 text-[0.875rem] m-0"
                         >
                             {player.name}
                         </p>
@@ -97,7 +97,7 @@
                 class="flex flex-[1_0_0] flex-col items-center justify-center min-h-px min-w-px relative w-full"
             >
                 <p
-                    class="font-pretendard font-normal leading-[normal] relative shrink-0 text-zinc-400 text-[0.875rem] m-0"
+                    class="font-pretendard font-normal leading-tight relative shrink-0 text-zinc-400 text-[0.875rem] m-0"
                 >
                     아직 지원자가 없어요.
                 </p>
@@ -118,7 +118,7 @@
                     {@html resizeSvg(triangleExclamationSvg)}
                 </div>
                 <p
-                    class="font-pretendard font-normal leading-[normal] relative shrink-0 text-red-600 text-[0.75rem] m-0"
+                    class="font-pretendard font-normal leading-tight relative shrink-0 text-red-600 text-[0.75rem] m-0"
                 >
                     {alertMessage}
                 </p>
@@ -143,7 +143,7 @@
                     class:active:bg-zinc-800={buttonState === "cancel"}
                 >
                     <p
-                        class="font-pretendard font-semibold leading-[normal] relative shrink-0 text-[1rem] m-0 text-white"
+                        class="font-pretendard font-semibold leading-tight relative shrink-0 text-[1rem] m-0 text-white"
                     >
                         {buttonState === "apply" ? "지원하기" : "취소하기"}
                     </p>
@@ -155,7 +155,7 @@
                 disabled
             >
                 <p
-                    class="font-pretendard font-semibold leading-[normal] relative shrink-0 text-[1rem] m-0 text-zinc-500"
+                    class="font-pretendard font-semibold leading-tight relative shrink-0 text-[1rem] m-0 text-zinc-500"
                 >
                     {buttonState === "closed" ? "마감" : "지원 불가"}
                 </p>

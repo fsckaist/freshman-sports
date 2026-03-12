@@ -1,7 +1,7 @@
 import { redirect, error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { users, matches, schedules, sports, classes, rosters } from '$lib/server/db/schema';
-import { eq, or, and, asc } from 'drizzle-orm';
+import { eq, or, and, asc, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad } from './$types';
 
@@ -43,6 +43,19 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
             cookies.delete('session', { path: '/' });
             throw redirect(302, '/login');
         }
+
+        // QUERY: Fetch user's registered sports
+        const userSports = await db.select({
+            name: sports.name
+        })
+            .from(rosters)
+            .innerJoin(sports, eq(rosters.sportId, sports.id))
+            .where(eq(rosters.userId, userProfile.id))
+            .orderBy(asc(sports.displayOrder));
+
+        const userSportsString = userSports.length > 0
+            ? userSports.map(s => s.name).join(', ')
+            : '참여 종목 없음';
 
         // QUERY 2: Fetch Class Info (if applicable)
         let classNumber = null;
@@ -130,7 +143,7 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
             sportId: sports.id
         })
             .from(matches)
-            .innerJoin(schedules, eq(matches.scheduleId, schedules.id))
+            .leftJoin(schedules, eq(matches.scheduleId, schedules.id))
             .innerJoin(sports, eq(matches.sportId, sports.id))
             .innerJoin(classA, eq(matches.classAId, classA.id))
             .innerJoin(classB, eq(matches.classBId, classB.id))
@@ -140,7 +153,16 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
                     eq(matches.classBId, userProfile.classId)
                 ) : eq(matches.id, '00000000-0000-0000-0000-000000000000') // Dummy false condition if no class
             )
-            .orderBy(asc(schedules.startTime));
+            .orderBy(
+                asc(sql`CASE 
+                    WHEN ${matches.status} = 'ONGOING' THEN 1 
+                    WHEN ${matches.status} = 'SCHEDULED' THEN 2 
+                    WHEN ${matches.status} = 'PENDING_SCHEDULE' THEN 3 
+                    WHEN ${matches.status} = 'FINISHED' THEN 4 
+                    ELSE 5 
+                END`),
+                asc(schedules.startTime)
+            );
 
         // Formatter for dates (Korean format)
         const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
@@ -152,7 +174,7 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
         });
 
         // QUERY 4: Fetch Players matching the specific roster for each match concurrently
-        const formattedSchedules = await Promise.all(
+        const formattedAllMatches = await Promise.all(
             userMatches.map(async (match) => {
                 let playersString = '';
 
@@ -178,15 +200,18 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
                 const ho = String(d.getHours()).padStart(2, '0');
                 const mi = String(d.getMinutes()).padStart(2, '0');
 
-                const formattedTime = `${mo}월 ${da}일 ${ho}시 ${mi}분`;
+                const formattedTime = match.time ? `${mo}월 ${da}일 ${ho}시 ${mi}분` : "시간 조율 필요";
 
                 // Map status enum to Korean string
                 let statusKo = "예정";
                 if (match.status === "ONGOING") statusKo = "진행";
                 else if (match.status === "FINISHED") statusKo = "종료";
                 else if (match.status === "CANCELED") statusKo = "취소";
+                else if (match.status === "PENDING_SCHEDULE") statusKo = "일정 조율 필요";
 
                 return {
+                    id: match.id,
+                    statusOriginal: match.status,
                     title: `${match.sportName} ${match.name || ''}`.trim(),
                     time: formattedTime,
                     status: statusKo,
@@ -198,20 +223,47 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
             })
         );
 
+        // Split into confirmed and pending
+        const confirmedSchedules = formattedAllMatches.filter(m => m.statusOriginal !== "PENDING_SCHEDULE");
+        const pendingSchedules = formattedAllMatches.filter(m => m.statusOriginal === "PENDING_SCHEDULE");
+
+        // QUERY 5: Build Notice Card logic for Pending Matches Action Items
+        // Re-using userMatches fetched earlier but ensuring only 'PENDING_SCHEDULE' matches where opponent is NOT eliminated
+        // Notice: 'matches.classAId' and 'matches.classBId' can be null if it's an eliminated slot
+        const userParticipatingSportsNames = userSports.map(s => s.name);
+
+        const pendingNotices = userMatches
+            .filter(m => m.status === "PENDING_SCHEDULE" && m.teamA !== null && m.teamB !== null && userParticipatingSportsNames.includes(m.sportName))
+            .map(m => {
+                let opponentClass = '미정';
+                if (m.teamA && m.teamB) {
+                    opponentClass = m.teamA === classNumber ? `${m.teamB}반` : `${m.teamA}반`;
+                }
+
+                return {
+                    id: m.id,
+                    sportName: m.sportName,
+                    opponent: opponentClass
+                };
+            });
+
         // 3. Return the mapped data
         return {
-            user: {
+            dashboardUser: {
                 userId: userProfile.id,
                 username: userProfile.username,
                 studentNumber: userProfile.studentNumber,
-                phoneNumber: userProfile.phoneNumber
+                phoneNumber: userProfile.phoneNumber,
+                sports: userSportsString
             },
             classInfo: {
                 classNumber,
                 proctors: proctorsString,
                 rosters: groupedRosters
             },
-            schedules: formattedSchedules
+            confirmedSchedules,
+            pendingSchedules,
+            pendingMatches: pendingNotices
         };
     } catch (e) {
         // Log the error internally and return a safe error state or 500 error

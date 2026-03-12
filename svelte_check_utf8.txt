@@ -1,0 +1,86 @@
+﻿Loading svelte-check in workspace: d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev
+Getting Svelte diagnostics...
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\AttendanceTracker.svelte[39m:178:17
+[33mWarn[39m: Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label (svelte)
+[36m                </h3>
+                [35m<button
+                    type="button"
+                    on:click={closeScan}
+                    class="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-md hover:bg-slate-100"
+                >
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>[36m
+            </div>[39m
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\AttendanceTracker.svelte[39m:249:29
+[33mWarn[39m: Avoid using autofocus
+https://svelte.dev/e/a11y_autofocus (svelte)
+[36m                            required
+                            [35mautofocus[36m
+                            placeholder="e.g. 20240001"[39m
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\MatchLogPanel.svelte[39m:117:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    >
+                        [35m<label class="text-xs font-bold text-indigo-700"
+                            >{activeMatch.classA}諛?/label
+                        >[36m
+                        <input[39m
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\MatchLogPanel.svelte[39m:135:25
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m                    >
+                        [35m<label class="text-xs font-bold text-rose-700"
+                            >{activeMatch.classB}諛?/label
+                        >[36m
+                        <input[39m
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\MatchLogPanel.svelte[39m:12:46
+[31mError[39m: Parameter 'u' implicitly has an 'any' type. (ts)
+[36m    $: allCheckedIn = [
+        ...activeMatch.attendance.teamA.map(([35mu[36m) => ({
+            ...u,[39m
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\MatchLogPanel.svelte[39m:17:46
+[31mError[39m: Parameter 'u' implicitly has an 'any' type. (ts)
+[36m        })),
+        ...activeMatch.attendance.teamB.map(([35mu[36m) => ({
+            ...u,[39m
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\MatchLogPanel.svelte[39m:22:49
+[31mError[39m: Parameter 'u' implicitly has an 'any' type. (ts)
+[36m        })),
+        ...activeMatch.attendance.cheering.map(([35mu[36m) => ({
+            ...u,[39m
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\MatchSidebar.svelte[39m:4:16
+[31mError[39m: Variable 'matches' implicitly has type 'any[]' in some locations where its type cannot be determined. (ts)
+[36m
+    export let [35mmatches[36m = [];
+    export let activeMatchId: string | null = null;[39m
+
+d:\Development\ProgrammingProject\Webpages\Freshman Sports\Dev\[32msrc\lib\components\record\MatchSidebar.svelte[39m:44:12
+[31mError[39m: Variable 'matches' implicitly has an 'any[]' type. (ts)
+[36m<div class="space-y-3">
+    {#each [35mmatches[36m as match}
+        {@const isSelected = activeMatchId === match.id}[39m
+
+====================================
+[31msvelte-check found 5 errors and 4 warnings in 3 files
+[39m

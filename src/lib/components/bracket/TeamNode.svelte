@@ -29,7 +29,7 @@
 >
     {#if className === "0" || notAvailable}
         <p
-            class="font-pretendard font-semibold leading-[normal] relative shrink-0 text-[1rem] {textClass} m-0"
+            class="font-pretendard font-semibold leading-tight relative shrink-0 text-[1rem] {textClass} m-0"
         >
             {notAvailable ? "-" : "?"}
         </p>
@@ -86,7 +86,7 @@
 
     {#if !notAvailable && className !== "0"}
         <div
-            class="content-stretch flex font-pretendard font-semibold items-center leading-[normal] relative shrink-0 text-[1rem] {gapClass} {textClass}"
+            class="content-stretch flex font-pretendard font-semibold items-center leading-tight relative shrink-0 text-[1rem] {gapClass} {textClass}"
         >
             <p class="relative shrink-0 m-0">{className}</p>
             <p class="relative shrink-0 m-0">반</p>

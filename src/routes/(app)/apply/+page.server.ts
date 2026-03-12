@@ -1,15 +1,17 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import { sports, users, rosters } from '$lib/server/db/schema';
+import { sports, users, rosters, system_config } from '$lib/server/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-    // 1. User Context
     const user = locals.user;
-    if (!user) {
-        throw redirect(302, '/login');
-    }
+    if (!user) throw redirect(302, '/login');
+
+    // State guard: apply page only visible during REGISTRATION
+    const configs = await db.select().from(system_config).limit(1);
+    const eventState = configs[0]?.eventState ?? 'REGISTRATION';
+    if (eventState !== 'REGISTRATION') throw redirect(302, '/dashboard');
 
     if (!user.classId) {
         // If a user doesn't belong to a class, they can't see the sports rosters or apply

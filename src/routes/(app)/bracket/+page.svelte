@@ -1,5 +1,6 @@
 <script lang="ts">
     import BracketGrid from "$lib/components/bracket/BracketGrid.svelte";
+    export let data;
 </script>
 
 <div
@@ -37,7 +38,7 @@
         <div
             class="content-stretch flex flex-col items-start min-h-0 min-w-px overflow-auto relative w-full flex-1 touch-pan-x touch-pan-y"
         >
-            <BracketGrid />
+            <BracketGrid bracketDataBySport={data.bracketDataBySport} />
         </div>
     </div>
 </div>

@@ -13,30 +13,75 @@
     const resizeSvg = (svg: string) =>
         svg.replace('width="16" height="16"', 'width="24" height="24"');
 
-    const navItemsGeneral = [
-        { name: "개요", path: "/dashboard", icon: resizeSvg(rawOverviewIcon) },
-        { name: "지원하기", path: "/apply", icon: resizeSvg(rawApplyIcon) },
+    const allNavItems = [
         {
+            id: "overview",
+            name: "개요",
+            path: "/dashboard",
+            icon: resizeSvg(rawOverviewIcon),
+            states: ["REGISTRATION", "ONGOING", "COMPLETED"],
+        },
+        {
+            id: "apply",
+            name: "지원하기",
+            path: "/apply",
+            icon: resizeSvg(rawApplyIcon),
+            states: ["REGISTRATION"],
+        },
+        {
+            id: "schedule",
             name: "일정 정하기",
             path: "/schedule",
             icon: resizeSvg(rawScheduleIcon),
+            states: ["ONGOING"],
         },
         {
+            id: "bracket",
             name: "대진표 보기",
             path: "/bracket",
             icon: resizeSvg(rawBracketIcon),
+            states: ["ONGOING"],
         },
-        { name: "규정 읽기", path: "/rules", icon: resizeSvg(rawRulesIcon) },
+        {
+            id: "rules",
+            name: "규정 읽기",
+            path: "/rules",
+            icon: resizeSvg(rawRulesIcon),
+            states: ["REGISTRATION", "ONGOING", "COMPLETED"],
+        },
     ];
 
-    const navItemsAdmin = [
+    const adminNavItems = [
         {
+            id: "record",
             name: "경기 기록지",
             path: "/record",
             icon: resizeSvg(rawRecordIcon),
+            requiresManager: true,
         },
-        { name: "관리", path: "/admin", icon: resizeSvg(rawAdminIcon) },
+        {
+            id: "admin",
+            name: "관리",
+            path: "/admin",
+            icon: resizeSvg(rawAdminIcon),
+            requiresAdmin: true,
+        },
     ];
+
+    $: eventState = ($page.data.eventState ?? "REGISTRATION") as
+        | "REGISTRATION"
+        | "ONGOING"
+        | "COMPLETED";
+    $: user = $page.data.user;
+
+    $: visibleGeneral = allNavItems.filter((item) =>
+        item.states.includes(eventState),
+    );
+    $: visibleAdmin = adminNavItems.filter((item) => {
+        if (item.requiresAdmin) return user?.isAdmin;
+        if (item.requiresManager) return user?.isManager || user?.isAdmin;
+        return true;
+    });
 </script>
 
 <aside
@@ -59,7 +104,7 @@
         class="flex flex-[1_0_0] flex-col items-end justify-between min-h-px min-w-px pl-[1.875rem] w-full relative"
     >
         <nav class="flex flex-col gap-[0.625rem] items-start shrink-0 relative">
-            {#each navItemsGeneral as item}
+            {#each visibleGeneral as item}
                 {@const isActive = $page.url.pathname.startsWith(item.path)}
                 <a
                     href={item.path}
@@ -86,7 +131,7 @@
         </nav>
 
         <nav class="flex flex-col gap-[0.625rem] items-start shrink-0 relative">
-            {#each navItemsAdmin as item}
+            {#each visibleAdmin as item}
                 {@const isActive = $page.url.pathname.startsWith(item.path)}
                 <a
                     href={item.path}

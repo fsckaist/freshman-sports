@@ -64,18 +64,20 @@
     >
         <div class="flex flex-col gap-[0.5rem] items-start shrink-0 relative">
             <h3
-                class="font-pretendard font-semibold leading-[normal] shrink-0 text-zinc-900 text-[1.5rem] m-0"
+                class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-900 text-[1.5rem] m-0"
             >
                 {title}
             </h3>
-            <div class="flex gap-[0.3125rem] items-center justify-center shrink-0">
+            <div
+                class="flex gap-[0.3125rem] items-center justify-center shrink-0"
+            >
                 <div
                     class="shrink-0 size-[0.75rem] relative text-zinc-900 flex items-center justify-center"
                 >
                     {@html DateIcon}
                 </div>
                 <p
-                    class="font-pretendard font-normal leading-[normal] shrink-0 text-zinc-900 text-[0.875rem] m-0"
+                    class="font-pretendard font-normal leading-tight shrink-0 text-zinc-900 text-[0.875rem] m-0"
                 >
                     {time}
                 </p>
@@ -87,7 +89,7 @@
             class="flex flex-col items-center justify-center px-[0.5rem] py-[0.1875rem] rounded-[0.3125rem] shrink-0 mt-[0.25rem] {currentConfig.badgeBgClass}"
         >
             <p
-                class="font-pretendard font-semibold leading-[normal] shrink-0 text-[0.875rem] m-0 {currentConfig.badgeTextClass}"
+                class="font-pretendard font-semibold leading-tight shrink-0 text-[0.875rem] m-0 {currentConfig.badgeTextClass}"
             >
                 {status}
             </p>
@@ -108,7 +110,7 @@
                 class="flex gap-[0.3125rem] items-center justify-center shrink-0 relative"
             >
                 <p
-                    class="font-pretendard font-semibold leading-[normal] shrink-0 text-zinc-600 text-[0.875rem] m-0"
+                    class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-600 text-[0.875rem] m-0"
                 >
                     {teamA}
                 </p>
@@ -116,13 +118,13 @@
                     class="bg-zinc-400 flex flex-col items-center justify-center px-[0.1875rem] py-px rounded-[0.1875rem] shrink-0 relative"
                 >
                     <span
-                        class="font-pretendard font-bold leading-[normal] shrink-0 text-zinc-100 text-[0.5rem] tracking-widest pt-[1px]"
+                        class="font-pretendard font-bold leading-tight shrink-0 text-zinc-100 text-[0.5rem] tracking-widest pt-[1px]"
                     >
                         VS
                     </span>
                 </div>
                 <p
-                    class="font-pretendard font-semibold leading-[normal] shrink-0 text-zinc-600 text-[0.875rem] m-0"
+                    class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-600 text-[0.875rem] m-0"
                 >
                     {teamB}
                 </p>
@@ -138,7 +140,7 @@
                     {@html LocationIcon}
                 </div>
                 <p
-                    class="font-pretendard font-normal leading-[normal] shrink-0 text-zinc-600 text-[0.75rem] m-0 pt-[1px]"
+                    class="font-pretendard font-normal leading-tight shrink-0 text-zinc-600 text-[0.75rem] m-0 pt-[1px]"
                 >
                     {location}
                 </p>
@@ -147,7 +149,7 @@
 
         <!-- Players -->
         <p
-            class="font-pretendard font-normal leading-[normal] shrink-0 text-zinc-600 text-[0.625rem] m-0 pt-[2px]"
+            class="font-pretendard font-normal leading-tight shrink-0 text-zinc-600 text-[0.625rem] m-0 pt-[2px]"
         >
             선수 : {players}
         </p>
