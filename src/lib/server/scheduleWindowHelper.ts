@@ -188,8 +188,9 @@ function computeWindowFromEnds(feederEndTimes: Date[])
 
     const laterDate = feederEndTimes.reduce((a, b) => (a > b ? a : b));
 
-    // Deadline is the end of the day or the later date
+    // Deadline is the end of the day AFTER the later date (ensuring a full day buffer)
     const deadline = new Date(laterDate);
+    deadline.setDate(deadline.getDate() + 1);
     deadline.setHours(23, 59, 59, 999);
 
     // Start is 3 weekdays after deadline

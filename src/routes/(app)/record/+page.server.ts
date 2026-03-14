@@ -110,6 +110,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 minPlayers: sports.minPlayers,
                 refereeName: referee.name,
                 managerName: manager.name,
+                matchNotes: matches.matchNotes
             })
             .from(matches)
             .innerJoin(sports, eq(matches.sportId, sports.id))
@@ -150,12 +151,14 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 .innerJoin(users, eq(registers.userId, users.id))
                 .where(eq(registers.scheduleId, activeMatch.scheduleId!));
 
-            // Categorize registers into Team A, Team B, Cheering
+            // Separate cheering into Class A and Class B
             const teamACheckedIn = [];
             const teamAOfflinePlanned = []; // Those who voted but haven't checked in
             const teamBCheckedIn = [];
             const teamBOfflinePlanned = [];
-            const cheeringCheckedIn = [];
+            const cheeringA = [];
+            const cheeringB = [];
+            const otherCheering = []; 
 
             for (const reg of matchRegisters) {
                 if (reg.checkedInAt) {
@@ -164,7 +167,14 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     } else if (teamBUserIds.has(reg.userId)) {
                         teamBCheckedIn.push(reg);
                     } else {
-                        cheeringCheckedIn.push(reg);
+                        // Cheer section - check if they belong to A or B
+                        if (reg.classId === activeMatch.classAId) {
+                            cheeringA.push(reg);
+                        } else if (reg.classId === activeMatch.classBId) {
+                            cheeringB.push(reg);
+                        } else {
+                            otherCheering.push(reg);
+                        }
                     }
                 } else {
                     // Not checked in yet (voted only)
@@ -183,7 +193,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     teamBTotal: activeMatch.minPlayers,
                     teamA: teamACheckedIn,
                     teamB: teamBCheckedIn,
-                    cheering: cheeringCheckedIn,
+                    cheeringA,
+                    cheeringB,
                     plannedTeamA: teamAOfflinePlanned,
                     plannedTeamB: teamBOfflinePlanned
                 }
@@ -246,9 +257,6 @@ export const actions: Actions = {
             if (!rosterEntry) {
                 return fail(400, { message: '해당 종목 출전 엔트리(선수 명단)에 등록되어 있지 않습니다.' });
             }
-        } else {
-            // Cheering Registration Logic
-            // Cheering can be anyone, so no class/roster check is needed!
         }
 
         // Check if already registered

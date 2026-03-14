@@ -9,6 +9,7 @@
     let showForfeitConfirm = false;
     let showStartConfirm = false;
     let showEndConfirm = false;
+    let showDetailsModal = false;
 
     // Detailed Score State
     // We'll manage state for Team A and Team B
@@ -31,6 +32,26 @@
     // 0: Default, 1: Yellow, 2: Red
     let cardsA: Record<string, number> = {};
     let cardsB: Record<string, number> = {};
+
+    interface DetailedNotes {
+        teamA: { scores: typeof scoreDataA; cards: Record<string, number> };
+        teamB: { scores: typeof scoreDataB; cards: Record<string, number> };
+    }
+
+    function createDefaultNotes(): DetailedNotes {
+        return {
+            teamA: { scores: { FirstScore: 0, FirstFoul: 0, SecondScore: 0, SecondFoul: 0, PenScore: 0 }, cards: {} },
+            teamB: { scores: { FirstScore: 0, FirstFoul: 0, SecondScore: 0, SecondFoul: 0, PenScore: 0 }, cards: {} }
+        };
+    }
+
+    $: parsedNotes = (() => {
+        try {
+            return (activeMatch.matchNotes ? JSON.parse(activeMatch.matchNotes) : createDefaultNotes()) as DetailedNotes;
+        } catch {
+            return createDefaultNotes();
+        }
+    })();
 
     $: {
         // Initialize cards state for any newly loaded players
@@ -627,13 +648,24 @@
             </button>
         {:else if activeMatch.status === "FINISHED"}
             <div
-                class="bg-zinc-100 content-stretch flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full"
+                class="flex gap-2 w-full"
             >
-                <p
-                    class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-zinc-500 whitespace-nowrap"
+                <div
+                    class="bg-zinc-100 content-stretch flex flex-1 h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem]"
                 >
-                    종료된 경기입니다
-                </p>
+                    <p
+                        class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-zinc-500 whitespace-nowrap"
+                    >
+                        종료된 경기입니다
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    on:click={() => (showDetailsModal = true)}
+                    class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold border border-amber-200 content-stretch flex flex-col h-[3.125rem] items-center justify-center px-[1.5rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0"
+                >
+                    상세 정보
+                </button>
             </div>
         {/if}
     </div>
@@ -844,6 +876,128 @@
                     </p>
                 </button>
             </div>
+        </div>
+    </div>
+{/if}
+
+{#if showDetailsModal}
+    <div
+        class="fixed inset-0 bg-zinc-800/30 flex items-center justify-center z-50 p-4"
+        style="backdrop-filter: blur(2px);"
+    >
+        <div
+            class="bg-zinc-50 flex flex-col gap-6 items-center justify-start overflow-clip p-6 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[45rem] max-w-full max-h-[90vh] overflow-y-auto"
+        >
+            <div class="w-full flex justify-between items-center">
+                <h2 class="text-[1.5rem] font-bold text-zinc-800">경기 상세 정보</h2>
+                <button 
+                    on:click={() => showDetailsModal = false}
+                    class="p-2 hover:bg-zinc-200 rounded-full transition-colors"
+                    aria-label="닫기"
+                    title="닫기"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Score Comparison Table -->
+            <div class="w-full grid grid-cols-3 gap-4">
+                <div class="col-span-1 flex flex-col items-center">
+                    <span class="text-zinc-500 text-sm mb-1">{activeMatch.classA}반</span>
+                    <span class="text-3xl font-black text-zinc-800">{activeMatch.scoreA}</span>
+                </div>
+                <div class="col-span-1 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-zinc-300">VS</span>
+                </div>
+                <div class="col-span-1 flex flex-col items-center">
+                    <span class="text-zinc-500 text-sm mb-1">{activeMatch.classB}반</span>
+                    <span class="text-3xl font-black text-zinc-800">{activeMatch.scoreB}</span>
+                </div>
+            </div>
+
+            <div class="w-full h-px bg-zinc-200"></div>
+
+            <!-- Detail Tabs -->
+            <div class="w-full grid grid-cols-2 gap-8">
+                <!-- Team A Details -->
+                <div class="flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-zinc-700">{activeMatch.classA}반 상세</h3>
+                    
+                    <div class="bg-white rounded-xl border border-zinc-100 p-4">
+                        <div class="grid grid-cols-2 gap-y-2 text-sm">
+                            <span class="text-zinc-400">전반전 득점</span>
+                            <span class="font-bold text-right">{parsedNotes.teamA.scores.FirstScore}</span>
+                            <span class="text-zinc-400">전반전 파울</span>
+                            <span class="font-bold text-right">{parsedNotes.teamA.scores.FirstFoul}</span>
+                            <div class="col-span-2 h-px bg-zinc-50 my-1"></div>
+                            <span class="text-zinc-400">후반전 득점</span>
+                            <span class="font-bold text-right">{parsedNotes.teamA.scores.SecondScore}</span>
+                            <span class="text-zinc-400">후반전 파울</span>
+                            <span class="font-bold text-right">{parsedNotes.teamA.scores.SecondFoul}</span>
+                            <div class="col-span-2 h-px bg-zinc-50 my-1"></div>
+                            <span class="text-zinc-400">승부차기</span>
+                            <span class="font-bold text-right">{parsedNotes.teamA.scores.PenScore}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <span class="text-sm font-bold text-zinc-500">경고 및 퇴장</span>
+                        <div class="flex flex-wrap gap-2">
+                            {#each Object.entries(parsedNotes.teamA.cards) as [name, type]}
+                                {#if type > 0}
+                                    <div class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 {type === 1 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}">
+                                        <div class="w-2 h-3 rounded-sm {type === 1 ? 'bg-amber-500' : 'bg-red-500'}"></div>
+                                        {name}
+                                    </div>
+                                {/if}
+                            {/each}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team B Details -->
+                <div class="flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-zinc-700">{activeMatch.classB}반 상세</h3>
+                    
+                    <div class="bg-white rounded-xl border border-zinc-100 p-4">
+                        <div class="grid grid-cols-2 gap-y-2 text-sm">
+                            <span class="text-zinc-400">전반전 득점</span>
+                            <span class="font-bold text-right">{parsedNotes.teamB.scores.FirstScore}</span>
+                            <span class="text-zinc-400">전반전 파울</span>
+                            <span class="font-bold text-right">{parsedNotes.teamB.scores.FirstFoul}</span>
+                            <div class="col-span-2 h-px bg-zinc-50 my-1"></div>
+                            <span class="text-zinc-400">후반전 득점</span>
+                            <span class="font-bold text-right">{parsedNotes.teamB.scores.SecondScore}</span>
+                            <span class="text-zinc-400">후반전 파울</span>
+                            <span class="font-bold text-right">{parsedNotes.teamB.scores.SecondFoul}</span>
+                            <div class="col-span-2 h-px bg-zinc-50 my-1"></div>
+                            <span class="text-zinc-400">승부차기</span>
+                            <span class="font-bold text-right">{parsedNotes.teamB.scores.PenScore}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <span class="text-sm font-bold text-zinc-500">경고 및 퇴장</span>
+                        <div class="flex flex-wrap gap-2">
+                            {#each Object.entries(parsedNotes.teamB.cards) as [name, type]}
+                                {#if type > 0}
+                                    <div class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 {type === 1 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}">
+                                        <div class="w-2 h-3 rounded-sm {type === 1 ? 'bg-amber-500' : 'bg-red-500'}"></div>
+                                        {name}
+                                    </div>
+                                {/if}
+                            {/each}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button 
+                on:click={() => showDetailsModal = false}
+                class="w-full mt-4 py-3 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition-colors"
+            >
+                확인
+            </button>
         </div>
     </div>
 {/if}

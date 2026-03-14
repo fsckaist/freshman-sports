@@ -22,27 +22,35 @@
     let isSubmitting = false;
     $: isMatchFinished = activeMatch.status === "FINISHED";
 
+    let activeTab = "teamA";
 
-    $: teamATracker = {
-        label: `${activeMatch.classA}반 선수`,
-        current: activeMatch.attendance.teamA.length,
-        total: activeMatch.attendance.teamATotal,
-        color: "indigo",
-    };
+    $: tabs = [
+        {
+            id: "teamA",
+            label: `${activeMatch.classA}반 선수`,
+            current: activeMatch.attendance.teamA.length,
+            total: activeMatch.attendance.teamATotal,
+            color: "amber",
+        },
+        {
+            id: "teamB",
+            label: `${activeMatch.classB}반 선수`,
+            current: activeMatch.attendance.teamB.length,
+            total: activeMatch.attendance.teamBTotal,
+            color: "amber",
+        },
+        {
+            id: "cheering",
+            label: "응원 인원",
+            current:
+                activeMatch.attendance.cheeringA.length +
+                activeMatch.attendance.cheeringB.length,
+            total: null,
+            color: "zinc",
+        },
+    ];
 
-    $: teamBTracker = {
-        label: `${activeMatch.classB}반 선수`,
-        current: activeMatch.attendance.teamB.length,
-        total: activeMatch.attendance.teamBTotal,
-        color: "rose",
-    };
-
-    $: cheeringTracker = {
-        label: "응원단 & 기타",
-        current: activeMatch.attendance.cheering.length,
-        total: null,
-        color: "emerald",
-    };
+    $: currentTab = tabs.find((t) => t.id === activeTab);
 
     function openScan(target: string) {
         scanningTarget = target;
@@ -54,145 +62,103 @@
         scanModalOpen = false;
         studentNumberInput = "";
     }
-
-    function getCardStyle(color: string) {
-        switch (color) {
-            case "indigo":
-                return "bg-indigo-50 border-indigo-200 text-indigo-800";
-            case "rose":
-                return "bg-rose-50 border-rose-200 text-rose-800";
-            case "emerald":
-                return "bg-emerald-50 border-emerald-200 text-emerald-800";
-            default:
-                return "bg-zinc-50 border-zinc-200 text-zinc-800";
-        }
-    }
-
-    function getButtonClass(color: string) {
-        switch (color) {
-            case "indigo":
-                return "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500";
-            case "rose":
-                return "bg-rose-600 hover:bg-rose-700 focus:ring-rose-500";
-            case "emerald":
-                return "bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500";
-            default:
-                return "bg-zinc-600 hover:bg-zinc-700 focus:ring-zinc-500";
-        }
-    }
 </script>
 
 <div
-    class="flex gap-[0.9375rem] w-full h-[10.5625rem] items-start relative shrink-0"
+    class="flex gap-4 w-full h-[10.5rem] bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden"
 >
-    <!-- Team A Card -->
-    <div
-        class="bg-white flex flex-[1_0_0] flex-col h-full items-center justify-between overflow-clip p-[0.625rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)]"
-    >
-        <div
-            class="flex flex-[1_0_0] flex-col gap-[0.625rem] items-center justify-center leading-[normal] relative text-center whitespace-nowrap"
-        >
-            <p
-                class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.375rem]"
+    <!-- Left: Vertical Tabs -->
+    <div class="w-48 bg-zinc-50 border-r border-zinc-100 flex flex-col pt-1">
+        {#each tabs as tab}
+            <button
+                type="button"
+                on:click={() => (activeTab = tab.id)}
+                class="flex flex-col flex-1 justify-center items-start px-4 py-2.5 transition-all relative {activeTab ===
+                tab.id
+                    ? 'bg-white'
+                    : 'hover:bg-zinc-100/50'}"
             >
-                {activeMatch.classA ? `${activeMatch.classA}반 ` : ""}선수 등록
-            </p>
-            <div
-                class="flex font-['Pretendard_Variable'] font-normal gap-[2px] items-start justify-center relative shrink-0 text-[1.125rem]"
-            >
-                <p class="relative shrink-0 text-zinc-500">
-                    {teamATracker.current}
-                </p>
-                <p class="relative shrink-0 text-zinc-400">/</p>
-                <p class="relative shrink-0 text-zinc-400">
-                    {teamATracker.total}
-                </p>
-            </div>
-        </div>
-        <button
-            type="button"
-            disabled={isMatchFinished}
-            on:click={() => openScan("Team A")}
-            class="bg-amber-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:bg-zinc-400"
-        >
-            <p
-                class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-white whitespace-nowrap"
-            >
-                선수 스캔
-            </p>
-        </button>
+                {#if activeTab === tab.id}
+                    <div
+                        class="absolute left-0 top-2 bottom-2 w-1 bg-amber-500 rounded-r-full"
+                    ></div>
+                {/if}
+                <span
+                    class="text-[0.9rem] font-medium {activeTab === tab.id
+                        ? 'text-zinc-800'
+                        : 'text-zinc-500'}"
+                >
+                    {tab.label}
+                </span>
+            </button>
+        {/each}
     </div>
 
-    <!-- Team B Card -->
-    <div
-        class="bg-white flex flex-[1_0_0] flex-col h-full items-center justify-between overflow-clip p-[0.625rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)]"
-    >
-        <div
-            class="flex flex-[1_0_0] flex-col gap-[0.625rem] items-center justify-center leading-[normal] relative text-center whitespace-nowrap"
-        >
-            <p
-                class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.375rem]"
-            >
-                {activeMatch.classB ? `${activeMatch.classB}반 ` : ""}선수 등록
-            </p>
-            <div
-                class="flex font-['Pretendard_Variable'] font-normal gap-[2px] items-start justify-center relative shrink-0 text-[1.125rem]"
-            >
-                <p class="relative shrink-0 text-zinc-500">
-                    {teamBTracker.current}
-                </p>
-                <p class="relative shrink-0 text-zinc-400">/</p>
-                <p class="relative shrink-0 text-zinc-400">
-                    {teamBTracker.total}
-                </p>
-            </div>
-        </div>
-        <button
-            type="button"
-            disabled={isMatchFinished}
-            on:click={() => openScan("Team B")}
-            class="bg-amber-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:bg-zinc-400"
-        >
-            <p
-                class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-white whitespace-nowrap"
-            >
-                선수 스캔
-            </p>
-        </button>
-    </div>
+    <!-- Right: Content Area -->
+    <div class="flex-1 flex flex-col p-3 justify-between items-center text-center">
+        <div class="flex flex-col items-center justify-center flex-1">
+            <h3 class="text-[1rem] font-bold text-zinc-800">
+                {currentTab?.label} 등록
+            </h3>
 
-    <!-- Cheering Card -->
-    <div
-        class="bg-white flex flex-[1_0_0] flex-col h-full items-center justify-between overflow-clip p-[0.625rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)]"
-    >
-        <div
-            class="flex flex-[1_0_0] flex-col gap-[0.625rem] items-center justify-center leading-[normal] relative text-center whitespace-nowrap"
-        >
-            <p
-                class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.375rem]"
-            >
-                응원 인원 등록
-            </p>
-            <div
-                class="flex font-['Pretendard_Variable'] font-normal gap-[2px] items-start justify-center relative shrink-0 text-[1.125rem]"
-            >
-                <p class="relative shrink-0 text-zinc-500">
-                    {cheeringTracker.current}
-                </p>
-                <!-- Just displaying the number of cheers -->
+            <div class="mt-2 text-zinc-600 text-[0.875rem] flex justify-center">
+                {#if activeTab === "cheering"}
+                    <div class="flex gap-4 items-center">
+                        <div class="flex flex-col">
+                            <span
+                                class="text-[0.8rem] text-zinc-600 font-medium"
+                                >{activeMatch.classA}반</span
+                            >
+                            <span class="text-[1.25rem] font-bold text-zinc-800"
+                                >{activeMatch.attendance.cheeringA.length}</span
+                            >
+                        </div>
+                        <div class="w-px h-8 bg-zinc-100 self-end mb-1"></div>
+                        <div class="flex flex-col">
+                            <span
+                                class="text-[0.8rem] text-zinc-600 font-medium"
+                                >{activeMatch.classB}반</span
+                            >
+                            <span class="text-[1.25rem] font-bold text-zinc-800"
+                                >{activeMatch.attendance.cheeringB.length}</span
+                            >
+                        </div>
+                    </div>
+                {:else}
+                    <div class="flex items-baseline justify-center gap-1.5 mt-1">
+                        <span class="text-[1.75rem] font-black text-zinc-800"
+                            >{currentTab?.current}</span
+                        >
+                        <span class="text-[1rem] text-zinc-400 font-bold"
+                            >/</span
+                        >
+                        <span class="text-[1.125rem] text-zinc-600 font-bold"
+                            >{currentTab?.total}</span
+                        >
+                    </div>
+                {/if}
             </div>
         </div>
+
         <button
             type="button"
             disabled={isMatchFinished}
-            on:click={() => openScan("Cheering")}
-            class="bg-zinc-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-zinc-600 transition-colors disabled:opacity-50 disabled:bg-zinc-400"
+            on:click={() =>
+                openScan(
+                    activeTab === "teamA"
+                        ? "Team A"
+                        : activeTab === "teamB"
+                          ? "Team B"
+                          : "Cheering",
+                )}
+            class="w-full h-10 rounded-xl font-bold text-[0.9375rem] transition-all flex items-center justify-center gap-2
+            {activeTab === 'cheering'
+                ? 'bg-zinc-800 text-white hover:bg-zinc-700 active:scale-[0.98]'
+                : 'bg-amber-500 text-white hover:bg-amber-600 active:scale-[0.98] shadow-sm shadow-amber-200'}
+            disabled:opacity-40 disabled:grayscale disabled:scale-100"
         >
-            <p
-                class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-white whitespace-nowrap"
-            >
-                응원 스캔
-            </p>
+            {@html ScanIcon}
+            {activeTab === "cheering" ? "응원 인원 스캔" : "선수 스캔"}
         </button>
     </div>
 </div>
