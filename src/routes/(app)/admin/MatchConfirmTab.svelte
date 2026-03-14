@@ -81,7 +81,7 @@
         <div
             class="flex flex-col gap-3 overflow-y-auto w-[18rem] shrink-0 p-[1.875rem] py-6 border-r border-zinc-100 hide-scrollbar scroll-smooth bg-zinc-50/50"
         >
-            {#each completedClasses as matchPair}
+            {#each completedClasses.filter((m) => m.classA && m.classB) as matchPair}
                 <a
                     href="?tab=confirm&sportId={activeSportId}&matchId={matchPair.id}"
                     class="flex flex-[0_0_auto] flex-col gap-1 items-center justify-center py-4 px-4 rounded-xl border transition-all cursor-pointer no-underline
@@ -95,26 +95,16 @@
                             ? 'bg-amber-100 text-amber-900'
                             : 'bg-zinc-100 text-zinc-800'}"
                     >
-                        <span>{matchPair.sportName}</span>
                         {#if matchPair.matchName}
-                            <span class="opacity-50">•</span>
                             <span>{matchPair.matchName}</span>
                         {/if}
                     </div>
                     <div
                         class="flex gap-2 items-center font-bold text-lg text-zinc-800"
                     >
-                        <span
-                            >{matchPair.classA
-                                ? `${matchPair.classA}반`
-                                : "미정"}</span
-                        >
+                        <span>{matchPair.classA}반</span>
                         <span class="text-[0.6rem] text-zinc-400">VS</span>
-                        <span
-                            >{matchPair.classB
-                                ? `${matchPair.classB}반`
-                                : "미정"}</span
-                        >
+                        <span>{matchPair.classB}반</span>
                     </div>
                 </a>
             {/each}
