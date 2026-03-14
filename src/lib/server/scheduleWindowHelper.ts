@@ -234,24 +234,8 @@ async function getBranchCompletionTime(
         }
     }
 
-    // 2. If it's Round 1 and not scheduled, it's undetermined
-    if (round === 1) return "undetermined";
-
-    // 3. Round > 1: Check feeders.
-    // If it's a "Bye" match (effectively), it might not need scheduling but still has a "completion time".
-    const prevRound = round - 1;
-    const f1Time = await getBranchCompletionTime(sportId, prevRound, position * 2, durationMs);
-    const f2Time = await getBranchCompletionTime(sportId, prevRound, position * 2 + 1, durationMs);
-
-    if (f1Time === "undetermined" || f2Time === "undetermined") return "undetermined";
-
-    // If both null, this branch doesn't exist? (Shouldn't happen for active path)
-    if (!f1Time && !f2Time) return null;
-
-    // Return the later of the two (null counts as 0)
-    if (!f1Time) return f2Time;
-    if (!f2Time) return f1Time;
-    return f1Time > f2Time ? f1Time : f2Time;
+    // 2. If not scheduled, it's undetermined. No recursion allowed.
+    return "undetermined";
 }
 
 // ─── Main Public Functions ────────────────────────────────────────────────────
