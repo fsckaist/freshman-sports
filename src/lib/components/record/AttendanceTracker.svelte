@@ -14,17 +14,17 @@
     const CloseIcon = resizeSvgTo20(rawXmarkIcon);
     const ScanIcon = resizeSvgTo20(rawBarcodeIcon);
 
-    export let activeMatch;
+    let { activeMatch } = $props();
 
-    let scanModalOpen = false;
-    let scanningTarget = "";
-    let studentNumberInput = "";
-    let isSubmitting = false;
-    $: isMatchFinished = activeMatch.status === "FINISHED";
+    let scanModalOpen = $state(false);
+    let scanningTarget = $state("");
+    let studentNumberInput = $state("");
+    let isSubmitting = $state(false);
+    const isMatchFinished = $derived(activeMatch.status === "FINISHED");
 
-    let activeTab = "teamA";
+    let activeTab = $state("teamA");
 
-    $: tabs = [
+    const tabs = $derived([
         {
             id: "teamA",
             label: `${activeMatch.classA}반 선수`,
@@ -48,9 +48,9 @@
             total: null,
             color: "zinc",
         },
-    ];
+    ]);
 
-    $: currentTab = tabs.find((t) => t.id === activeTab);
+    const currentTab = $derived(tabs.find((t) => t.id === activeTab));
 
     function openScan(target: string) {
         scanningTarget = target;
@@ -68,11 +68,11 @@
     class="flex gap-4 w-full h-[10.5rem] bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden"
 >
     <!-- Left: Vertical Tabs -->
-    <div class="w-48 bg-zinc-50 border-r border-zinc-100 flex flex-col pt-1">
+    <div class="flex-1 bg-zinc-50 border-r border-zinc-100 flex flex-col pt-1">
         {#each tabs as tab}
             <button
                 type="button"
-                on:click={() => (activeTab = tab.id)}
+                onclick={() => (activeTab = tab.id)}
                 class="flex flex-col flex-1 justify-center items-start px-4 py-2.5 transition-all relative {activeTab ===
                 tab.id
                     ? 'bg-white'
@@ -95,7 +95,9 @@
     </div>
 
     <!-- Right: Content Area -->
-    <div class="flex-1 flex flex-col p-3 justify-between items-center text-center">
+    <div
+        class="flex-2 flex flex-col p-3 justify-between items-center text-center"
+    >
         <div class="flex flex-col items-center justify-center flex-1">
             <h3 class="text-[1rem] font-bold text-zinc-800">
                 {currentTab?.label} 등록
@@ -125,7 +127,9 @@
                         </div>
                     </div>
                 {:else}
-                    <div class="flex items-baseline justify-center gap-1.5 mt-1">
+                    <div
+                        class="flex items-baseline justify-center gap-1.5 mt-1"
+                    >
                         <span class="text-[1.75rem] font-black text-zinc-800"
                             >{currentTab?.current}</span
                         >
@@ -143,7 +147,7 @@
         <button
             type="button"
             disabled={isMatchFinished}
-            on:click={() =>
+            onclick={() =>
                 openScan(
                     activeTab === "teamA"
                         ? "Team A"
@@ -246,7 +250,7 @@
                 >
                     <button
                         type="button"
-                        on:click={closeScan}
+                        onclick={closeScan}
                         class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
                     >
                         <p

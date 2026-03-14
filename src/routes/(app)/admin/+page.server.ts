@@ -295,7 +295,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     cheering: cheeringCheckedIn,
                     teamATotal: activeSport.minPlayers,
                     teamBTotal: activeSport.minPlayers
-                }
+                },
+                matchNotes: matchRecord[0]?.matchNotes
             };
         }
 
