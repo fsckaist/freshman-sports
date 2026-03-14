@@ -62,6 +62,7 @@
         scanModalOpen = false;
         studentNumberInput = "";
     }
+    import { toast } from "$lib/toast.svelte";
 </script>
 
 <div
@@ -217,8 +218,11 @@
                         isSubmitting = false;
                         if (result.type === "success") {
                             studentNumberInput = ""; // clear for next scan
+                            const message = result.data?.message;
+                            toast.success(typeof message === 'string' ? message : "등록되었습니다.");
                         } else if (result.type === "failure") {
-                            alert(result.data?.message || "Failed to register");
+                            const message = result.data?.message;
+                            toast.error(typeof message === 'string' ? message : "Failed to register");
                         }
                         update({ reset: false }); // keep form modal open for rapid scans
                     };

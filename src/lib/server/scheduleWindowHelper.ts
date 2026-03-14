@@ -398,12 +398,48 @@ async function computeOrUpdateNextMatchWindowForMatch(matchId: string, sportId: 
  * @param byeMatchId The match that was processed as a bye
  */
 export async function propagateByeWindow(byeMatchId: string): Promise<void> {
-    // A bye match doesn't have a real scheduledAt — use "now" as the proxy
-    // so the next round can compute its window immediately
+    // 1. Find the bracket node for this bye match
+    const bracketNode = await db.select().from(tournament_brackets).where(eq(tournament_brackets.matchId, byeMatchId)).limit(1);
+    if (!bracketNode[0]) return;
+
+    const { sportId, round, position } = bracketNode[0];
+    let candidateScheduledAt = new Date();
+
+    // 2. If it's Round > 1, find predecessors to determine the date
+    if (round > 1) {
+        const prevRound = round - 1;
+        const pos1 = position * 2;
+        const pos2 = position * 2 + 1;
+
+        const feeders = await db.select({ matchId: tournament_brackets.matchId })
+            .from(tournament_brackets)
+            .where(and(
+                eq(tournament_brackets.sportId, sportId),
+                eq(tournament_brackets.round, prevRound),
+                or(eq(tournament_brackets.position, pos1), eq(tournament_brackets.position, pos2))
+            ));
+
+        const feederMatchIds = feeders.map(f => f.matchId).filter((id): id is string => !!id);
+
+        if (feederMatchIds.length > 0) {
+            const feederMatches = await db.select({ scheduledAt: matches.scheduledAt })
+                .from(matches)
+                .where(inArray(matches.id, feederMatchIds));
+            
+            const validDates = feederMatches.map(m => m.scheduledAt).filter((d): d is Date => !!d);
+            
+            if (validDates.length > 0) {
+                const laterDate = new Date(Math.max(...validDates.map(d => d.getTime())));
+                candidateScheduledAt = new Date(laterDate);
+                candidateScheduledAt.setDate(candidateScheduledAt.getDate() + 1);
+            }
+        }
+    }
+
+    // 3. Update the match's scheduledAt if not already set
     const byeMatch = await db.select().from(matches).where(eq(matches.id, byeMatchId)).limit(1);
     if (!byeMatch[0]?.scheduledAt) {
-        // Set scheduledAt to now so the window can be computed
-        await db.update(matches).set({ scheduledAt: new Date() }).where(eq(matches.id, byeMatchId));
+        await db.update(matches).set({ scheduledAt: candidateScheduledAt }).where(eq(matches.id, byeMatchId));
     }
 
     // Then run normal window computation

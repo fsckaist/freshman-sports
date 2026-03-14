@@ -1,7 +1,13 @@
 <script lang="ts">
     import Sidebar from "$lib/components/layout/Sidebar.svelte";
+    import ToastContainer from "$lib/components/ui/ToastContainer.svelte";
+    import { browser } from "$app/environment";
     let { children } = $props();
 </script>
+
+{#if browser}
+    <ToastContainer />
+{/if}
 
 <div
     class="flex h-screen w-full overflow-hidden bg-white"

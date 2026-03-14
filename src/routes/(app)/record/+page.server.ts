@@ -59,7 +59,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             userId: users.id,
             userName: users.name,
             classId: users.classId,
-            checkedInAt: registers.checkedInAt
+            checkedInAt: registers.checkedInAt,
+            isCheering: registers.isCheering
         })
         .from(registers)
         .innerJoin(users, eq(registers.userId, users.id))
@@ -145,7 +146,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     name: users.name,
                     studentNumber: users.studentNumber,
                     classId: users.classId,
-                    checkedInAt: registers.checkedInAt
+                    checkedInAt: registers.checkedInAt,
+                    isCheering: registers.isCheering
                 })
                 .from(registers)
                 .innerJoin(users, eq(registers.userId, users.id))
@@ -162,12 +164,21 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
             for (const reg of matchRegisters) {
                 if (reg.checkedInAt) {
-                    if (teamAUserIds.has(reg.userId)) {
+                    if (reg.isCheering) {
+                        // Explicitly cheering context
+                        if (reg.classId === activeMatch.classAId) {
+                            cheeringA.push(reg);
+                        } else if (reg.classId === activeMatch.classBId) {
+                            cheeringB.push(reg);
+                        } else {
+                            otherCheering.push(reg);
+                        }
+                    } else if (teamAUserIds.has(reg.userId)) {
                         teamACheckedIn.push(reg);
                     } else if (teamBUserIds.has(reg.userId)) {
                         teamBCheckedIn.push(reg);
                     } else {
-                        // Cheer section - check if they belong to A or B
+                        // Cheer section - fallback for those not on roster
                         if (reg.classId === activeMatch.classAId) {
                             cheeringA.push(reg);
                         } else if (reg.classId === activeMatch.classBId) {
@@ -269,23 +280,46 @@ export const actions: Actions = {
         });
 
         if (existing && existing.checkedInAt) {
-            return fail(400, { message: '이미 체크인 된 선수입니다.' });
+            const alreadyCheering = existing.isCheering;
+            const scanningAsCheering = scanType === "Cheering";
+
+            if (alreadyCheering && scanningAsCheering) {
+                return fail(400, { message: '이미 응원 인원으로 등록된 사용자입니다.' });
+            }
+
+            if (!alreadyCheering) {
+                if (scanningAsCheering) {
+                    return fail(400, { message: '이미 선수로 등록된 사용자는 응원 인원으로 변경할 수 없습니다.' });
+                } else {
+                    return fail(400, { message: '이미 선수로 등록된 사용자입니다.' });
+                }
+            }
+
+            // Case: alreadyCheering is true, and scanningAsCheering is false.
+            // Allow "upgrading" to player status.
         }
 
         if (existing) {
             await db.update(registers)
-                .set({ checkedInAt: new Date() })
+                .set({ 
+                    checkedInAt: new Date(),
+                    isCheering: scanType === "Cheering"
+                })
                 .where(eq(registers.id, existing.id));
         } else {
             await db.insert(registers).values({
                 scheduleId: match.scheduleId,
                 userId: user.id,
                 classId: user.classId!,
-                checkedInAt: new Date()
+                checkedInAt: new Date(),
+                isCheering: scanType === "Cheering"
             });
         }
 
-        return { success: true };
+        return { 
+            success: true, 
+            message: scanType === "Cheering" ? "응원 인원으로 등록되었습니다." : "선수로 등록되었습니다." 
+        };
     },
 
     startMatch: async ({ request }) => {
