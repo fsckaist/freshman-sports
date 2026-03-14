@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     // State guard: bracket only visible during ONGOING
     const configs = await db.select().from(system_config).limit(1);
     const eventState = configs[0]?.eventState ?? 'REGISTRATION';
-    if (eventState !== 'ONGOING') throw redirect(302, '/dashboard');
+    if (eventState !== 'ONGOING') throw redirect(302, '/');
 
     // 1. Fetch all brackets joined with classes and sports
     const allNodes = await db

@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     // Role guard: only managers and admins can access the record page
     const user = locals.user;
     if (!user) throw redirect(302, '/login');
-    if (!user.isManager && !user.isAdmin) throw redirect(302, '/dashboard');
+    if (!user.isManager && !user.isAdmin) throw redirect(302, '/');
 
     // Fetch all sports for tabs
     const allSportsList = await db

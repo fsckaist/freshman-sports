@@ -145,7 +145,7 @@
 
         <!-- Right Container -->
         <div
-            class="flex-1 flex flex-col overflow-auto min-h-0 min-w-0 relative p-[1.875rem] py-6 bg-white dark:bg-zinc-900 gap-6"
+            class="flex-1 flex flex-col overflow-auto min-h-0 min-w-0 relative p-[1.875rem] py-6 bg-white dark:bg-zinc-950 gap-6"
         >
             {#if activeResultMatch}
                 <!-- Reusing MatchLogPanel from Record Page for simple view -->

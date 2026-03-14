@@ -36,7 +36,10 @@ async function main() {
 
         // --- 2. system_config ---
         console.log("⚙️  Inserting system_config...");
-        await db.insert(schema.system_config).values({ eventState: 'ONGOING' });
+        await db.insert(schema.system_config).values({ 
+            eventState: 'REGISTRATION',
+            registrationDeadline: new Date("2026-03-15T23:59:59")
+        });
 
         // --- 3. Classes (31) ---
         console.log("🏫 Inserting 31 Classes...");
@@ -98,7 +101,8 @@ async function main() {
                 periodEnd: march31,
                 round1SelectionStart: march13,
                 round1SelectionEnd: march20,
-                round1Deadline: march20
+                round1Deadline: march20,
+                requiredGender: 'MALE_ONLY'
             },
             {
                 name: "여자 배드민턴 복식",
@@ -114,37 +118,82 @@ async function main() {
                 periodEnd: march31,
                 round1SelectionStart: march13,
                 round1SelectionEnd: march20,
-                round1Deadline: march20
+                round1Deadline: march20,
+                requiredGender: 'FEMALE_ONLY'
             }
         ]).returning();
 
         // --- 5. Users ---
-        console.log("👤 Inserting Users...");
+        console.log("👤 Inserting Users (Role-based Student Numbers)...");
         const usersToInsert: typeof schema.users.$inferInsert[] = [];
 
+        // 1. Admin (2022...)
+        usersToInsert.push({
+            name: "총관리자",
+            studentNumber: "20220001",
+            email: "admin@kaist.ac.kr",
+            isAdmin: true,
+            isManager: true,
+            agreedPrivacy: false,
+            agreedRules: false,
+            gender: 'MALE'
+        });
+
+        // 2. Managers (2023...) - 10 users
+        for (let i = 1; i <= 10; i++) {
+            usersToInsert.push({
+                name: `매니저_${i}`,
+                studentNumber: `2023${i.toString().padStart(4, '0')}`,
+                email: `manager_${i}@kaist.ac.kr`,
+                isManager: true,
+                agreedPrivacy: false,
+                agreedRules: false,
+                gender: i % 2 === 0 ? 'FEMALE' : 'MALE'
+            });
+        }
+
+        // 3. Referees (2024...) - 50 users
+        for (let i = 1; i <= 50; i++) {
+            usersToInsert.push({
+                name: `심판_${i}`,
+                studentNumber: `2024${i.toString().padStart(4, '0')}`,
+                email: `referee_${i}@kaist.ac.kr`,
+                isReferee: true,
+                agreedPrivacy: false,
+                agreedRules: false,
+                gender: i % 2 === 0 ? 'FEMALE' : 'MALE'
+            });
+        }
+
+        // 4. Per-Class Users: Proctors (2025...) and Students (2026...)
         for (const c of insertedClasses) {
+            // 2 Proctors per class
+            for (let i = 1; i <= 2; i++) {
+                usersToInsert.push({
+                    name: `프락터_${c.classNumber}반_${i}`,
+                    studentNumber: `2025${c.classNumber.toString().padStart(2, '0')}${i.toString().padStart(2, '0')}`,
+                    email: `proctor_${c.classNumber}_${i}@kaist.ac.kr`,
+                    classId: c.id,
+                    isProctor: true,
+                    agreedPrivacy: false,
+                    agreedRules: false,
+                    gender: i === 1 ? 'MALE' : 'FEMALE'
+                });
+            }
+
+            // 10 Students per class
             for (let i = 1; i <= 10; i++) {
                 usersToInsert.push({
                     name: `학생_${c.classNumber}반_${i}`,
                     studentNumber: `2026${c.classNumber.toString().padStart(2, '0')}${i.toString().padStart(2, '0')}`,
                     email: `student_${c.classNumber}_${i}@kaist.ac.kr`,
                     classId: c.id,
-                    agreedPrivacy: true,
-                    agreedRules: true
+                    agreedPrivacy: false,
+                    agreedRules: false,
+                    gender: i <= 5 ? 'MALE' : 'FEMALE' // 5 Male, 5 Female
                 });
             }
         }
-
-        // Add admin/manager/referee
-        usersToInsert.push({
-            name: "관리자",
-            studentNumber: "20230001",
-            email: "admin@kaist.ac.kr",
-            isAdmin: true,
-            isManager: true,
-            agreedPrivacy: true,
-            agreedRules: true
-        });
 
         const batchSize = 100;
         let insertedUsers: typeof schema.users.$inferSelect[] = [];
@@ -156,13 +205,14 @@ async function main() {
         // --- 6. Rosters (Every student for Every sport) ---
         console.log("📋 Adding Rosters for ALL students in ALL sports...");
         const rosterInserts: typeof schema.rosters.$inferInsert[] = [];
-        const students = insertedUsers.filter(u => u.classId && !u.isProctor && !u.isAdmin && !u.isReferee);
+        // Only regular students and proctors participate in sports
+        const participants = insertedUsers.filter(u => u.classId && (u.isProctor || (!u.isAdmin && !u.isManager && !u.isReferee)));
 
         for (const sport of insertedSports) {
-            for (const student of students) {
+            for (const participant of participants) {
                 rosterInserts.push({
-                    userId: student.id,
-                    classId: student.classId!,
+                    userId: participant.id,
+                    classId: participant.classId!,
                     sportId: sport.id
                 });
             }
@@ -175,71 +225,11 @@ async function main() {
         // --- 7. Brackets & Matches ---
         await seedBrackets(insertedClasses, insertedSports);
 
-        // --- 8. Initial Schedules (First Week) ---
-        console.log("📅 Generating Initial Schedules...");
-        const scheduleInserts: typeof schema.schedules.$inferInsert[] = [];
-        for (const sport of insertedSports) {
-            let cursor = new Date(march13);
-            cursor.setHours(10, 0, 0, 0);
+        // --- 8. Initial Schedules (Skipped as requested) ---
+        console.log("📅 Skipping initial schedules (keep table empty)...");
 
-            // 7 days
-            for (let d = 0; d < 7; d++) {
-                // Skip weekends for coordination
-                if (cursor.getDay() !== 0 && cursor.getDay() !== 6) {
-                    for (let h = 0; h < 6; h++) { // 10:00 to 16:00
-                        scheduleInserts.push({
-                            sportId: sport.id,
-                            startTime: new Date(cursor),
-                            isAvailable: true
-                        });
-                        cursor.setMinutes(cursor.getMinutes() + sport.timeSlotInterval!);
-                    }
-                    // Reset to 10:00 next day
-                    cursor.setHours(10, 0, 0, 0);
-                }
-                cursor.setDate(cursor.getDate() + 1);
-            }
-        }
-
-        const insertedSchedules = await db.insert(schema.schedules).values(scheduleInserts).returning();
-
-        // --- 9. Initial Votes (Pre-filled for Round 1) ---
-        console.log("🗳️  Pre-filling Votes for Round 1 Matches...");
-        const registerInserts: typeof schema.registers.$inferInsert[] = [];
-
-        // Find Round 1 matches
-        const round1Matches = await db.select().from(schema.matches).where(eq(schema.matches.status, 'PENDING_SCHEDULE'));
-
-        for (const match of round1Matches) {
-            const sport = insertedSports.find(s => s.id === match.sportId)!;
-            const slots = insertedSchedules.filter(s => s.sportId === sport.id);
-
-            // Select half of the slots randomly or sequentially
-            const slotsToVote = slots.slice(0, Math.ceil(slots.length / 2));
-
-            // Get students for classA and classB
-            const classAStudents = students.filter(s => s.classId === match.classAId).slice(0, sport.minPlayers!);
-            const classBStudents = students.filter(s => s.classId === match.classBId).slice(0, sport.minPlayers!);
-
-            for (const slot of slotsToVote) {
-                // Have some members from each team vote for this slot
-                for (const student of [...classAStudents, ...classBStudents]) {
-                    // Randomly decide if this student votes for this slot to make it look realistic
-                    if (Math.random() > 0.3) {
-                        registerInserts.push({
-                            userId: student.id,
-                            classId: student.classId!,
-                            scheduleId: slot.id,
-                            isAvailable: true
-                        });
-                    }
-                }
-            }
-        }
-
-        for (let i = 0; i < registerInserts.length; i += batchSize) {
-            await db.insert(schema.registers).values(registerInserts.slice(i, i + batchSize));
-        }
+        // --- 9. Initial Votes (Skipped as requested) ---
+        console.log("🗳️  Skipping initial votes (keep table empty)...");
 
         console.log("✅ Seed complete!");
     } catch (error) {

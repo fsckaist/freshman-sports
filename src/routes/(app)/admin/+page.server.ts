@@ -15,12 +15,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
         // Must be admin
         if (!user.isAdmin) {
-            throw redirect(302, '/dashboard');
+            throw redirect(302, '/');
         }
 
         // Fetch event state for system tab
         const configRows = await db.select().from(system_config).limit(1);
         const eventState = (configRows[0]?.eventState ?? 'REGISTRATION') as EventState;
+        const registrationDeadline = configRows[0]?.registrationDeadline ?? null;
 
 
         // --- TAB 1: Schedule Configuration Data ---
@@ -313,7 +314,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
             finishedMatches,
             activeResultMatch: activeResultMatchDetails,
-            eventState
+            eventState,
+            registrationDeadline
         };
     } catch (e) {
         if (e && typeof e === 'object' && 'status' in e && e.status === 302) {
@@ -790,6 +792,7 @@ export const actions: Actions = {
             const dailyEndTime = formData.get('dailyEndTime')?.toString();
             const timeSlotInterval = formData.get('timeSlotInterval')?.toString();
             const maxParallelMatches = formData.get('maxParallelMatches')?.toString();
+            const requiredGender = formData.get('requiredGender')?.toString();
 
             if (!sportId) return fail(400, { message: '종목 ID가 누락되었습니다.' });
             const sId = sportId as string;
@@ -804,6 +807,7 @@ export const actions: Actions = {
             if (dailyEndTime) updatePayload.dailyEndTime = dailyEndTime;
             if (timeSlotInterval) updatePayload.timeSlotInterval = parseInt(timeSlotInterval);
             if (maxParallelMatches) updatePayload.maxParallelMatches = parseInt(maxParallelMatches);
+            if (requiredGender) updatePayload.requiredGender = requiredGender;
 
             // 1. Save per-sport config
             await db.update(sports).set(updatePayload).where(eq(sports.id, sId));
@@ -864,6 +868,32 @@ export const actions: Actions = {
             return { success: true, eventState: newState };
         } catch (e) {
             console.error('setEventState error:', e);
+            return fail(500);
+        }
+    },
+    setRegistrationDeadline: async ({ request, locals }) => {
+        try {
+            const user = locals.user;
+            if (!user?.isAdmin) return fail(403);
+
+            const formData = await request.formData();
+            const deadline = formData.get('registrationDeadline')?.toString();
+
+            if (!deadline) return fail(400, { message: '마감 기한을 입력해주세요.' });
+
+            const deadlineDate = new Date(deadline);
+            if (isNaN(deadlineDate.getTime())) return fail(400, { message: '유효하지 않은 날짜 형식입니다.' });
+
+            const existing = await db.select().from(system_config).limit(1);
+            if (existing.length > 0) {
+                await db.update(system_config).set({ registrationDeadline: deadlineDate, updatedAt: new Date() });
+            } else {
+                await db.insert(system_config).values({ registrationDeadline: deadlineDate });
+            }
+
+            return { success: true };
+        } catch (e) {
+            console.error('setRegistrationDeadline error:', e);
             return fail(500);
         }
     }

@@ -130,7 +130,12 @@
                     ])}"
                 >
                     <p
-                        class="font-pretendard font-extrabold text-[0.75rem] text-white m-0 leading-[0.75rem] tracking-wide"
+                        class="font-pretendard font-extrabold text-[0.75rem] text-white m-0 leading-[0.75rem] tracking-wide
+                        {cx([
+                            !isMatchAvailable
+                                ? 'dark:text-zinc-500'
+                                : 'dark:text-white',
+                        ])}"
                     >
                         VS
                     </p>
@@ -139,7 +144,7 @@
 
             <!-- Metrics Area -->
             <div
-                class="flex flex-[1_0_0] w-full min-h-0 bg-white dark:bg-zinc-900"
+                class="flex flex-[1_0_0] w-full min-h-0 bg-white dark:bg-zinc-950"
             >
                 <!-- Our Data -->
                 <div
@@ -228,7 +233,7 @@
             {/if}
         {:else}
             <!-- EMPTY USER MODE -->
-            <div class="w-full h-full bg-white dark:bg-zinc-900"></div>
+            <div class="w-full h-full bg-white dark:bg-zinc-950"></div>
         {/if}
     {/if}
 </button>

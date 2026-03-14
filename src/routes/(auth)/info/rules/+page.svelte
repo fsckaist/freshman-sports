@@ -13,7 +13,7 @@
 </svelte:head>
 
 <div
-    class="relative size-full min-h-screen bg-white dark:bg-zinc-900 overflow-hidden flex justify-center"
+    class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
     <!-- Centered 90rem wrapper so the absolute watermark is properly anchored -->
     <div
@@ -32,7 +32,7 @@
 
         <!-- Title & Button Frame -->
         <div
-            class="content-stretch flex items-end justify-between p-[0.625rem] relative shrink-0 w-full z-10"
+            class="content-stretch flex items-end justify-between p-[0.625rem] relative shrink-0 w-full z-10 border-b border-transparent dark:border-zinc-800/50 pb-[1.25rem]"
         >
             <div
                 class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100"
@@ -155,7 +155,7 @@
 
         <!-- Sticky Footer -->
         <div
-            class="content-stretch flex items-center p-[0.625rem] relative shrink-0 w-full"
+            class="content-stretch flex items-center p-[0.625rem] relative shrink-0 w-full border-t border-transparent dark:border-zinc-800/50 pt-[1.25rem]"
         >
             <p
                 class="font-pretendard font-medium text-zinc-800 dark:text-zinc-100 m-0 p-0 text-[1.125rem]"

@@ -23,7 +23,7 @@
                 "flex flex-[1_0_0] items-center justify-center h-[3.125rem] cursor-pointer outline-none transition-colors duration-200",
                 activeTab === tab.id
                     ? "bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 border-amber-500"
-                    : "bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent border-t-0 border-l-0",
+                    : "bg-zinc-100 dark:bg-zinc-950 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent border-t-0 border-l-0",
                 i !== tabs.length - 1 ? "border-r border-zinc-200 dark:border-zinc-800" : "",
             ])}
         >

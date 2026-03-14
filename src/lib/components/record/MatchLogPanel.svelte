@@ -231,7 +231,7 @@
                     </h3>
 
                     <div
-                        class="bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
+                        class="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
                     >
                         <div class="grid grid-cols-2 gap-y-2 text-sm">
                             <span class="text-zinc-400 dark:text-zinc-500">전반전 득점</span>
@@ -297,7 +297,7 @@
                     </h3>
 
                     <div
-                        class="bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
+                        class="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
                     >
                         <div class="grid grid-cols-2 gap-y-2 text-sm">
                             <span class="text-zinc-400 dark:text-zinc-500">전반전 득점</span>

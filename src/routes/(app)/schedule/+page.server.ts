@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { sports, schedules, registers, users, rosters, matches, system_config, tournament_brackets } from '$lib/server/db/schema';
 import { eq, and, or, asc, gte, lte } from 'drizzle-orm';
+import { getRemainingTimeLabel } from '$lib/server/timeUtils';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
@@ -12,7 +13,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         // State guard: schedule page only visible during ONGOING
         const configs = await db.select().from(system_config).limit(1);
         const eventState = configs[0]?.eventState ?? 'REGISTRATION';
-        if (eventState !== 'ONGOING') throw redirect(302, '/dashboard');
+        if (eventState !== 'ONGOING') throw redirect(302, '/');
 
         // 1. URL Parameter Handling
         let requestedSportId = url.searchParams.get('sportId');
@@ -114,6 +115,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
         let deadlineAt: string | null = null;
         let hoursRemaining = 0;
+        let timeRemaining = "0분";
         let deadlinePassed = false;
         let deadlineLabel = "N/A";
 
@@ -129,6 +131,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
             const difMs = deadlineDate.getTime() - now.getTime();
             hoursRemaining = Math.max(0, Math.floor(difMs / (1000 * 60 * 60)));
+            timeRemaining = getRemainingTimeLabel(deadlineDate);
         }
 
         const rawData = (startDate && endDate) ? await db.select({
@@ -236,11 +239,11 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         return {
             deadlineDate: deadlineLabel,
             deadlineAt,
-            hoursRemaining,
+            timeRemaining,
             deadlinePassed,
             sports: sportTabs,
             activeSportId: activeSport.id,
-            gridData: (deadlinePassed || !startDate) ? {} : formattedGrid,
+            gridData: !startDate ? {} : formattedGrid,
             currentUserClassId: user.classId,
             opponentClassId,
             isEligible,

@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { sports, users, rosters, system_config } from '$lib/server/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
+import { getRemainingTimeLabel } from '$lib/server/timeUtils';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -11,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     // State guard: apply page only visible during REGISTRATION
     const configs = await db.select().from(system_config).limit(1);
     const eventState = configs[0]?.eventState ?? 'REGISTRATION';
-    if (eventState !== 'REGISTRATION') throw redirect(302, '/dashboard');
+    if (eventState !== 'REGISTRATION') throw redirect(302, '/');
 
     if (!user.classId) {
         // If a user doesn't belong to a class, they can't see the sports rosters or apply
@@ -36,12 +37,22 @@ export const load: PageServerLoad = async ({ locals }) => {
         .innerJoin(users, eq(rosters.userId, users.id))
         .where(eq(rosters.classId, user.classId));
 
-    // Calculate deadline (Hardcoded for now as per mock, can be dynamic later)
-    const deadlineStr = "03월 15일 23:59";
-    const deadlineDate = new Date("2026-03-15T23:59:59+09:00");
-    const today = new Date();
-    const diffTime = Math.abs(deadlineDate.getTime() - today.getTime());
-    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    // Calculate deadline
+    const registrationDeadline = configs[0]?.registrationDeadline;
+    let deadlineStr = "미정";
+    let daysRemaining = "0";
+    let timeRemaining = "0분";
+
+    if (registrationDeadline) {
+        const d = new Date(registrationDeadline);
+        const pad = (n: number) => String(n).padStart(2, '0');
+        deadlineStr = `${pad(d.getMonth() + 1)}월 ${pad(d.getDate())}일 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+        const today = new Date();
+        const diffTime = registrationDeadline.getTime() - today.getTime();
+        daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24))).toString();
+        timeRemaining = getRemainingTimeLabel(registrationDeadline);
+    }
 
     // 3. Transform Data Output
     const sportsData = allSports.map((sport) => {
@@ -52,15 +63,24 @@ export const load: PageServerLoad = async ({ locals }) => {
 
         // Determine Button State
         let buttonState: "apply" | "cancel" | "closed" | "disabled" = "apply";
+        let alertMessage: string | undefined = undefined;
+
+        // Gender Check
+        const isGenderMismatched =
+            (sport.requiredGender === 'MALE_ONLY' && user.gender !== 'MALE') ||
+            (sport.requiredGender === 'FEMALE_ONLY' && user.gender !== 'FEMALE');
+
         if (isCurrentUserEnrolled) {
             buttonState = "cancel";
+        } else if (isGenderMismatched) {
+            buttonState = "disabled";
+            const reqLabel = sport.requiredGender === 'MALE_ONLY' ? "남성" : "여성";
         } else if (currentSpots >= sport.maxPlayers) {
             buttonState = "closed";
         }
 
-        // Evaluate Alert Message
-        let alertMessage: string | undefined = undefined;
-        if (currentSpots < sport.minPlayers) {
+        // Evaluate Alert Message (if not already set by gender check)
+        if (!alertMessage && currentSpots < sport.minPlayers) {
             alertMessage = `최소 참여 인원이 충족되지 않았어요. (${currentSpots}/${sport.minPlayers})`;
         }
 
@@ -86,13 +106,14 @@ export const load: PageServerLoad = async ({ locals }) => {
             descriptionLines,
             rosters: rostersFormatted,
             buttonState,
-            alertMessage
+            alertMessage,
+            requiredGender: sport.requiredGender
         };
     });
 
     return {
         deadlineDate: deadlineStr,
-        daysRemaining: daysRemaining.toString(),
+        timeRemaining,
         sports: sportsData
     };
 };
@@ -148,6 +169,16 @@ export const actions: Actions = {
 
         if (currentRosterCountArr.length >= sportInfo.maxPlayers) {
             return fail(400, { message: "해당 종목의 모집이 마감되었어요." });
+        }
+
+        // Check 3: Gender Compatibility
+        const isGenderMismatched =
+            (sportInfo.requiredGender === 'MALE_ONLY' && user.gender !== 'MALE') ||
+            (sportInfo.requiredGender === 'FEMALE_ONLY' && user.gender !== 'FEMALE');
+
+        if (isGenderMismatched) {
+            const reqLabel = sportInfo.requiredGender === 'MALE_ONLY' ? "남성" : "여성";
+            return fail(400, { message: `${reqLabel} 전용 종목입니다.` });
         }
 
         // Insert

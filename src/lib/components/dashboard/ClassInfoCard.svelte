@@ -50,7 +50,7 @@
 
     <!-- Roster Grid Card -->
     <div
-        class="bg-neutral-50 dark:bg-zinc-900/50 flex flex-[1_0_0] flex-col gap-[0.625rem] items-start min-w-px overflow-clip p-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none rounded-[1.25rem] w-full relative"
+        class="bg-neutral-50 dark:bg-zinc-900/50 flex flex-[1_0_0] flex-col gap-[0.625rem] items-start min-w-px overflow-auto p-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none rounded-[1.25rem] w-full relative"
     >
         <div class="flex items-center justify-center px-[0.3125rem] shrink-0">
             <h3

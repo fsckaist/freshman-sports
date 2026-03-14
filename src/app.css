@@ -17,7 +17,7 @@
   }
 
   :root.dark body {
-    background-color: var(--color-zinc-900);
+    background-color: var(--color-zinc-950);
     color: var(--color-zinc-50);
   }
 

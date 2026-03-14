@@ -69,7 +69,9 @@
     class="flex gap-4 w-full h-[10.5rem] bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden"
 >
     <!-- Left: Vertical Tabs -->
-    <div class="flex-1 bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-100 dark:border-zinc-800 flex flex-col pt-1">
+    <div
+        class="flex-1 bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col"
+    >
         {#each tabs as tab}
             <button
                 type="button"
@@ -112,17 +114,21 @@
                                 class="text-[0.8rem] text-zinc-600 dark:text-zinc-400 font-medium"
                                 >{activeMatch.classA}반</span
                             >
-                            <span class="text-[1.25rem] font-bold text-zinc-800 dark:text-zinc-100"
+                            <span
+                                class="text-[1.25rem] font-bold text-zinc-800 dark:text-zinc-100"
                                 >{activeMatch.attendance.cheeringA.length}</span
                             >
                         </div>
-                        <div class="w-px h-8 bg-zinc-100 dark:bg-zinc-800 self-end mb-1"></div>
+                        <div
+                            class="w-px h-8 bg-zinc-100 dark:bg-zinc-800 self-end mb-1"
+                        ></div>
                         <div class="flex flex-col">
                             <span
                                 class="text-[0.8rem] text-zinc-600 dark:text-zinc-400 font-medium"
                                 >{activeMatch.classB}반</span
                             >
-                            <span class="text-[1.25rem] font-bold text-zinc-800 dark:text-zinc-100"
+                            <span
+                                class="text-[1.25rem] font-bold text-zinc-800 dark:text-zinc-100"
                                 >{activeMatch.attendance.cheeringB.length}</span
                             >
                         </div>
@@ -131,13 +137,15 @@
                     <div
                         class="flex items-baseline justify-center gap-1.5 mt-1"
                     >
-                        <span class="text-[1.75rem] font-black text-zinc-800 dark:text-zinc-100"
+                        <span
+                            class="text-[1.75rem] font-black text-zinc-800 dark:text-zinc-100"
                             >{currentTab?.current}</span
                         >
                         <span class="text-[1rem] text-zinc-400 font-bold"
                             >/</span
                         >
-                        <span class="text-[1.125rem] text-zinc-600 dark:text-zinc-300 font-bold"
+                        <span
+                            class="text-[1.125rem] text-zinc-600 dark:text-zinc-300 font-bold"
                             >{currentTab?.total}</span
                         >
                     </div>
@@ -219,10 +227,18 @@
                         if (result.type === "success") {
                             studentNumberInput = ""; // clear for next scan
                             const message = result.data?.message;
-                            toast.success(typeof message === 'string' ? message : "등록되었습니다.");
+                            toast.success(
+                                typeof message === "string"
+                                    ? message
+                                    : "등록되었습니다.",
+                            );
                         } else if (result.type === "failure") {
                             const message = result.data?.message;
-                            toast.error(typeof message === 'string' ? message : "Failed to register");
+                            toast.error(
+                                typeof message === "string"
+                                    ? message
+                                    : "Failed to register",
+                            );
                         }
                         update({ reset: false }); // keep form modal open for rapid scans
                     };

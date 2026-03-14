@@ -35,13 +35,15 @@ export const handle: Handle = async ({ event, resolve }) => {
                 throw redirect(303, '/register/rules');
             }
         } else if (needsPolicy) {
-            if (pathname !== '/register/policy' && pathname !== '/info/policy') {
-                throw redirect(303, '/register/policy');
+            if (pathname !== '/register/privacy' && pathname !== '/info/privacy') {
+                throw redirect(303, '/register/privacy');
             }
         }
         else {
             if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/info') || pathname === '/') {
-                throw redirect(303, '/dashboard');
+                if (pathname !== '/') {
+                    throw redirect(303, '/');
+                }
             }
         }
     }

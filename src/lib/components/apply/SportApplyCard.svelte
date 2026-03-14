@@ -16,6 +16,7 @@
         rosters = [] as RosterMember[],
         buttonState = "apply",
         alertMessage = "",
+        requiredGender = "MIXED",
         onButtonClick = () => {},
     } = $props<{
         id: string;
@@ -26,6 +27,7 @@
         rosters: RosterMember[];
         buttonState: "apply" | "cancel" | "closed" | "disabled";
         alertMessage?: string;
+        requiredGender?: "MALE_ONLY" | "FEMALE_ONLY" | "MIXED";
         onButtonClick?: () => void;
     }>();
 
@@ -49,11 +51,13 @@
         class="flex flex-col gap-[0.625rem] items-start justify-center leading-tight relative shrink-0 w-full"
     >
         <div class="flex items-start justify-between relative shrink-0 w-full">
-            <h2
-                class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.6rem] m-0"
-            >
-                {title}
-            </h2>
+            <div class="flex flex-col gap-1">
+                <h2
+                    class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.6rem] m-0"
+                >
+                    {title}
+                </h2>
+            </div>
             <p
                 class="font-pretendard font-medium relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.125rem] m-0"
             >
@@ -81,7 +85,9 @@
                 {#each rosters as player}
                     <div
                         class="bg-white dark:bg-zinc-800 border-1 border-solid content-stretch flex flex-col items-center justify-center overflow-clip px-[1.875rem] py-[0.625rem] relative rounded-[0.5rem] shrink-0 w-full transition-colors duration-200
-                        {player.isCurrentUser ? 'border-orange-500' : 'border-zinc-300 dark:border-zinc-700'}"
+                        {player.isCurrentUser
+                            ? 'border-orange-500'
+                            : 'border-zinc-300 dark:border-zinc-700'}"
                     >
                         <p
                             class="font-pretendard font-normal leading-tight relative shrink-0 text-zinc-800 dark:text-zinc-200 text-[0.875rem] m-0"
@@ -134,7 +140,9 @@
                 <input type="hidden" name="sportId" value={id} />
                 <button
                     class="content-stretch flex border-none h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full transition-colors duration-200 group cursor-pointer
-                    {buttonState === 'apply' ? 'bg-amber-500 hover:bg-amber-600 active:bg-amber-800' : 'bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800'}"
+                    {buttonState === 'apply'
+                        ? 'bg-amber-500 hover:bg-amber-600 active:bg-amber-800'
+                        : 'bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800'}"
                 >
                     <p
                         class="font-pretendard font-semibold leading-tight relative shrink-0 text-[1rem] m-0 text-white"

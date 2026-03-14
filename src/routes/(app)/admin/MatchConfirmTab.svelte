@@ -117,7 +117,7 @@
 
         <!-- Grid Container -->
         <div
-            class="flex-1 flex flex-col overflow-auto w-0 min-w-0 min-h-0 relative py-6 bg-white dark:bg-zinc-900"
+            class="flex-1 flex flex-col overflow-auto w-0 min-w-0 min-h-0 relative py-6 bg-white dark:bg-zinc-950"
         >
             {#if Object.keys(confirmGridData).length === 0}
                 <div

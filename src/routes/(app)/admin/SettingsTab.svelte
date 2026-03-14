@@ -4,6 +4,7 @@
     let {
         eventState = "REGISTRATION",
         sports = [],
+        registrationDeadline = null,
     }: {
         eventState?: "REGISTRATION" | "ONGOING" | "COMPLETED";
         sports?: Array<{
@@ -18,10 +19,14 @@
             dailyEndTime: string | null;
             timeSlotInterval: number | null;
             maxParallelMatches: number | null;
+            requiredGender: "MALE_ONLY" | "FEMALE_ONLY" | "MIXED";
         }>;
+        registrationDeadline?: string | Date | null;
     } = $props();
 
     let isUpdating = $state(false);
+    let isDeadlineUpdating = $state(false);
+    let localRegistrationDeadline = $state("");
     let isScheduleUpdating: Record<string, boolean> = $state({});
     let currentState = $derived(eventState);
 
@@ -57,12 +62,16 @@
             dailyEndTime: string;
             timeSlotInterval: number;
             maxParallelMatches: number;
+            requiredGender: "MALE_ONLY" | "FEMALE_ONLY" | "MIXED";
         }
     > = $state({});
 
     // Keep internal form state in sync with props, especially after server updates
     let lastSportsHash = "";
     $effect(() => {
+        // Sync registration deadline
+        localRegistrationDeadline = toLocal(registrationDeadline);
+
         // Only update sportForms if the sports prop itself has changed (e.g. from server)
         // This prevents overwriting user input while they are typing.
         const currentHash = JSON.stringify(sports);
@@ -81,6 +90,7 @@
                     dailyEndTime: s.dailyEndTime || "16:00",
                     timeSlotInterval: s.timeSlotInterval || 60,
                     maxParallelMatches: s.maxParallelMatches || 1,
+                    requiredGender: s.requiredGender || "MIXED",
                 };
             }
             lastSportsHash = currentHash;
@@ -212,6 +222,56 @@
             </div>
         </div>
 
+        <!-- Registration Deadline Card -->
+        <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+                <h3
+                    class="font-pretendard font-semibold text-zinc-800 dark:text-zinc-100 text-[1rem] m-0"
+                >
+                    종목 지원 마감 기한
+                </h3>
+                <p
+                    class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.8125rem] m-0"
+                >
+                    학생들이 종목에 지원할 수 있는 최종 기한을 설정합니다.
+                </p>
+            </div>
+
+            <form
+                method="POST"
+                action="?/setRegistrationDeadline"
+                use:enhance={() => {
+                    isDeadlineUpdating = true;
+                    return async ({ update }) => {
+                        isDeadlineUpdating = false;
+                        update({ reset: false });
+                    };
+                }}
+                class="flex gap-3 items-end"
+            >
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="font-pretendard text-zinc-500 text-[0.75rem]"
+                        for="reg-deadline">마감 일시</label
+                    >
+                    <input
+                        id="reg-deadline"
+                        type="datetime-local"
+                        name="registrationDeadline"
+                        bind:value={localRegistrationDeadline}
+                        class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
+                    />
+                </div>
+                <button
+                    type="submit"
+                    disabled={isDeadlineUpdating}
+                    class="font-pretendard font-medium text-[0.875rem] bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-2 rounded-lg hover:bg-zinc-700 dark:hover:bg-zinc-200 active:bg-zinc-800 dark:active:bg-zinc-300 transition-colors disabled:opacity-50 h-[38px]"
+                >
+                    {isDeadlineUpdating ? "저장 중..." : "저장하기"}
+                </button>
+            </form>
+        </div>
+
         <!-- Per-Sport Schedule Config -->
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-1">
@@ -290,8 +350,30 @@
                                             sportForms[sport.id]
                                                 .maxParallelMatches
                                         }
-                                        class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400"
+                                        class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                     />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <p
+                                    class="font-pretendard font-medium text-zinc-600 dark:text-zinc-400 text-[0.875rem] m-0"
+                                >
+                                    성별 제한 설정
+                                </p>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <input type="radio" name="requiredGender" value="MALE_ONLY" bind:group={sportForms[sport.id].requiredGender} class="accent-zinc-800 dark:accent-zinc-100" />
+                                        <span class="font-pretendard text-[0.875rem] text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">남성만</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <input type="radio" name="requiredGender" value="FEMALE_ONLY" bind:group={sportForms[sport.id].requiredGender} class="accent-zinc-800 dark:accent-zinc-100" />
+                                        <span class="font-pretendard text-[0.875rem] text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">여성만</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <input type="radio" name="requiredGender" value="MIXED" bind:group={sportForms[sport.id].requiredGender} class="accent-zinc-800 dark:accent-zinc-100" />
+                                        <span class="font-pretendard text-[0.875rem] text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">양성</span>
+                                    </label>
                                 </div>
                             </div>
 
@@ -317,7 +399,7 @@
                                                 sportForms[sport.id]
                                                     .dailyStartTime
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                     <div class="flex flex-col gap-1.5">
@@ -334,7 +416,7 @@
                                                 sportForms[sport.id]
                                                     .dailyEndTime
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                     <div class="flex flex-col gap-1.5">
@@ -352,7 +434,7 @@
                                                 sportForms[sport.id]
                                                     .timeSlotInterval
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                 </div>
@@ -378,7 +460,7 @@
                                             bind:value={
                                                 sportForms[sport.id].periodStart
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400 transition-colors"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                     <div class="flex flex-col gap-1.5">
@@ -393,7 +475,7 @@
                                             bind:value={
                                                 sportForms[sport.id].periodEnd
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400 transition-colors"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                 </div>
@@ -422,7 +504,7 @@
                                             bind:value={
                                                 sportForms[sport.id].selStart
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400 transition-colors"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                     <div class="flex flex-col gap-1.5">
@@ -438,7 +520,7 @@
                                             bind:value={
                                                 sportForms[sport.id].selEnd
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400 transition-colors"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                     <div class="flex flex-col gap-1.5">
@@ -454,7 +536,7 @@
                                             bind:value={
                                                 sportForms[sport.id].deadline
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 rounded-lg px-3 py-2 bg-zinc-50 focus:outline-none focus:border-zinc-400 transition-colors"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                 </div>

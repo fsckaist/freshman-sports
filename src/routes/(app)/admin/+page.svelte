@@ -74,6 +74,7 @@
                     | "ONGOING"
                     | "COMPLETED"}
                 sports={data.sports ?? []}
+                registrationDeadline={data.registrationDeadline}
             />
         {/if}
     </div>

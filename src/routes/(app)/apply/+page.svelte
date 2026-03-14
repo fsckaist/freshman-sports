@@ -40,7 +40,7 @@
                 종목 지원은 {data.deadlineDate}까지 할 수 있어요.
             </p>
             <p class="relative shrink-0 m-0">
-                마감까지 {data.daysRemaining}일 남았어요.
+                마감까지 {data.timeRemaining} 남았어요.
             </p>
         </div>
     </div>
@@ -59,6 +59,7 @@
                 rosters={sport.rosters}
                 buttonState={sport.buttonState}
                 alertMessage={sport.alertMessage}
+                requiredGender={sport.requiredGender}
             />
         {/each}
     </div>

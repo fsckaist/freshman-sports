@@ -44,7 +44,7 @@ export const actions = {
 
             // Conditional Redirect based on user agreements
             if (user.agreedPrivacy && user.agreedRules) {
-                throw redirect(303, '/dashboard');
+                throw redirect(303, '/');
             } else {
                 throw redirect(303, '/register/rules');
             }

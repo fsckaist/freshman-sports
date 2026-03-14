@@ -3,6 +3,8 @@ import { pgTable, uuid, varchar, integer, boolean, timestamp, text, pgEnum, uniq
 // Enums matching schema
 export const matchStatusEnum = pgEnum("match_status", ["PENDING_SCHEDULE", "SCHEDULED", "ONGOING", "FINISHED", "CANCELED"]);
 export const bracketStatusEnum = pgEnum("bracket_status", ["win", "lose", "default"]);
+export const genderEnum = pgEnum("gender", ["MALE", "FEMALE"]);
+export const genderModeEnum = pgEnum("gender_mode", ["MALE_ONLY", "FEMALE_ONLY", "MIXED"]);
 
 export const classes = pgTable("classes", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -18,6 +20,7 @@ export const sports = pgTable("sports", {
     periodStart: timestamp("period_start"),
     periodEnd: timestamp("period_end"),
     displayOrder: integer("display_order").notNull().default(0),
+    requiredGender: genderModeEnum("required_gender").notNull().default("MIXED"),
 
     // Round-1 schedule window (per-sport)
     round1SelectionStart: timestamp("round1_selection_start"),
@@ -41,6 +44,7 @@ export const users = pgTable("users", {
     studentNumber: varchar("student_number").notNull().unique(),
     name: varchar("name"),
     phoneNumber: varchar("phone_number"),
+    gender: genderEnum("gender"),
 
     // Roles
     isProctor: boolean("is_proctor").default(false),
@@ -121,6 +125,7 @@ export const eventStateEnum = pgEnum("event_state", ["REGISTRATION", "ONGOING", 
 export const system_config = pgTable("system_config", {
     id: uuid("id").primaryKey().defaultRandom(),
     eventState: eventStateEnum("event_state").notNull().default("REGISTRATION"),
+    registrationDeadline: timestamp("registration_deadline"),
     updatedAt: timestamp("updated_at").defaultNow(),
 });
 

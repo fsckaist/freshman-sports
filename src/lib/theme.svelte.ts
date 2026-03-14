@@ -20,7 +20,10 @@ function createThemeManager() {
         $effect.root(() => {
             $effect(() => {
                 const currentTheme = theme;
-                localStorage.setItem('theme', currentTheme);
+                // Only set if changed to avoid unnecessary storage events (though storage event only fires for other windows)
+                if (localStorage.getItem('theme') !== currentTheme) {
+                    localStorage.setItem('theme', currentTheme);
+                }
                 
                 if (currentTheme === 'dark') {
                     document.documentElement.classList.add('dark');
@@ -29,8 +32,18 @@ function createThemeManager() {
                 }
                 
                 console.log('[ThemeManager] Applied theme:', currentTheme);
-                console.log('[ThemeManager] html classList:', document.documentElement.className);
             });
+        });
+
+        // Listen for changes from other tabs
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'theme' && event.newValue) {
+                const newTheme = event.newValue as Theme;
+                if (newTheme !== theme) {
+                    console.log('[ThemeManager] Syncing from storage event:', newTheme);
+                    theme = newTheme;
+                }
+            }
         });
     }
 

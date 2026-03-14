@@ -26,7 +26,7 @@
         {
             id: "overview",
             name: "개요",
-            path: "/dashboard",
+            path: "/",
             icon: resizeSvg(rawOverviewIcon),
             states: ["REGISTRATION", "ONGOING", "COMPLETED"],
         },
@@ -138,7 +138,7 @@
     >
         <nav class="flex flex-col gap-[0.625rem] items-start shrink-0 relative">
             {#each visibleGeneral as item}
-                {@const isActive = $page.url.pathname.startsWith(item.path)}
+                {@const isActive = item.path === "/" ? $page.url.pathname === "/" : $page.url.pathname.startsWith(item.path)}
                 <a
                     href={item.path}
                     class="group flex h-[3rem] items-center justify-end gap-[0.625rem] overflow-clip px-[1.25rem] py-[0.75rem] rounded-l-[0.625rem] shrink-0 w-[10.625rem] decoration-transparent transition-colors cursor-pointer {isActive
@@ -165,7 +165,7 @@
 
         <nav class="flex flex-col gap-[0.625rem] items-start shrink-0 relative">
             {#each visibleAdmin as item}
-                {@const isActive = $page.url.pathname.startsWith(item.path)}
+                {@const isActive = item.path === "/" ? $page.url.pathname === "/" : $page.url.pathname.startsWith(item.path)}
                 <a
                     href={item.path}
                     class="group flex h-[3rem] items-center justify-end gap-[0.625rem] overflow-clip px-[1.25rem] py-[0.75rem] rounded-l-[0.625rem] shrink-0 w-[10.625rem] decoration-transparent transition-colors cursor-pointer {isActive

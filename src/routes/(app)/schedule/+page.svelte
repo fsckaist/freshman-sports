@@ -1,8 +1,15 @@
 <script lang="ts">
     import ScheduleSelectionGrid from "$lib/components/schedule/ScheduleSelectionGrid.svelte";
+    import triangleExclamationSvg from "@gravity-ui/icons/svgs/triangle-exclamation.svg?raw";
     import type { PageData } from "./$types";
 
     let { data } = $props<{ data: PageData }>();
+
+    function resizeSvg(svgString: string) {
+        return svgString
+            .replace(/width="16"/g, 'width="18"')
+            .replace(/height="16"/g, 'height="18"');
+    }
 </script>
 
 <div
@@ -43,7 +50,7 @@
                     class="flex flex-[1_0_0] items-center justify-center h-[3.125rem] cursor-pointer outline-none border-t-0 border-l-0 border-b border-solid transition-colors duration-200 no-underline
                 {data.activeSportId === sport.id
                         ? 'bg-white dark:bg-zinc-900 border-white dark:border-zinc-900 text-zinc-600 dark:text-zinc-300'
-                        : 'bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 active:bg-zinc-400 dark:active:bg-zinc-700 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'}
+                        : 'bg-zinc-100 dark:bg-zinc-950 hover:bg-zinc-300 dark:hover:bg-zinc-800 active:bg-zinc-400 dark:active:bg-zinc-700 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'}
                 {i !== data.sports.length - 1
                         ? 'border-r border-zinc-200 dark:border-zinc-800'
                         : 'border-r-0'}"
@@ -101,12 +108,12 @@
                         class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0 text-center"
                     >
                         {data.deadlinePassed
-                            ? "투표 기간이 종료되었습니다."
+                            ? "등록된 일정 슬롯이 없습니다."
                             : "등록된 일정 슬롯이 없습니다."}
                     </p>
                 </div>
             {:else}
-                <div class="py-6">
+                <div class="py-6 flex flex-col items-center gap-6">
                     <div class="mx-auto w-fit">
                         <ScheduleSelectionGrid
                             gridData={data.gridData}
@@ -129,13 +136,15 @@
                 <p
                     class="font-pretendard font-normal text-[0.875rem] text-zinc-600 dark:text-zinc-400 m-0"
                 >
-                    '{data.sports.find((s: any) => s.id === data.activeSportId)
-                        ?.name ?? "해당 종목"}' 일정 정하기는 {data.deadlineAt}까지
-                    할 수 있어요.
                     {#if !data.deadlinePassed}
-                        마감까지 {data.hoursRemaining}시간 남았어요.
+                        '{data.sports.find(
+                            (s: any) => s.id === data.activeSportId,
+                        )?.name ?? "해당 종목"}' 일정 정하기는 {data.deadlineAt}까지
+                        할 수 있어요. 마감까지 {data.timeRemaining} 남았어요.
                     {:else}
-                        <span class="text-red-500 dark:text-red-400 font-bold">(종료됨)</span>
+                        <span class="text-red-500 dark:text-red-400 font-bold"
+                            >일정 정하기가 마감되었어요</span
+                        >
                     {/if}
                 </p>
             {/if}
