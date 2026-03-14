@@ -392,23 +392,28 @@ export async function propagateByeWindow(byeMatchId: string): Promise<void> {
     // 2. If it's Round > 1, find predecessors to determine the date
     if (round > 1) {
         const prevRound = round - 1;
-        const pos1 = position * 2;
-        const pos2 = position * 2 + 1;
+        const targetNodes = await db.select().from(tournament_brackets).where(eq(tournament_brackets.matchId, byeMatchId));
+        const allFeederMatchIds = new Set<string>();
 
-        const feeders = await db.select({ matchId: tournament_brackets.matchId })
-            .from(tournament_brackets)
-            .where(and(
-                eq(tournament_brackets.sportId, sportId),
-                eq(tournament_brackets.round, prevRound),
-                or(eq(tournament_brackets.position, pos1), eq(tournament_brackets.position, pos2))
-            ));
+        for (const tNode of targetNodes) {
+            const pos1 = tNode.position * 2;
+            const pos2 = tNode.position * 2 + 1;
 
-        const feederMatchIds = feeders.map(f => f.matchId).filter((id): id is string => !!id);
+            const feeders = await db.select({ matchId: tournament_brackets.matchId })
+                .from(tournament_brackets)
+                .where(and(
+                    eq(tournament_brackets.sportId, sportId),
+                    eq(tournament_brackets.round, prevRound),
+                    or(eq(tournament_brackets.position, pos1), eq(tournament_brackets.position, pos2))
+                ));
+            
+            feeders.forEach(f => { if (f.matchId) allFeederMatchIds.add(f.matchId); });
+        }
 
-        if (feederMatchIds.length > 0) {
+        if (allFeederMatchIds.size > 0) {
             const feederMatches = await db.select({ scheduledAt: matches.scheduledAt })
                 .from(matches)
-                .where(inArray(matches.id, feederMatchIds));
+                .where(inArray(matches.id, Array.from(allFeederMatchIds)));
             
             const validDates = feederMatches.map(m => m.scheduledAt).filter((d): d is Date => !!d);
             

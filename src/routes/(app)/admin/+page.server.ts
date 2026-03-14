@@ -681,7 +681,9 @@ export const actions: Actions = {
                             await propagateBracketProgress(nextRound, nextPosition);
                         }
                         // Trigger schedule window updates for the newly finished/updated automated match
-                        if (mId) await computeOrUpdateNextMatchWindow(mId);
+                        if (mId) {
+                            try { await propagateByeWindow(mId); } catch (e) { console.error('propagateByeWindow error:', e); }
+                        }
                     } else if (classA || classB) {
                         // Create match even if only one side is decided
                         if (!mId) {
