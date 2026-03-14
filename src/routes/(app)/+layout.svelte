@@ -21,7 +21,7 @@
     </div>
 
     <!-- Main Content Area (Gray Background) -->
-    <div class="relative flex-1 h-full bg-zinc-100 dark:bg-zinc-950">
+    <div class="relative flex-1 h-full bg-zinc-100 dark:bg-zinc-900">
         <!-- Glowing background watermark from the Figma extraction -->
         <div
             class="absolute -translate-y-[7.65625rem] blur-[0.625rem] opacity-20 right-[-12.8125rem] size-[65.3125rem] top-1/2 pointer-events-none select-none mix-blend-multiply z-0"

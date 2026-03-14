@@ -69,7 +69,7 @@
     class="flex gap-4 w-full h-[10.5rem] bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden"
 >
     <!-- Left: Vertical Tabs -->
-    <div class="flex-1 bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col pt-1">
+    <div class="flex-1 bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-100 dark:border-zinc-800 flex flex-col pt-1">
         {#each tabs as tab}
             <button
                 type="button"

@@ -68,12 +68,21 @@
     class="flex relative shrink-0 h-[5rem] aspect-square rounded-[1.5625rem] border border-solid overflow-hidden select-none outline-none p-0 transition-opacity duration-200
     {cx([
         !isAdmin ? 'flex-col' : 'items-center justify-center',
-        ((isEmpty && !isAdmin) || isDisabled || (isAdmin && isEmpty && !isAtLimit)) ? 'border-zinc-300 dark:border-zinc-800' : '',
-        (isAdmin && isEmpty && isAtLimit) ? 'border-red-400' : '',
-        ((!isEmpty || isAdmin) && !isDisabled && !(isAdmin && isEmpty && !isAtLimit) && !(isAdmin && isEmpty && isAtLimit)) ? 'border-amber-500 cursor-pointer hover:opacity-60 active:opacity-30' : '',
-        (isEmpty && isAdmin) ? 'bg-zinc-100 dark:bg-zinc-900' : '',
-        (!isEmpty && isAdmin) ? 'bg-amber-50 dark:bg-amber-950/20' : '',
-        (isAdmin && isEmpty && isAtLimit) ? 'disabled' : ''
+        (isEmpty && !isAdmin) ||
+        isDisabled ||
+        (isAdmin && isEmpty && !isAtLimit)
+            ? 'border-zinc-300 dark:border-zinc-800'
+            : '',
+        isAdmin && isEmpty && isAtLimit ? 'border-red-400' : '',
+        (!isEmpty || isAdmin) &&
+        !isDisabled &&
+        !(isAdmin && isEmpty && !isAtLimit) &&
+        !(isAdmin && isEmpty && isAtLimit)
+            ? 'border-amber-500 dark:border-zinc-600 cursor-pointer hover:opacity-60 active:opacity-30'
+            : '',
+        isEmpty && isAdmin ? 'bg-zinc-100 dark:bg-zinc-900' : '',
+        !isEmpty && isAdmin ? 'bg-amber-50 dark:bg-amber-950/20' : '',
+        isAdmin && isEmpty && isAtLimit ? 'disabled' : '',
     ])}"
     disabled={(isEmpty && !isAdmin) ||
         isDisabled ||
@@ -87,7 +96,9 @@
             <span
                 class="font-pretendard font-bold text-[0.875rem]
                 {cx([
-                    !isEmpty ? 'text-amber-500' : 'text-zinc-400 dark:text-zinc-500'
+                    !isEmpty
+                        ? 'text-amber-500'
+                        : 'text-zinc-400 dark:text-zinc-500',
                 ])}"
             >
                 {isEmpty ? "비활성화" : "활성화"}
@@ -105,13 +116,17 @@
             <div
                 class="flex items-center justify-center w-full py-[0.25rem] shrink-0 border-b
                 {cx([
-                    !isMatchAvailable ? 'border-zinc-300 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900/50' : 'border-amber-500 bg-amber-400'
+                    !isMatchAvailable
+                        ? 'border-zinc-300 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900/50'
+                        : 'border-amber-500 bg-amber-400',
                 ])}"
             >
                 <div
                     class="flex items-center justify-center px-[0.3125rem] py-px rounded-[0.3125rem]
                     {cx([
-                        !isMatchAvailable ? 'bg-zinc-300 dark:bg-zinc-800' : 'bg-amber-300'
+                        !isMatchAvailable
+                            ? 'bg-zinc-300 dark:bg-zinc-800'
+                            : 'bg-amber-300',
                     ])}"
                 >
                     <p
@@ -123,7 +138,9 @@
             </div>
 
             <!-- Metrics Area -->
-            <div class="flex flex-[1_0_0] w-full min-h-0 bg-white dark:bg-zinc-950">
+            <div
+                class="flex flex-[1_0_0] w-full min-h-0 bg-white dark:bg-zinc-900"
+            >
                 <!-- Our Data -->
                 <div
                     class="flex flex-[1_0_0] flex-col items-center justify-center gap-px h-full relative border-r border-solid border-zinc-300 dark:border-zinc-800"
@@ -132,7 +149,9 @@
                         <div
                             class="flex items-center justify-center leading-none w-[0.75rem] h-[0.75rem]
                             {cx([
-                                isOurTeamAvailable ? 'text-amber-500' : 'text-zinc-400 dark:text-zinc-500'
+                                isOurTeamAvailable
+                                    ? 'text-amber-500'
+                                    : 'text-zinc-400 dark:text-zinc-500',
                             ])}"
                         >
                             {@html resizeSvg(personSvg)}
@@ -141,8 +160,12 @@
                     <div
                         class="flex items-center font-pretendard leading-none gap-px font-semibold text-[1rem]"
                     >
-                        <span class="text-zinc-800 dark:text-zinc-200">{ourCount}</span>
-                        <span class="text-zinc-400 dark:text-zinc-500">/{ourMax}</span>
+                        <span class="text-zinc-800 dark:text-zinc-200"
+                            >{ourCount}</span
+                        >
+                        <span class="text-zinc-400 dark:text-zinc-500"
+                            >/{ourMax}</span
+                        >
                     </div>
                 </div>
 
@@ -154,7 +177,9 @@
                         <div
                             class="flex items-center justify-center leading-none w-[0.75rem] h-[0.75rem]
                             {cx([
-                                isOppTeamAvailable ? 'text-amber-500' : 'text-zinc-400 dark:text-zinc-500'
+                                isOppTeamAvailable
+                                    ? 'text-amber-500'
+                                    : 'text-zinc-400 dark:text-zinc-500',
                             ])}"
                         >
                             {@html resizeSvg(skullSvg)}
@@ -164,11 +189,17 @@
                         class="flex items-center font-pretendard leading-none gap-px font-semibold text-[1rem]"
                     >
                         {#if isOpponentUndecided}
-                            <span class="text-zinc-600 dark:text-zinc-400">?</span>
+                            <span class="text-zinc-600 dark:text-zinc-400"
+                                >?</span
+                            >
                         {:else}
-                            <span class="text-zinc-800 dark:text-zinc-200">{oppCount}</span>
+                            <span class="text-zinc-800 dark:text-zinc-200"
+                                >{oppCount}</span
+                            >
                         {/if}
-                        <span class="text-zinc-400 dark:text-zinc-500">/{oppMax}</span>
+                        <span class="text-zinc-400 dark:text-zinc-500"
+                            >/{oppMax}</span
+                        >
                     </div>
                 </div>
             </div>
@@ -178,13 +209,17 @@
                 <div
                     class="flex items-center justify-center w-full py-[0.25rem] shrink-0 border-t border-solid transition-colors duration-200
                     {cx([
-                        isParticipating ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-500' : 'bg-zinc-100 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-800'
+                        isParticipating
+                            ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-500'
+                            : 'bg-zinc-100 dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-800',
                     ])}"
                 >
                     <p
                         class="font-pretendard text-[0.75rem] font-semibold m-0 leading-tight flex items-center justify-center gap-1
                         {cx([
-                            isParticipating ? 'text-amber-500' : 'text-zinc-400 dark:text-zinc-500'
+                            isParticipating
+                                ? 'text-amber-500'
+                                : 'text-zinc-400 dark:text-zinc-500',
                         ])}"
                     >
                         {isParticipating ? "참여" : "미참여"}
@@ -193,7 +228,7 @@
             {/if}
         {:else}
             <!-- EMPTY USER MODE -->
-            <div class="w-full h-full bg-white dark:bg-zinc-950"></div>
+            <div class="w-full h-full bg-white dark:bg-zinc-900"></div>
         {/if}
     {/if}
 </button>

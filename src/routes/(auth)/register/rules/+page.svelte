@@ -4,7 +4,7 @@
 </script>
 
 <div
-    class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
+    class="relative size-full min-h-screen bg-white dark:bg-zinc-900 overflow-hidden flex justify-center"
 >
     <!-- Centered 90rem wrapper so the absolute watermark is properly anchored -->
     <div

@@ -43,7 +43,7 @@
                     class="flex flex-[1_0_0] items-center justify-center h-[3.125rem] cursor-pointer outline-none border-t-0 border-l-0 border-b border-solid transition-colors duration-200 no-underline
                 {data.activeSportId === sport.id
                         ? 'bg-white dark:bg-zinc-900 border-white dark:border-zinc-900 text-zinc-600 dark:text-zinc-300'
-                        : 'bg-zinc-100 dark:bg-zinc-950 hover:bg-zinc-300 dark:hover:bg-zinc-800 active:bg-zinc-400 dark:active:bg-zinc-700 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'}
+                        : 'bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-800 active:bg-zinc-400 dark:active:bg-zinc-700 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'}
                 {i !== data.sports.length - 1
                         ? 'border-r border-zinc-200 dark:border-zinc-800'
                         : 'border-r-0'}"
