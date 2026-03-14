@@ -166,15 +166,15 @@
         style="backdrop-filter: blur(4px);"
     >
         <div
-            class="bg-white flex flex-col gap-6 items-center justify-start overflow-clip p-6 relative rounded-[1.25rem] shadow-2xl shrink-0 w-[45rem] max-w-full max-h-[90vh] overflow-y-auto border border-zinc-200"
+            class="bg-white dark:bg-zinc-900 flex flex-col gap-6 items-center justify-start overflow-clip p-6 relative rounded-[1.25rem] shadow-2xl shrink-0 w-[45rem] max-w-full max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-800"
         >
             <div class="w-full flex justify-between items-center">
-                <h2 class="text-[1.5rem] font-bold text-zinc-800">
+                <h2 class="text-[1.5rem] font-bold text-zinc-800 dark:text-zinc-100">
                     경기 상세 정보
                 </h2>
                 <button
                     onclick={() => (showDetailsModal = false)}
-                    class="p-2 hover:bg-zinc-100 rounded-full transition-colors"
+                    class="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
                     aria-label="닫기"
                     title="닫기"
                 >
@@ -200,21 +200,21 @@
             <!-- Score Comparison Table -->
             <div class="w-full grid grid-cols-3 gap-4">
                 <div class="col-span-1 flex flex-col items-center">
-                    <span class="text-zinc-500 text-sm mb-1"
+                    <span class="text-zinc-500 dark:text-zinc-400 text-sm mb-1"
                         >{activeMatch.classA}반</span
                     >
-                    <span class="text-3xl font-black text-zinc-800"
+                    <span class="text-3xl font-black text-zinc-800 dark:text-zinc-100"
                         >{activeMatch.scoreA}</span
                     >
                 </div>
                 <div class="col-span-1 flex items-center justify-center">
-                    <span class="text-2xl font-bold text-zinc-300">VS</span>
+                    <span class="text-2xl font-bold text-zinc-300 dark:text-zinc-600">VS</span>
                 </div>
                 <div class="col-span-1 flex flex-col items-center">
-                    <span class="text-zinc-500 text-sm mb-1"
+                    <span class="text-zinc-500 dark:text-zinc-400 text-sm mb-1"
                         >{activeMatch.classB}반</span
                     >
-                    <span class="text-3xl font-black text-zinc-800"
+                    <span class="text-3xl font-black text-zinc-800 dark:text-zinc-100"
                         >{activeMatch.scoreB}</span
                     >
                 </div>
@@ -226,38 +226,38 @@
             <div class="w-full grid grid-cols-2 gap-8">
                 <!-- Team A Details -->
                 <div class="flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-zinc-700">
+                    <h3 class="text-lg font-bold text-zinc-700 dark:text-zinc-200">
                         {activeMatch.classA}반 상세
                     </h3>
 
                     <div
-                        class="bg-zinc-50 rounded-xl border border-zinc-100 p-4"
+                        class="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
                     >
                         <div class="grid grid-cols-2 gap-y-2 text-sm">
-                            <span class="text-zinc-400">전반전 득점</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">전반전 득점</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.FirstScore}</span
                             >
-                            <span class="text-zinc-400">전반전 파울</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">전반전 파울</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.FirstFoul}</span
                             >
                             <div
-                                class="col-span-2 h-px bg-zinc-200/50 my-1"
+                                class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
                             ></div>
-                            <span class="text-zinc-400">후반전 득점</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">후반전 득점</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.SecondScore}</span
                             >
-                            <span class="text-zinc-400">후반전 파울</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">후반전 파울</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.SecondFoul}</span
                             >
                             <div
-                                class="col-span-2 h-px bg-zinc-200/50 my-1"
+                                class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
                             ></div>
-                            <span class="text-zinc-400">승부차기</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">승부차기</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.PenScore}</span
                             >
                         </div>
@@ -292,38 +292,38 @@
 
                 <!-- Team B Details -->
                 <div class="flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-zinc-700">
+                    <h3 class="text-lg font-bold text-zinc-700 dark:text-zinc-200">
                         {activeMatch.classB}반 상세
                     </h3>
 
                     <div
-                        class="bg-zinc-50 rounded-xl border border-zinc-100 p-4"
+                        class="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
                     >
                         <div class="grid grid-cols-2 gap-y-2 text-sm">
-                            <span class="text-zinc-400">전반전 득점</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">전반전 득점</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.FirstScore}</span
                             >
-                            <span class="text-zinc-400">전반전 파울</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">전반전 파울</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.FirstFoul}</span
                             >
                             <div
-                                class="col-span-2 h-px bg-zinc-200/50 my-1"
+                                class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
                             ></div>
-                            <span class="text-zinc-400">후반전 득점</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">후반전 득점</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.SecondScore}</span
                             >
-                            <span class="text-zinc-400">후반전 파울</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">후반전 파울</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.SecondFoul}</span
                             >
                             <div
-                                class="col-span-2 h-px bg-zinc-200/50 my-1"
+                                class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
                             ></div>
-                            <span class="text-zinc-400">승부차기</span>
-                            <span class="font-bold text-right"
+                            <span class="text-zinc-400 dark:text-zinc-500">승부차기</span>
+                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.PenScore}</span
                             >
                         </div>
@@ -372,13 +372,13 @@
                 })()}
 
                 {#if rawNotes}
-                    <div class="w-full h-px bg-zinc-200"></div>
+                    <div class="w-full h-px bg-zinc-200 dark:bg-zinc-800"></div>
                     <div class="w-full flex flex-col gap-2">
-                        <h3 class="text-lg font-bold text-zinc-700">
+                        <h3 class="text-lg font-bold text-zinc-700 dark:text-zinc-200">
                             기타 정보
                         </h3>
                         <div
-                            class="bg-zinc-100 rounded-xl p-4 text-zinc-600 text-[1rem] leading-relaxed break-keep"
+                            class="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-4 text-zinc-600 dark:text-zinc-300 text-[1rem] leading-relaxed break-keep"
                         >
                             {rawNotes}
                         </div>
@@ -391,7 +391,7 @@
                     console.log("Confirm clicked");
                     showDetailsModal = false;
                 }}
-                class="w-full mt-4 py-3 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition-colors"
+                class="w-full mt-4 py-3 bg-zinc-800 dark:bg-zinc-700 text-white font-bold rounded-xl hover:bg-zinc-700 dark:hover:bg-zinc-600 transition-colors"
             >
                 확인
             </button>
@@ -421,7 +421,7 @@
 {/if}
 
 <div
-    class="bg-white flex flex-col gap-[0.625rem] items-start min-h-[25rem] overflow-clip p-[1.25rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] w-full h-full"
+    class="bg-white dark:bg-zinc-900 flex flex-col gap-[0.625rem] items-start min-h-[25rem] overflow-clip p-[1.25rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] w-full h-full border border-zinc-100 dark:border-zinc-800"
 >
     <div
         class="content-stretch flex flex-[1_0_0] gap-[0.625rem] items-center min-h-px min-w-px relative w-full overflow-hidden"
@@ -431,14 +431,14 @@
             class="content-stretch flex flex-[1_0_0] flex-col gap-[0.625rem] h-full items-center min-h-px min-w-px overflow-y-auto relative rounded-[1.25rem] px-2"
         >
             <p
-                class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 text-[1.5rem] whitespace-nowrap mt-2"
+                class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] whitespace-nowrap mt-2"
             >
                 {activeMatch.classA ? `${activeMatch.classA}반` : "Unknown"}
             </p>
-            <div class="h-px w-full bg-zinc-200 shrink-0 my-1"></div>
+            <div class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0 my-1"></div>
 
             {#if activeMatch.status === "FINISHED"}
-                <div class="text-[3.375rem] font-black text-zinc-800 my-4">
+                <div class="text-[3.375rem] font-black text-zinc-800 dark:text-zinc-100 my-4">
                     {activeMatch.scoreA}
                 </div>
             {:else if activeMatch.status === "ONGOING"}
@@ -453,31 +453,31 @@
                             class="w-full border border-zinc-200 rounded-xl flex items-center h-20 overflow-hidden"
                         >
                             <div
-                                class="bg-zinc-100 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200"
+                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600">득점</span>
-                                <span class="text-sm text-zinc-600">파울</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">파울</span>
                             </div>
                             <!-- Controls -->
-                            <div class="flex-1 flex flex-col h-full bg-white">
+                            <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
                                 <div
-                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100"
+                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
                                 >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("A", "FirstScore", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700"
+                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataA.FirstScore}</span
                                     >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("A", "FirstScore", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Plus}</button
                                     >
                                 </div>
@@ -488,17 +488,17 @@
                                         type="button"
                                         onclick={() =>
                                             updateScore("A", "FirstFoul", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700"
+                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataA.FirstFoul}</span
                                     >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("A", "FirstFoul", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Plus}</button
                                     >
                                 </div>
@@ -512,33 +512,33 @@
                             후반
                         </p>
                         <div
-                            class="w-full border border-zinc-200 rounded-xl flex items-center h-20 overflow-hidden"
+                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-20 overflow-hidden"
                         >
                             <div
-                                class="bg-zinc-100 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200"
+                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600">득점</span>
-                                <span class="text-sm text-zinc-600">파울</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">파울</span>
                             </div>
-                            <div class="flex-1 flex flex-col h-full bg-white">
+                            <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
                                 <div
-                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100"
+                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
                                 >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("A", "SecondScore", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700"
+                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataA.SecondScore}</span
                                     >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("A", "SecondScore", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Plus}</button
                                     >
                                 </div>
@@ -549,17 +549,17 @@
                                         type="button"
                                         onclick={() =>
                                             updateScore("A", "SecondFoul", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700"
+                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataA.SecondFoul}</span
                                     >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("A", "SecondFoul", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Plus}</button
                                     >
                                 </div>
@@ -573,31 +573,31 @@
                             승부차기
                         </p>
                         <div
-                            class="w-full border border-zinc-200 rounded-xl flex items-center h-10 overflow-hidden"
+                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-10 overflow-hidden"
                         >
                             <div
-                                class="bg-zinc-100 flex flex-col items-center justify-center px-4 h-full shrink-0 border-r border-zinc-200"
+                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600">득점</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
                             </div>
                             <div
-                                class="flex-1 flex items-center justify-between px-4 bg-white h-full"
+                                class="flex-1 flex items-center justify-between px-4 bg-white dark:bg-zinc-900 h-full"
                             >
                                 <button
                                     type="button"
                                     onclick={() =>
                                         updateScore("A", "PenScore", -1)}
-                                    class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                    class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                     >{@html Minus}</button
                                 >
-                                <span class="font-medium text-zinc-700"
+                                <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                     >{scoreDataA.PenScore}</span
                                 >
                                 <button
                                     type="button"
                                     onclick={() =>
                                         updateScore("A", "PenScore", 1)}
-                                    class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                    class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                     >{@html Plus}</button
                                 >
                             </div>
@@ -616,7 +616,7 @@
                                 <button
                                     type="button"
                                     onclick={() => toggleCard("A", player.name)}
-                                    class="bg-white border border-[#e4e4e7] border-solid content-stretch flex flex-col items-center justify-center px-[0.625rem] py-[0.3125rem] relative rounded-[0.5rem] transition-colors hover:bg-zinc-50"
+                                    class="bg-white dark:bg-zinc-800 border border-[#e4e4e7] dark:border-zinc-700 border-solid content-stretch flex flex-col items-center justify-center px-[0.625rem] py-[0.3125rem] relative rounded-[0.5rem] transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-700"
                                 >
                                     <p
                                         class="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] not-italic relative shrink-0 text-[0.875rem] whitespace-nowrap {cardsA[
@@ -644,7 +644,7 @@
             {/if}
 
             <p
-                class="font-['Pretendard_Variable'] font-medium leading-[1.5rem] min-w-full relative shrink-0 text-zinc-800 text-[1.125rem] text-center w-full pt-4"
+                class="font-['Pretendard_Variable'] font-medium leading-[1.5rem] min-w-full relative shrink-0 text-zinc-800 dark:text-zinc-200 text-[1.125rem] text-center w-full pt-4"
             >
                 출전 선수
             </p>
@@ -657,7 +657,7 @@
 
         <!-- Vertical Divider -->
         <div
-            class="flex h-full w-px bg-zinc-200 items-center justify-center relative self-center shrink-0 mx-2"
+            class="flex h-full w-px bg-zinc-200 dark:bg-zinc-800 items-center justify-center relative self-center shrink-0 mx-2"
         ></div>
 
         <!-- Team B Column -->
@@ -665,14 +665,14 @@
             class="content-stretch flex flex-[1_0_0] flex-col gap-[0.625rem] h-full items-center min-h-px min-w-px overflow-y-auto relative rounded-[1.25rem] px-2"
         >
             <p
-                class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 text-[1.5rem] whitespace-nowrap mt-2"
+                class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] whitespace-nowrap mt-2"
             >
                 {activeMatch.classB ? `${activeMatch.classB}반` : "Unknown"}
             </p>
-            <div class="h-px w-full bg-zinc-200 shrink-0 my-1"></div>
+            <div class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0 my-1"></div>
 
             {#if activeMatch.status === "FINISHED"}
-                <div class="text-[3.375rem] font-black text-zinc-800 my-4">
+                <div class="text-[3.375rem] font-black text-zinc-800 dark:text-zinc-100 my-4">
                     {activeMatch.scoreB}
                 </div>
             {:else if activeMatch.status === "ONGOING"}
@@ -684,34 +684,34 @@
                             전반
                         </p>
                         <div
-                            class="w-full border border-zinc-200 rounded-xl flex items-center h-20 overflow-hidden"
+                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-20 overflow-hidden"
                         >
                             <div
-                                class="bg-zinc-100 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200"
+                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600">득점</span>
-                                <span class="text-sm text-zinc-600">파울</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">파울</span>
                             </div>
                             <!-- Controls -->
-                            <div class="flex-1 flex flex-col h-full bg-white">
+                            <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
                                 <div
-                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100"
+                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
                                 >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("B", "FirstScore", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700"
+                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataB.FirstScore}</span
                                     >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("B", "FirstScore", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Plus}</button
                                     >
                                 </div>
@@ -722,17 +722,17 @@
                                         type="button"
                                         onclick={() =>
                                             updateScore("B", "FirstFoul", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700"
+                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataB.FirstFoul}</span
                                     >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("B", "FirstFoul", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Plus}</button
                                     >
                                 </div>
@@ -746,33 +746,33 @@
                             후반
                         </p>
                         <div
-                            class="w-full border border-zinc-200 rounded-xl flex items-center h-20 overflow-hidden"
+                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-20 overflow-hidden"
                         >
                             <div
-                                class="bg-zinc-100 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200"
+                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600">득점</span>
-                                <span class="text-sm text-zinc-600">파울</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">파울</span>
                             </div>
-                            <div class="flex-1 flex flex-col h-full bg-white">
+                            <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
                                 <div
-                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100"
+                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
                                 >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("B", "SecondScore", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700"
+                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataB.SecondScore}</span
                                     >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("B", "SecondScore", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Plus}</button
                                     >
                                 </div>
@@ -783,17 +783,17 @@
                                         type="button"
                                         onclick={() =>
                                             updateScore("B", "SecondFoul", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700"
+                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataB.SecondFoul}</span
                                     >
                                     <button
                                         type="button"
                                         onclick={() =>
                                             updateScore("B", "SecondFoul", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Plus}</button
                                     >
                                 </div>
@@ -807,31 +807,31 @@
                             승부차기
                         </p>
                         <div
-                            class="w-full border border-zinc-200 rounded-xl flex items-center h-10 overflow-hidden"
+                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-10 overflow-hidden"
                         >
                             <div
-                                class="bg-zinc-100 flex flex-col items-center justify-center px-4 h-full shrink-0 border-r border-zinc-200"
+                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600">득점</span>
+                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
                             </div>
                             <div
-                                class="flex-1 flex items-center justify-between px-4 bg-white h-full"
+                                class="flex-1 flex items-center justify-between px-4 bg-white dark:bg-zinc-900 h-full"
                             >
                                 <button
                                     type="button"
                                     onclick={() =>
                                         updateScore("B", "PenScore", -1)}
-                                    class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                    class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                     >{@html Minus}</button
                                 >
-                                <span class="font-medium text-zinc-700"
+                                <span class="font-medium text-zinc-700 dark:text-zinc-200"
                                     >{scoreDataB.PenScore}</span
                                 >
                                 <button
                                     type="button"
                                     onclick={() =>
                                         updateScore("B", "PenScore", 1)}
-                                    class="w-7 h-7 rounded border border-zinc-200 flex items-center justify-center hover:bg-zinc-50"
+                                    class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                     >{@html Plus}</button
                                 >
                             </div>
@@ -850,7 +850,7 @@
                                 <button
                                     type="button"
                                     onclick={() => toggleCard("B", player.name)}
-                                    class="bg-white border border-[#e4e4e7] border-solid content-stretch flex flex-col items-center justify-center px-[0.625rem] py-[0.3125rem] relative rounded-[0.5rem] transition-colors hover:bg-zinc-50"
+                                    class="bg-white dark:bg-zinc-800 border border-[#e4e4e7] dark:border-zinc-700 border-solid content-stretch flex flex-col items-center justify-center px-[0.625rem] py-[0.3125rem] relative rounded-[0.5rem] transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-700"
                                 >
                                     <p
                                         class="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] not-italic relative shrink-0 text-[0.875rem] whitespace-nowrap {cardsB[
@@ -878,7 +878,7 @@
             {/if}
 
             <p
-                class="font-['Pretendard_Variable'] font-medium leading-[1.5rem] min-w-full relative shrink-0 text-zinc-800 text-[1.125rem] text-center w-full pt-4"
+                class="font-['Pretendard_Variable'] font-medium leading-[1.5rem] min-w-full relative shrink-0 text-zinc-800 dark:text-zinc-200 text-[1.125rem] text-center w-full pt-4"
             >
                 출전 선수
             </p>
@@ -932,10 +932,10 @@
         {:else if activeMatch.status === "FINISHED"}
             <div class="flex gap-2 w-full">
                 <div
-                    class="bg-zinc-100 content-stretch flex flex-4 h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem]"
+                    class="bg-zinc-100 dark:bg-zinc-800 content-stretch flex flex-4 h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem]"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-zinc-500 whitespace-nowrap"
+                        class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-zinc-500 dark:text-zinc-400 whitespace-nowrap"
                     >
                         종료된 경기입니다
                     </p>
@@ -945,7 +945,7 @@
                     onclick={() => {
                         showDetailsModal = true;
                     }}
-                    class="bg-zinc-800 flex-1 hover:bg-zinc-700 text-white font-bold content-stretch flex flex-col h-[3.125rem] items-center justify-center px-[1.5rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0"
+                    class="bg-zinc-800 dark:bg-zinc-700 flex-1 hover:bg-zinc-700 dark:hover:bg-zinc-600 text-white font-bold content-stretch flex flex-col h-[3.125rem] items-center justify-center px-[1.5rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0"
                 >
                     상세 정보
                 </button>
@@ -960,18 +960,18 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
         >
             <div
                 class="flex flex-col gap-5 items-center justify-center p-[3.125rem] relative shrink-0 w-full text-center"
             >
                 <p
-                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.5rem]"
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem]"
                 >
                     정말로 기권패 / 몰수패 처리가 맞나요?
                 </p>
                 <p
-                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[1.125rem]"
+                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.125rem]"
                 >
                     시스템 상 결과를 번복할 수 없습니다.
                 </p>
@@ -981,7 +981,7 @@
             >
                 <button
                     onclick={() => (showForfeitConfirm = false)}
-                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
+                    class="bg-zinc-500 dark:bg-zinc-600 hover:bg-zinc-600 dark:hover:bg-zinc-500 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
                 >
                     <p
                         class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
@@ -1030,18 +1030,18 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
         >
             <div
                 class="flex flex-col gap-5 items-center justify-center p-[3.125rem] relative shrink-0 w-full text-center"
             >
                 <p
-                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.5rem]"
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem]"
                 >
                     정말로 경기를 시작할까요?
                 </p>
                 <p
-                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[1.125rem]"
+                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.125rem]"
                 >
                     시스템 상 결과를 번복할 수 없습니다.
                 </p>
@@ -1051,7 +1051,7 @@
             >
                 <button
                     onclick={() => (showStartConfirm = false)}
-                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
+                    class="bg-zinc-500 dark:bg-zinc-600 hover:bg-zinc-600 dark:hover:bg-zinc-500 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
                 >
                     <p
                         class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
@@ -1102,13 +1102,13 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[35.5625rem] max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[35.5625rem] max-w-full"
         >
             <div
                 class="flex flex-col items-center justify-center p-[3.125rem] pb-[3.125rem] relative shrink-0 w-full text-center"
             >
                 <p
-                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.5rem]"
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem]"
                 >
                     정말로 경기가 끝났나요?
                 </p>
@@ -1116,12 +1116,12 @@
                     class="flex flex-col mt-5 gap-1.5 items-center justify-center"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[1.125rem]"
+                        class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.125rem]"
                     >
                         시스템 상 결과를 번복할 수 없습니다.
                     </p>
                     <p
-                        class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-red-600 text-[1.125rem] break-keep leading-tight"
+                        class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-red-600 dark:text-red-400 text-[1.125rem] break-keep leading-tight"
                     >
                         반드시 모든 선수의 결과 확인을 받은 후 경기를
                         종료해주세요.
@@ -1133,7 +1133,7 @@
             >
                 <button
                     onclick={() => (showEndConfirm = false)}
-                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
+                    class="bg-zinc-500 dark:bg-zinc-600 hover:bg-zinc-600 dark:hover:bg-zinc-500 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
                 >
                     <p
                         class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"

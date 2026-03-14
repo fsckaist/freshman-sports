@@ -12,12 +12,12 @@
             class="content-stretch flex flex-col gap-[0.625rem] items-start justify-center leading-tight relative shrink-0"
         >
             <p
-                class="font-pretendard font-bold relative shrink-0 text-zinc-800 text-[2rem] m-0"
+                class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[2rem] m-0"
             >
                 대진표 보기
             </p>
             <div
-                class="font-pretendard font-normal relative shrink-0 text-zinc-600 text-[0.875rem] whitespace-nowrap"
+                class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
             >
                 <p class="m-0">
                     아래 화면에서 새내기 체육대회 대진표를 확인하세요.
@@ -32,7 +32,7 @@
 
     <!-- Main Card Body -->
     <div
-        class="bg-white content-stretch flex flex-[1_0_0] flex-col gap-[1.25rem] items-center min-h-0 min-w-px overflow-clip pb-[1.25rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] w-full max-w-full"
+        class="bg-white dark:bg-zinc-900 content-stretch flex flex-[1_0_0] flex-col gap-[1.25rem] items-center min-h-0 min-w-px overflow-clip pb-[1.25rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none w-full max-w-full"
     >
         <!-- Scrollable Bracket Container -->
         <div

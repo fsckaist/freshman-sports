@@ -66,18 +66,18 @@
 </script>
 
 <div
-    class="flex gap-4 w-full h-[10.5rem] bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden"
+    class="flex gap-4 w-full h-[10.5rem] bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden"
 >
     <!-- Left: Vertical Tabs -->
-    <div class="flex-1 bg-zinc-50 border-r border-zinc-100 flex flex-col pt-1">
+    <div class="flex-1 bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col pt-1">
         {#each tabs as tab}
             <button
                 type="button"
                 onclick={() => (activeTab = tab.id)}
                 class="flex flex-col flex-1 justify-center items-start px-4 py-2.5 transition-all relative {activeTab ===
                 tab.id
-                    ? 'bg-white'
-                    : 'hover:bg-zinc-100/50'}"
+                    ? 'bg-white dark:bg-zinc-900'
+                    : 'hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50'}"
             >
                 {#if activeTab === tab.id}
                     <div
@@ -86,8 +86,8 @@
                 {/if}
                 <span
                     class="text-[0.9rem] font-medium {activeTab === tab.id
-                        ? 'text-zinc-800'
-                        : 'text-zinc-500'}"
+                        ? 'text-zinc-800 dark:text-zinc-100'
+                        : 'text-zinc-500 dark:text-zinc-400'}"
                 >
                     {tab.label}
                 </span>
@@ -100,7 +100,7 @@
         class="flex-2 flex flex-col p-3 justify-between items-center text-center"
     >
         <div class="flex flex-col items-center justify-center flex-1">
-            <h3 class="text-[1rem] font-bold text-zinc-800">
+            <h3 class="text-[1rem] font-bold text-zinc-800 dark:text-zinc-100">
                 {currentTab?.label} 등록
             </h3>
 
@@ -109,20 +109,20 @@
                     <div class="flex gap-4 items-center">
                         <div class="flex flex-col">
                             <span
-                                class="text-[0.8rem] text-zinc-600 font-medium"
+                                class="text-[0.8rem] text-zinc-600 dark:text-zinc-400 font-medium"
                                 >{activeMatch.classA}반</span
                             >
-                            <span class="text-[1.25rem] font-bold text-zinc-800"
+                            <span class="text-[1.25rem] font-bold text-zinc-800 dark:text-zinc-100"
                                 >{activeMatch.attendance.cheeringA.length}</span
                             >
                         </div>
-                        <div class="w-px h-8 bg-zinc-100 self-end mb-1"></div>
+                        <div class="w-px h-8 bg-zinc-100 dark:bg-zinc-800 self-end mb-1"></div>
                         <div class="flex flex-col">
                             <span
-                                class="text-[0.8rem] text-zinc-600 font-medium"
+                                class="text-[0.8rem] text-zinc-600 dark:text-zinc-400 font-medium"
                                 >{activeMatch.classB}반</span
                             >
-                            <span class="text-[1.25rem] font-bold text-zinc-800"
+                            <span class="text-[1.25rem] font-bold text-zinc-800 dark:text-zinc-100"
                                 >{activeMatch.attendance.cheeringB.length}</span
                             >
                         </div>
@@ -131,13 +131,13 @@
                     <div
                         class="flex items-baseline justify-center gap-1.5 mt-1"
                     >
-                        <span class="text-[1.75rem] font-black text-zinc-800"
+                        <span class="text-[1.75rem] font-black text-zinc-800 dark:text-zinc-100"
                             >{currentTab?.current}</span
                         >
                         <span class="text-[1rem] text-zinc-400 font-bold"
                             >/</span
                         >
-                        <span class="text-[1.125rem] text-zinc-600 font-bold"
+                        <span class="text-[1.125rem] text-zinc-600 dark:text-zinc-300 font-bold"
                             >{currentTab?.total}</span
                         >
                     </div>
@@ -158,8 +158,8 @@
                 )}
             class="w-full h-10 rounded-xl font-bold text-[0.9375rem] transition-all flex items-center justify-center gap-2
             {activeTab === 'cheering'
-                ? 'bg-zinc-800 text-white hover:bg-zinc-700 active:scale-[0.98]'
-                : 'bg-amber-500 text-white hover:bg-amber-600 active:scale-[0.98] shadow-sm shadow-amber-200'}
+                ? 'bg-zinc-800 dark:bg-zinc-700 text-white hover:bg-zinc-700 dark:hover:bg-zinc-600 active:scale-[0.98]'
+                : 'bg-amber-500 text-white hover:bg-amber-600 active:scale-[0.98] shadow-sm shadow-amber-200 dark:shadow-none'}
             disabled:opacity-40 disabled:grayscale disabled:scale-100"
         >
             {@html ScanIcon}
@@ -175,18 +175,18 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 flex flex-col gap-[1.875rem] items-center justify-center overflow-clip p-[1.875rem] relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 flex flex-col gap-[1.875rem] items-center justify-center overflow-clip p-[1.875rem] relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] border dark:border-zinc-800 shrink-0 w-[31.3125rem] max-w-full"
         >
             <div
                 class="flex flex-col gap-2 items-center justify-center relative shrink-0 w-full text-center"
             >
                 <p
-                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.5rem]"
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem]"
                 >
                     {scanningTarget === "Cheering" ? "응원 스캔" : "선수 스캔"}
                 </p>
                 <p
-                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[1rem]"
+                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[1rem]"
                 >
                     QR 코드를 스캔하거나 학번을 입력해주세요.
                 </p>
@@ -194,7 +194,7 @@
 
             <!-- QR Code Scanner Area -->
             <div
-                class="w-full aspect-square bg-zinc-200/50 rounded-2xl border-2 border-dashed border-zinc-300 flex flex-col items-center justify-center relative overflow-hidden shrink-0"
+                class="w-full aspect-square bg-zinc-200/50 dark:bg-zinc-800/50 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex flex-col items-center justify-center relative overflow-hidden shrink-0"
             >
                 <div
                     id="qr-reader"
@@ -234,7 +234,7 @@
                 <div class="w-full flex flex-col gap-2">
                     <label
                         for="studentNumber"
-                        class="font-['Pretendard_Variable'] font-semibold text-zinc-700 text-[0.875rem]"
+                        class="font-['Pretendard_Variable'] font-semibold text-zinc-700 dark:text-zinc-300 text-[0.875rem]"
                     >
                         학번 수동 입력
                     </label>
@@ -245,7 +245,7 @@
                         bind:value={studentNumberInput}
                         required
                         placeholder="예: 20240001"
-                        class="w-full h-[3.125rem] bg-white border border-zinc-200 rounded-[0.9375rem] px-4 font-['Pretendard_Variable'] text-[1rem] text-zinc-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                        class="w-full h-[3.125rem] bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-[0.9375rem] px-4 font-['Pretendard_Variable'] text-[1rem] text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
                     />
                 </div>
 

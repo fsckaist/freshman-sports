@@ -113,15 +113,15 @@
 </script>
 
 <div
-    class="flex flex-col bg-white rounded-[1.25rem] w-full flex-[1_0_0] relative overflow-hidden shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] h-full"
+    class="flex flex-col bg-white dark:bg-zinc-900 rounded-[1.25rem] w-full flex-[1_0_0] relative overflow-hidden shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none h-full"
 >
     <!-- Header -->
     <div
-        class="flex items-center px-[1.875rem] py-4 shrink-0 border-b border-zinc-100"
+        class="flex items-center px-[1.875rem] py-4 shrink-0 border-b border-zinc-100 dark:border-zinc-800"
     >
         <div>
             <h2
-                class="font-pretendard font-bold text-zinc-800 text-[1.25rem] m-0"
+                class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[1.25rem] m-0"
             >
                 시스템 설정
             </h2>
@@ -140,14 +140,14 @@
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-1">
                 <h3
-                    class="font-pretendard font-semibold text-zinc-800 text-[1rem] m-0"
+                    class="font-pretendard font-semibold text-zinc-800 dark:text-zinc-100 text-[1rem] m-0"
                 >
                     체육대회 상태
                 </h3>
                 <p
-                    class="font-pretendard font-normal text-zinc-400 text-[0.8125rem] m-0"
+                    class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.8125rem] m-0"
                 >
-                    현재 상태: <span class="font-semibold text-zinc-700"
+                    현재 상태: <span class="font-semibold text-zinc-700 dark:text-zinc-300"
                         >{stateLabels[currentState]}</span
                     >
                 </p>
@@ -177,8 +177,8 @@
                                 currentState === option.value}
                             class="flex flex-col gap-1.5 w-52 p-4 rounded-xl border-2 text-left transition-all cursor-pointer disabled:cursor-default
                             {currentState === option.value
-                                ? 'border-zinc-800 bg-zinc-50'
-                                : 'border-zinc-200 bg-white hover:border-zinc-400 hover:bg-zinc-50'}"
+                                ? 'border-zinc-800 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
+                                : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800'}"
                         >
                             <div
                                 class="flex items-center justify-between w-full"
@@ -186,14 +186,14 @@
                                 <span
                                     class="font-pretendard font-bold text-[1rem]
                                     {currentState === option.value
-                                        ? 'text-zinc-800'
-                                        : 'text-zinc-500'}"
+                                        ? 'text-zinc-800 dark:text-zinc-100'
+                                        : 'text-zinc-500 dark:text-zinc-400'}"
                                 >
                                     {option.label}
                                 </span>
                                 {#if currentState === option.value}
                                     <div
-                                        class="w-2.5 h-2.5 rounded-full bg-zinc-800 shrink-0"
+                                        class="w-2.5 h-2.5 rounded-full bg-zinc-800 dark:bg-zinc-100 shrink-0"
                                     ></div>
                                 {:else}
                                     <div
@@ -202,7 +202,7 @@
                                 {/if}
                             </div>
                             <p
-                                class="font-pretendard font-normal text-zinc-400 text-[0.75rem] m-0 leading-snug"
+                                class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.75rem] m-0 leading-snug"
                             >
                                 {option.description}
                             </p>
@@ -216,12 +216,12 @@
         <div class="flex flex-col gap-4">
             <div class="flex flex-col gap-1">
                 <h3
-                    class="font-pretendard font-semibold text-zinc-800 text-[1rem] m-0"
+                    class="font-pretendard font-semibold text-zinc-800 dark:text-zinc-100 text-[1rem] m-0"
                 >
                     종목별 세부 설정
                 </h3>
                 <p
-                    class="font-pretendard font-normal text-zinc-400 text-[0.8125rem] m-0"
+                    class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.8125rem] m-0"
                 >
                     종목별 전체 게임 기간 및 첫 라운드 일정 선택 기간과 마감
                     기한을 설정합니다.
@@ -234,15 +234,15 @@
                 </p>
             {:else}
                 <!-- Sport Tabs -->
-                <div class="flex gap-0 border-b border-zinc-200">
+                <div class="flex gap-0 border-b border-zinc-200 dark:border-zinc-800">
                     {#each sports as sport, i}
                         <button
                             type="button"
                             onclick={() => (activeSportTab = sport.id)}
                             class="font-pretendard text-[0.875rem] font-medium px-4 py-2.5 border-b-2 transition-colors
                             {activeSportTab === sport.id
-                                ? 'border-zinc-800 text-zinc-800'
-                                : 'border-transparent text-zinc-400 hover:text-zinc-600'}"
+                                ? 'border-zinc-800 dark:border-zinc-100 text-zinc-800 dark:text-zinc-100'
+                                : 'border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'}"
                         >
                             {sport.name}
                         </button>
@@ -464,7 +464,7 @@
                                 <button
                                     type="submit"
                                     disabled={isScheduleUpdating[sport.id]}
-                                    class="font-pretendard font-medium text-[0.875rem] bg-zinc-800 text-white px-4 py-2 rounded-lg hover:bg-zinc-700 active:bg-zinc-800 transition-colors disabled:opacity-50"
+                                    class="font-pretendard font-medium text-[0.875rem] bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-2 rounded-lg hover:bg-zinc-700 dark:hover:bg-zinc-200 active:bg-zinc-800 dark:active:bg-zinc-300 transition-colors disabled:opacity-50"
                                 >
                                     {isScheduleUpdating[sport.id]
                                         ? "저장 중..."

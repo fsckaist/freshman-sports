@@ -29,23 +29,23 @@
         class="flex gap-[0.625rem] items-center justify-center shrink-0 w-full relative"
     >
         <h2
-            class="font-pretendard font-bold text-zinc-600 text-[1.5rem] leading-[normal] shrink-0 m-0"
+            class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] leading-[normal] shrink-0 m-0"
         >
             내 정보
         </h2>
         <div
-            class="flex flex-[1_0_0] h-[1px] items-center justify-center min-w-px relative bg-zinc-300 rounded-full"
+            class="flex flex-[1_0_0] h-[1px] items-center justify-center min-w-px relative bg-zinc-300 dark:bg-zinc-700 rounded-full"
         ></div>
     </div>
 
     <div
-        class="bg-white rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] shrink-0 w-full relative"
+        class="bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none shrink-0 w-full relative"
     >
         <div
             class="flex items-stretch overflow-clip rounded-[1.25rem] w-full h-full relative"
         >
             <div
-                class="bg-neutral-50 border-r border-zinc-200 flex flex-col font-pretendard font-normal gap-[0.9375rem] items-end justify-center leading-[normal] overflow-clip pl-[3.125rem] pr-[1.25rem] py-[1.25rem] shrink-0 text-zinc-600 text-[1.125rem]"
+                class="bg-neutral-50 dark:bg-zinc-800/50 border-r border-zinc-200 dark:border-zinc-800 flex flex-col font-pretendard font-normal gap-[0.9375rem] items-end justify-center leading-[normal] overflow-clip pl-[3.125rem] pr-[1.25rem] py-[1.25rem] shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.125rem]"
             >
                 <p class="shrink-0 m-0">이름</p>
                 <p class="shrink-0 m-0">학번</p>
@@ -54,7 +54,7 @@
             </div>
 
             <div
-                class="flex flex-[1_0_0] flex-col font-pretendard font-medium gap-[0.9375rem] items-start justify-center leading-[normal] min-w-px overflow-clip p-[1.25rem] text-zinc-800 text-[1.125rem]"
+                class="flex flex-[1_0_0] flex-col font-pretendard font-medium gap-[0.9375rem] items-start justify-center leading-[normal] min-w-px overflow-clip p-[1.25rem] text-zinc-800 dark:text-zinc-200 text-[1.125rem]"
             >
                 <p class="shrink-0 m-0">{name}</p>
                 <p class="shrink-0 m-0">{studentNumber}</p>
@@ -66,7 +66,7 @@
                 class="flex flex-col items-center justify-center p-[0.625rem] shrink-0"
             >
                 <div
-                    class="aspect-square bg-white flex flex-col items-center justify-center p-[0.5rem] rounded-[0.625rem] h-[8.125rem] border border-zinc-100 overflow-clip"
+                    class="aspect-square bg-white flex flex-col items-center justify-center p-[0.5rem] rounded-[0.625rem] h-[8.125rem] border border-zinc-100 dark:border-zinc-700 overflow-clip"
                 >
                     {#if qrCodeUrl}
                         <img

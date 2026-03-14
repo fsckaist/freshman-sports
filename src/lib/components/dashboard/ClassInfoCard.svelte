@@ -18,22 +18,22 @@
         class="flex gap-[0.625rem] items-center justify-center shrink-0 w-full relative"
     >
         <h2
-            class="font-pretendard font-bold text-zinc-600 text-[1.5rem] leading-[normal] shrink-0 m-0"
+            class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] leading-[normal] shrink-0 m-0"
         >
             내 새터반 정보
         </h2>
         <div
-            class="flex flex-[1_0_0] h-[1px] items-center justify-center min-w-px relative bg-zinc-300 rounded-full"
+            class="flex flex-[1_0_0] h-[1px] items-center justify-center min-w-px relative bg-zinc-300 dark:bg-zinc-700 rounded-full"
         ></div>
     </div>
 
     <!-- Class Details Header Card -->
     <div
-        class="bg-white flex font-pretendard font-normal items-stretch leading-[normal] overflow-clip rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] shrink-0 text-[1.125rem] w-full relative"
+        class="bg-white dark:bg-zinc-900 flex font-pretendard font-normal items-stretch leading-[normal] overflow-clip rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none shrink-0 text-[1.125rem] w-full relative"
     >
         <!-- Left Categories -->
         <div
-            class="bg-neutral-50 border-r border-zinc-200 flex flex-col gap-[0.9375rem] items-end justify-center overflow-clip pl-[3.125rem] pr-[1.25rem] py-[1.25rem] shrink-0 text-zinc-600"
+            class="bg-neutral-50 dark:bg-zinc-800/50 border-r border-zinc-200 dark:border-zinc-800 flex flex-col gap-[0.9375rem] items-end justify-center overflow-clip pl-[3.125rem] pr-[1.25rem] py-[1.25rem] shrink-0 text-zinc-600 dark:text-zinc-400"
         >
             <p class="shrink-0 m-0">새터반</p>
             <p class="shrink-0 m-0">프락터</p>
@@ -41,7 +41,7 @@
 
         <!-- Right Info -->
         <div
-            class="flex flex-[1_0_0] flex-col gap-[0.9375rem] items-start justify-center min-w-px overflow-clip p-[1.25rem] text-zinc-800 font-medium"
+            class="flex flex-[1_0_0] flex-col gap-[0.9375rem] items-start justify-center min-w-px overflow-clip p-[1.25rem] text-zinc-800 dark:text-zinc-200 font-medium"
         >
             <p class="shrink-0 m-0">{classNumber}반</p>
             <p class="shrink-0 m-0">{proctors}</p>
@@ -50,18 +50,18 @@
 
     <!-- Roster Grid Card -->
     <div
-        class="bg-neutral-50 flex flex-[1_0_0] flex-col gap-[0.625rem] items-start min-w-px overflow-clip p-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] rounded-[1.25rem] w-full relative"
+        class="bg-neutral-50 dark:bg-zinc-900/50 flex flex-[1_0_0] flex-col gap-[0.625rem] items-start min-w-px overflow-clip p-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none rounded-[1.25rem] w-full relative"
     >
         <div class="flex items-center justify-center px-[0.3125rem] shrink-0">
             <h3
-                class="font-pretendard font-normal leading-[normal] shrink-0 text-zinc-600 text-[1.125rem] m-0"
+                class="font-pretendard font-normal leading-[normal] shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.125rem] m-0"
             >
                 출전 선수
             </h3>
         </div>
 
         <div
-            class="w-full h-[1px] shrink-0 relative bg-zinc-200 rounded-full"
+            class="w-full h-[1px] shrink-0 relative bg-zinc-200 dark:bg-zinc-800 rounded-full"
         ></div>
 
         <div
@@ -71,25 +71,25 @@
                 {#each rosters as roster}
                     <!-- Individual Sport Roster Card -->
                     <div
-                        class="bg-white border border-zinc-100 flex flex-col gap-[0.625rem] items-center justify-center overflow-clip p-[1.25rem] rounded-[1.25rem] self-start shrink-0 relative"
+                        class="bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 flex flex-col gap-[0.625rem] items-center justify-center overflow-clip p-[1.25rem] rounded-[1.25rem] self-start shrink-0 relative"
                     >
                         <h4
-                            class="font-pretendard font-medium leading-[normal] shrink-0 text-zinc-800 text-[1.125rem] m-0 text-center"
+                            class="font-pretendard font-medium leading-[normal] shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.125rem] m-0 text-center"
                         >
                             {roster.sport}
                         </h4>
                         <div
-                            class="w-full h-[1px] shrink-0 relative bg-zinc-100 rounded-full"
+                            class="w-full h-[1px] shrink-0 relative bg-zinc-100 dark:bg-zinc-700 rounded-full"
                         ></div>
                         {#if roster.players && roster.players !== "출전 선수가 없어요."}
                             <p
-                                class="font-pretendard font-normal leading-[1.5rem] shrink-0 text-zinc-600 text-[0.875rem] text-center whitespace-pre-wrap m-0 w-full"
+                                class="font-pretendard font-normal leading-[1.5rem] shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] text-center whitespace-pre-wrap m-0 w-full"
                             >
                                 {roster.players}
                             </p>
                         {:else}
                             <p
-                                class="font-pretendard font-normal leading-[1.5rem] shrink-0 text-zinc-400 text-[0.875rem] text-center m-0 w-full"
+                                class="font-pretendard font-normal leading-[1.5rem] shrink-0 text-zinc-400 dark:text-zinc-500 text-[0.875rem] text-center m-0 w-full"
                             >
                                 출전 선수가 없어요.
                             </p>

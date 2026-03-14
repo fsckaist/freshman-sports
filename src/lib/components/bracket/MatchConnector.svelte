@@ -15,14 +15,14 @@
     >
         <path
             d="M 0 0 C 10 0 10 50 20 50"
-            stroke="#9F9FA9"
+            class="stroke-zinc-400 dark:stroke-zinc-600"
             stroke-width="2"
             fill="none"
             vector-effect="non-scaling-stroke"
         />
         <path
             d="M 0 100 C 10 100 10 50 20 50"
-            stroke="#9F9FA9"
+            class="stroke-zinc-400 dark:stroke-zinc-600"
             stroke-width="2"
             fill="none"
             vector-effect="non-scaling-stroke"

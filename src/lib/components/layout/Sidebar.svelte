@@ -9,9 +9,18 @@
     import rawRulesIcon from "@gravity-ui/icons/svgs/book.svg?raw";
     import rawRecordIcon from "@gravity-ui/icons/svgs/scales-balanced.svg?raw";
     import rawAdminIcon from "@gravity-ui/icons/svgs/wrench.svg?raw";
+    import rawSunIcon from "@gravity-ui/icons/svgs/sun.svg?raw";
+    import rawMoonIcon from "@gravity-ui/icons/svgs/moon.svg?raw";
+    import { themeManager } from "$lib/theme.svelte";
 
     const resizeSvg = (svg: string) =>
         svg.replace('width="16" height="16"', 'width="24" height="24"');
+
+    const ThemeIcon = $derived(
+        themeManager.theme === "dark"
+            ? resizeSvg(rawSunIcon)
+            : resizeSvg(rawMoonIcon),
+    );
 
     const allNavItems = [
         {
@@ -68,31 +77,55 @@
         },
     ];
 
-    $: eventState = ($page.data.eventState ?? "REGISTRATION") as
-        | "REGISTRATION"
-        | "ONGOING"
-        | "COMPLETED";
-    $: user = $page.data.user;
-
-    $: visibleGeneral = allNavItems.filter((item) =>
-        item.states.includes(eventState),
+    const eventState = $derived(
+        ($page.data.eventState ?? "REGISTRATION") as
+            | "REGISTRATION"
+            | "ONGOING"
+            | "COMPLETED",
     );
-    $: visibleAdmin = adminNavItems.filter((item) => {
-        if (item.requiresAdmin) return user?.isAdmin;
-        if (item.requiresManager) return user?.isManager || user?.isAdmin;
-        return true;
-    });
+    const user = $derived($page.data.user);
+
+    const visibleGeneral = $derived(
+        allNavItems.filter((item) => item.states.includes(eventState)),
+    );
+    const visibleAdmin = $derived(
+        adminNavItems.filter((item) => {
+            if (item.requiresAdmin) return user?.isAdmin;
+            if (item.requiresManager) return user?.isManager || user?.isAdmin;
+            return true;
+        }),
+    );
 </script>
 
 <aside
-    class="bg-white border-r border-zinc-200 flex flex-col gap-[1.875rem] h-full items-start overflow-hidden py-[3.125rem] relative shrink-0 w-[12.5rem]"
+    class="bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col gap-[1.875rem] h-full items-start overflow-hidden py-[3.125rem] relative shrink-0 w-[12.5rem]"
 >
     <!-- Brand -->
     <div
         class="flex flex-col items-end justify-center px-[1.875rem] shrink-0 w-full relative"
     >
+        <div class="flex items-center justify-between w-full">
+            <button
+                onclick={() => themeManager.toggle()}
+                class="flex self-start items-center justify-center size-[2.5rem] rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-600 transition-colors cursor-pointer"
+                title="테마 변경"
+            >
+                <div class="size-6">
+                    {@html ThemeIcon}
+                </div>
+            </button>
+            <div
+                class="size-20 shrink-0 relative overflow-visible translate-x-3"
+            >
+                <img
+                    src="/logo.png"
+                    alt="샛별 로고"
+                    class="absolute inset-0 size-full object-contain"
+                />
+            </div>
+        </div>
         <div
-            class="font-pretendard font-bold text-neutral-800 text-[1.75rem] leading-tight text-right whitespace-nowrap shrink-0 relative"
+            class="font-pretendard font-bold text-neutral-800 dark:text-zinc-100 text-[1.75rem] leading-tight text-right whitespace-nowrap shrink-0 relative"
         >
             <p class="m-0">새내기</p>
             <p class="m-0">체육 대회</p>
@@ -109,8 +142,8 @@
                 <a
                     href={item.path}
                     class="group flex h-[3rem] items-center justify-end gap-[0.625rem] overflow-clip px-[1.25rem] py-[0.75rem] rounded-l-[0.625rem] shrink-0 w-[10.625rem] decoration-transparent transition-colors cursor-pointer {isActive
-                        ? 'bg-zinc-100 text-zinc-600'
-                        : 'bg-transparent text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 active:bg-zinc-300 active:text-zinc-800'}"
+                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'
+                        : 'bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-800 dark:hover:text-zinc-100 active:bg-zinc-300 dark:active:bg-zinc-600 active:text-zinc-800 dark:active:text-zinc-50'}"
                 >
                     <div
                         class="overflow-clip relative shrink-0 size-[1.5rem] text-current transition-colors"
@@ -136,8 +169,8 @@
                 <a
                     href={item.path}
                     class="group flex h-[3rem] items-center justify-end gap-[0.625rem] overflow-clip px-[1.25rem] py-[0.75rem] rounded-l-[0.625rem] shrink-0 w-[10.625rem] decoration-transparent transition-colors cursor-pointer {isActive
-                        ? 'bg-zinc-100 text-zinc-600'
-                        : 'bg-transparent text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 active:bg-zinc-300 active:text-zinc-800'}"
+                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'
+                        : 'bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-800 dark:hover:text-zinc-100 active:bg-zinc-300 dark:active:bg-zinc-600 active:text-zinc-800 dark:active:text-zinc-50'}"
                 >
                     <div
                         class="overflow-clip relative shrink-0 size-[1.5rem] text-current transition-colors"
@@ -170,16 +203,18 @@
                 class="decoration-solid underline shrink-0 transition-colors cursor-pointer m-0 text-[0.75rem] {$page.url.pathname.startsWith(
                     '/contact',
                 )
-                    ? 'text-zinc-800 font-semibold'
-                    : 'text-zinc-600 hover:text-zinc-800'}">문의 하기</a
+                    ? 'text-zinc-800 dark:text-zinc-200 font-semibold'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'}"
+                >문의 하기</a
             >
             <a
                 href="/privacy"
                 class="decoration-solid underline shrink-0 transition-colors cursor-pointer m-0 text-[0.75rem] {$page.url.pathname.startsWith(
                     '/privacy',
                 )
-                    ? 'text-zinc-800 font-semibold'
-                    : 'text-zinc-600 hover:text-zinc-800'}">개인정보 처리방침</a
+                    ? 'text-zinc-800 dark:text-zinc-200 font-semibold'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'}"
+                >개인정보 처리방침</a
             >
             <form
                 action="/logout"
@@ -189,17 +224,21 @@
             >
                 <button
                     type="submit"
-                    class="decoration-solid underline shrink-0 text-zinc-600 hover:text-zinc-800 transition-colors cursor-pointer m-0 bg-transparent border-0 p-0 font-pretendard text-[0.75rem]"
+                    class="decoration-solid underline shrink-0 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer m-0 bg-transparent border-0 p-0 font-pretendard text-[0.75rem]"
                     >로그아웃</button
                 >
             </form>
         </div>
 
-        <p
-            class="font-pretendard font-medium leading-tight shrink-0 text-black text-[0.75rem] m-0 w-max relative"
-        >
-            <span class="text-zinc-800">제23대 새내기학생회 </span>
-            <span class="text-amber-500">샛별</span>
-        </p>
+        <div class="flex items-end justify-end w-full">
+            <p
+                class="font-pretendard font-medium leading-tight shrink-0 text-black dark:text-white text-[0.75rem] m-0 w-max relative"
+            >
+                <span class="text-zinc-800 dark:text-zinc-300"
+                    >제23대 새내기학생회
+                </span>
+                <span class="text-amber-500">샛별</span>
+            </p>
+        </div>
     </div>
 </aside>

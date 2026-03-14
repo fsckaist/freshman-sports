@@ -4,7 +4,7 @@
 </script>
 
 <div
-    class="relative size-full min-h-screen bg-white overflow-hidden flex justify-center"
+    class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
     <!-- Centered 90rem wrapper so the absolute watermark is properly anchored -->
     <div
@@ -12,7 +12,7 @@
     >
         <!-- Glowing Right Side Watermark -->
         <div
-            class="absolute -translate-y-1/2 blur-[0.625rem] opacity-20 right-[-12.8125rem] size-[65.3125rem] top-[calc(50%+7.65625rem)] pointer-events-none select-none mix-blend-multiply z-0"
+            class="absolute -translate-y-1/2 blur-[0.625rem] opacity-20 dark:opacity-10 right-[-12.8125rem] size-[65.3125rem] top-[calc(50%+7.65625rem)] pointer-events-none select-none mix-blend-multiply dark:mix-blend-plus-lighter z-0"
         >
             <img
                 src="/logo.png"
@@ -36,7 +36,7 @@
             </div>
 
             <div
-                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800"
+                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100"
             >
                 <p
                     class="font-pretendard font-semibold relative shrink-0 text-[1.5rem]"
@@ -58,7 +58,7 @@
             <div
                 class="content-stretch flex flex-col font-pretendard font-normal gap-[0.625rem] items-start leading-[normal] overflow-clip relative shrink-0 text-[1.25rem]"
             >
-                <p class="relative shrink-0 text-zinc-800 m-0">
+                <p class="relative shrink-0 text-zinc-800 dark:text-zinc-300 m-0">
                     공정하고 원활한 체육 대회 진행을 위하여 아래 규정을 꼭
                     확인해주세요.
                 </p>
@@ -78,7 +78,7 @@
                 class="content-stretch flex flex-col gap-[1rem] items-start relative shrink-0"
             >
                 <p
-                    class="font-pretendard font-normal leading-[normal] relative shrink-0 text-zinc-800 text-[1.25rem] m-0"
+                    class="font-pretendard font-normal leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.25rem] m-0"
                 >
                     체육 대회 진행 규정에 대해 동의하시나요?
                 </p>
@@ -95,7 +95,7 @@
             </form>
 
             <p
-                class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800"
+                class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100"
             >
                 제23대 새내기학생회 <span class="text-amber-500">샛별</span>
             </p>

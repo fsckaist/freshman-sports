@@ -18,15 +18,15 @@
             opacityClass: "opacity-100",
         },
         예정: {
-            borderClass: "border border-zinc-100",
+            borderClass: "border border-zinc-100 dark:border-zinc-800",
             badgeBgClass: "bg-amber-400",
             badgeTextClass: "text-amber-50",
             opacityClass: "opacity-100",
         },
         종료: {
-            borderClass: "border border-zinc-100",
+            borderClass: "border border-zinc-100 dark:border-zinc-800",
             badgeBgClass: "bg-zinc-400",
-            badgeTextClass: "text-zinc-100",
+            badgeTextClass: "text-zinc-100 dark:text-zinc-300",
             opacityClass: "opacity-30",
         },
     };
@@ -50,7 +50,7 @@
 </script>
 
 <div
-    class="bg-white border-solid flex flex-col gap-[0.625rem] items-start justify-center overflow-clip p-[1.25rem] rounded-[1.25rem] shrink-0 w-full relative {currentConfig.borderClass}"
+    class="bg-white dark:bg-zinc-900 border-solid flex flex-col gap-[0.625rem] items-start justify-center overflow-clip p-[1.25rem] rounded-[1.25rem] shrink-0 w-full relative {currentConfig.borderClass}"
 >
     <!-- Header -->
     <div
@@ -58,7 +58,7 @@
     >
         <div class="flex flex-col gap-[0.5rem] items-start shrink-0 relative">
             <h3
-                class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-800 text-[1.5rem] m-0"
+                class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] m-0"
             >
                 {title}
             </h3>
@@ -66,12 +66,12 @@
                 class="flex gap-[0.3125rem] items-center justify-center shrink-0"
             >
                 <div
-                    class="shrink-0 size-[0.75rem] relative text-zinc-800 flex items-center justify-center"
+                    class="shrink-0 size-[0.75rem] relative text-zinc-800 dark:text-zinc-300 flex items-center justify-center"
                 >
                     {@html DateIcon}
                 </div>
                 <p
-                    class="font-pretendard font-normal leading-tight shrink-0 text-zinc-800 text-[0.875rem] m-0"
+                    class="font-pretendard font-normal leading-tight shrink-0 text-zinc-800 dark:text-zinc-300 text-[0.875rem] m-0"
                 >
                     {time}
                 </p>
@@ -91,7 +91,7 @@
     </div>
 
     <div
-        class="w-full h-[1px] shrink-0 relative bg-zinc-200 rounded-full my-[1px]"
+        class="w-full h-[1px] shrink-0 relative bg-zinc-200 dark:bg-zinc-800 rounded-full my-[1px]"
     ></div>
 
     <!-- Content Area -->
@@ -104,12 +104,12 @@
                 class="flex gap-[0.3125rem] items-center justify-center shrink-0 relative"
             >
                 <p
-                    class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-600 text-[0.875rem] m-0"
+                    class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
                 >
                     {teamA}
                 </p>
                 <div
-                    class="bg-zinc-400 flex flex-col items-center justify-center px-[0.1875rem] py-px rounded-[0.1875rem] shrink-0 relative"
+                    class="bg-zinc-400 dark:bg-zinc-600 flex flex-col items-center justify-center px-[0.1875rem] py-px rounded-[0.1875rem] shrink-0 relative"
                 >
                     <span
                         class="font-pretendard font-bold leading-tight shrink-0 text-zinc-100 text-[0.5rem] tracking-widest pt-[1px]"
@@ -118,7 +118,7 @@
                     </span>
                 </div>
                 <p
-                    class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-600 text-[0.875rem] m-0"
+                    class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
                 >
                     {teamB}
                 </p>
@@ -129,12 +129,12 @@
                 class="flex gap-[0.1875rem] items-center justify-center shrink-0 relative"
             >
                 <div
-                    class="shrink-0 size-[0.75rem] relative text-zinc-600 flex items-center justify-center"
+                    class="shrink-0 size-[0.75rem] relative text-zinc-600 dark:text-zinc-400 flex items-center justify-center"
                 >
                     {@html LocationIcon}
                 </div>
                 <p
-                    class="font-pretendard font-normal leading-tight shrink-0 text-zinc-600 text-[0.75rem] m-0 pt-[1px]"
+                    class="font-pretendard font-normal leading-tight shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.75rem] m-0 pt-[1px]"
                 >
                     {location}
                 </p>
@@ -143,7 +143,7 @@
 
         <!-- Players -->
         <p
-            class="font-pretendard font-normal leading-tight shrink-0 text-zinc-600 text-[0.625rem] m-0 pt-[2px]"
+            class="font-pretendard font-normal leading-tight shrink-0 text-zinc-600 dark:text-zinc-500 text-[0.625rem] m-0 pt-[2px]"
         >
             선수 : {players}
         </p>

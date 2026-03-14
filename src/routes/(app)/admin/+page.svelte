@@ -32,7 +32,7 @@
         <div
             class="flex gap-[0.625rem] items-center justify-between shrink-0 w-full relative"
         >
-            <h1 class="font-pretendard font-bold text-zinc-800 text-[2rem] m-0">
+            <h1 class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[2rem] m-0">
                 관리자 대시보드
             </h1>
         </div>

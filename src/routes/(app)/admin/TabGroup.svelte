@@ -13,7 +13,7 @@
 </script>
 
 <div
-    class="flex items-center shrink-0 w-full overflow-hidden rounded-[1.25rem] bg-white shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-zinc-200"
+    class="flex items-center shrink-0 w-full overflow-hidden rounded-[1.25rem] bg-white dark:bg-zinc-900 shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none border border-zinc-200 dark:border-zinc-800"
 >
     {#each tabs as tab, i}
         <button
@@ -22,9 +22,9 @@
             class={cx([
                 "flex flex-[1_0_0] items-center justify-center h-[3.125rem] cursor-pointer outline-none transition-colors duration-200",
                 activeTab === tab.id
-                    ? "bg-white text-zinc-800 zinc-800 border-amber-500"
-                    : "bg-zinc-100 hover:bg-zinc-200 text-zinc-600 zinc-800 border-transparent border-t-0 border-l-0",
-                i !== tabs.length - 1 ? "border-r border-zinc-200" : "",
+                    ? "bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100 border-amber-500"
+                    : "bg-zinc-100 dark:bg-zinc-950 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent border-t-0 border-l-0",
+                i !== tabs.length - 1 ? "border-r border-zinc-200 dark:border-zinc-800" : "",
             ])}
         >
             <p

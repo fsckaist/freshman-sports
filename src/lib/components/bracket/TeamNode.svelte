@@ -10,13 +10,13 @@
 
     // Determine background color
     $: bgClass = isDefault
-        ? "bg-zinc-200"
+        ? "bg-zinc-200 dark:bg-zinc-800"
         : isLose
-          ? "bg-zinc-600"
+          ? "bg-zinc-600 dark:bg-zinc-700"
           : "bg-amber-500";
 
     // Determine text color
-    $: textClass = isDefault ? "text-zinc-800" : "text-white";
+    $: textClass = isDefault ? "text-zinc-800 dark:text-zinc-200" : "text-white";
 
     $: gapClass =
         (isDefault || isLose || isWin) && ourTeam
@@ -78,7 +78,7 @@
             >
                 <path
                     d="M7 8C10.85 8 14 10.5 14 12.5C14 12.8978 13.842 13.2794 13.5607 13.5607C13.2794 13.842 12.8978 14 12.5 14H1.5C1.10218 14 0.720644 13.842 0.43934 13.5607C0.158035 13.2794 0 12.8978 0 12.5C0 10.5 3.15 8 7 8ZM7 0C7.92826 0 8.8185 0.368749 9.47487 1.02513C10.1313 1.6815 10.5 2.57174 10.5 3.5C10.5 4.42826 10.1313 5.3185 9.47487 5.97487C8.8185 6.63125 7.92826 7 7 7C6.07174 7 5.1815 6.63125 4.52513 5.97487C3.86875 5.3185 3.5 4.42826 3.5 3.5C3.5 2.57174 3.86875 1.6815 4.52513 1.02513C5.1815 0.368749 6.07174 0 7 0Z"
-                    fill="#1F1F22"
+                    class="fill-zinc-900 dark:fill-zinc-300"
                 />
             </svg>
         </div>

@@ -11,7 +11,13 @@
     let activeMatchId = $derived(page.url.searchParams.get("matchId"));
 
     // Sport sidebar tab management
-    let activeSportId = $state(data.allSports?.[0]?.id || null);
+    let activeSportId = $state<string | null>(null);
+
+    $effect(() => {
+        if (activeSportId === null && data.allSports?.length > 0) {
+            activeSportId = data.allSports[0].id;
+        }
+    });
     let filteredMatches = $derived(
         activeSportId
             ? data.allMatches.filter((m) => m.sportId === activeSportId)
@@ -27,11 +33,13 @@
         <!-- Sidebar Title -->
         <div class="flex items-center gap-[0.625rem] mb-[1.25rem] shrink-0">
             <h1
-                class="font-pretendard font-bold text-zinc-600 text-[1.5rem] m-0 whitespace-nowrap"
+                class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
             >
                 경기 일정
             </h1>
-            <div class="flex-1 bg-zinc-300 h-px rounded-full"></div>
+            <div
+                class="flex-1 bg-zinc-300 dark:bg-zinc-700 h-px rounded-full"
+            ></div>
         </div>
 
         <!-- Sport Tabs -->
@@ -43,8 +51,8 @@
                     onclick={() => (activeSportId = sport.id)}
                     class="px-4 py-2 rounded-full whitespace-nowrap font-pretendard font-semibold text-sm transition-all border
                     {activeSportId === sport.id
-                        ? 'bg-amber-500 text-white border-amber-500'
-                        : 'bg-white text-zinc-500 border-zinc-200 hover:bg-zinc-50'}"
+                        ? 'bg-amber-500 text-white border-amber-500 shadow-md'
+                        : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700'}"
                 >
                     {sport.name}
                 </button>
@@ -53,7 +61,7 @@
 
         <!-- Scrollable Sidebar Container -->
         <div
-            class="flex-1 min-h-0 bg-zinc-50 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-transparent p-[0.625rem] overflow-hidden flex flex-col"
+            class="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-900/50 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-transparent dark:border-zinc-800 p-[0.625rem] overflow-hidden flex flex-col"
         >
             <div class="flex-1 overflow-y-auto hide-scrollbar p-[0.625rem]">
                 <MatchSidebar matches={filteredMatches} {activeMatchId} />
@@ -68,14 +76,14 @@
             <div class="flex flex-col shrink-0">
                 <div class="flex items-center gap-[0.625rem] mb-[1.25rem]">
                     <h2
-                        class="font-pretendard font-bold text-zinc-600 text-[1.5rem] m-0 whitespace-nowrap"
+                        class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
                     >
                         인원 관리
                     </h2>
-                    <div class="flex-1 bg-zinc-300 h-px rounded-full"></div>
+                    <div class="flex-1 bg-zinc-300 dark:bg-zinc-700 h-px rounded-full"></div>
                 </div>
                 <div
-                    class="bg-zinc-50 rounded-[1.25rem] p-[1rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] mb-[1.875rem]"
+                    class="bg-zinc-50 dark:bg-zinc-900/50 rounded-[1.25rem] p-[1rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-transparent dark:border-zinc-800 mb-[1.875rem]"
                 >
                     <AttendanceTracker activeMatch={data.activeMatchDetails} />
                 </div>
@@ -87,14 +95,14 @@
                     class="flex items-center gap-[0.625rem] mb-[1.25rem] shrink-0"
                 >
                     <h2
-                        class="font-pretendard font-bold text-zinc-600 text-[1.5rem] m-0 whitespace-nowrap"
+                        class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
                     >
                         경기 기록지
                     </h2>
-                    <div class="flex-1 bg-zinc-300 h-px rounded-full"></div>
+                    <div class="flex-1 bg-zinc-300 dark:bg-zinc-700 h-px rounded-full"></div>
                 </div>
                 <div
-                    class="flex-1 min-h-0 bg-zinc-50 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] overflow-hidden"
+                    class="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-900/50 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-transparent dark:border-zinc-800 overflow-hidden"
                 >
                     <div class="h-full overflow-y-auto hide-scrollbar">
                         <MatchLogPanel activeMatch={data.activeMatchDetails} />
@@ -106,7 +114,7 @@
             <div
                 class="flex-1 flex flex-col items-center justify-center p-[3.125rem] text-center"
             >
-                <div class="w-[5rem] h-[5rem] text-zinc-200 mb-[1.25rem]">
+                <div class="w-[5rem] h-[5rem] text-zinc-600 dark:text-zinc-500 mb-[1.25rem]">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
                             stroke-linecap="round"
@@ -117,12 +125,12 @@
                     </svg>
                 </div>
                 <h3
-                    class="font-pretendard font-bold text-zinc-800 text-[1.5rem] mb-[0.625rem]"
+                    class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] mb-[0.625rem]"
                 >
                     경기를 선택해주세요
                 </h3>
                 <p
-                    class="font-pretendard font-medium text-zinc-400 text-[1.125rem] max-w-[20rem]"
+                    class="font-pretendard font-medium text-zinc-400 dark:text-zinc-500 text-[1.125rem] max-w-[20rem]"
                 >
                     좌측 리스트에서 경기 기록 혹은 관리가 필요한 매치를
                     선택해주세요.

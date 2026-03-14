@@ -12,18 +12,18 @@
     {#if data.pendingMatches && data.pendingMatches.length > 0}
         <div class="flex flex-col gap-[0.625rem] shrink-0 w-full">
             <div
-                class="bg-red-50 border border-red-200 rounded-[1.25rem] p-[1rem] flex items-center gap-[0.3rem] w-full shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)]"
+                class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-[1.25rem] p-[1rem] flex items-center gap-[0.3rem] w-full shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none"
             >
                 <!-- Notice Icon -->
                 <div
-                    class="flex items-center justify-center shrink-0 w-[1.5rem] h-[1.5rem] text-red-800"
+                    class="flex items-center justify-center shrink-0 w-[1.5rem] h-[1.5rem] text-red-800 dark:text-red-400"
                 >
                     {@html noticeIconSvg}
                 </div>
 
                 <div class="flex flex-col">
                     <h3
-                        class="font-pretendard font-regular text-red-800 text-[1rem] m-0 leading-tight"
+                        class="font-pretendard font-regular text-red-800 dark:text-red-400 text-[1rem] m-0 leading-tight"
                     >
                         <span class="font-bold">
                             {Array.from(
@@ -70,7 +70,7 @@
                 class="flex gap-[0.625rem] items-center justify-center shrink-0 w-full relative"
             >
                 <h2
-                    class="font-pretendard font-bold leading-[normal] shrink-0 text-zinc-600 text-[1.5rem] m-0"
+                    class="font-pretendard font-bold leading-[normal] shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0"
                 >
                     경기 일정
                 </h2>
@@ -78,14 +78,14 @@
                     class="flex flex-[1_0_0] h-px items-center justify-center min-w-px relative"
                 >
                     <div
-                        class="flex-none w-full bg-zinc-300 h-[1px] rounded-full"
+                        class="flex-none w-full bg-zinc-300 dark:bg-zinc-700 h-[1px] rounded-full"
                     ></div>
                 </div>
             </div>
 
             <!-- Scrollable Cards Container -->
             <div
-                class="bg-zinc-50 flex flex-[1_0_0] flex-col gap-[0.625rem] items-start min-h-px min-w-px p-[1.25rem] rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] w-full relative hide-scrollbar overflow-auto"
+                class="bg-zinc-50 dark:bg-zinc-900/50 flex flex-[1_0_0] flex-col gap-[0.625rem] items-start min-h-px min-w-px p-[1.25rem] rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none w-full relative hide-scrollbar overflow-auto"
             >
                 {#if data.confirmedSchedules && data.confirmedSchedules.length > 0}
                     {#each data.confirmedSchedules as schedule}

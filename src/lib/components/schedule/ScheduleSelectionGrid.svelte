@@ -88,14 +88,14 @@
     >
         <!-- Header Row -->
         <div
-            class="flex items-center justify-center text-zinc-400 font-pretendard text-[0.875rem] font-semibold text-center"
+            class="flex items-center justify-center text-zinc-400 dark:text-zinc-500 font-pretendard text-[0.875rem] font-semibold text-center"
             style="grid-column-start: 1;"
         >
             날짜 / 시간
         </div>
         {#each timeHeaders as time}
             <div
-                class="flex items-center justify-center text-zinc-800 font-pretendard text-[0.9375rem] font-bold text-center py-[0.625rem]"
+                class="flex items-center justify-center text-zinc-800 dark:text-zinc-200 font-pretendard text-[0.9375rem] font-bold text-center py-[0.625rem]"
             >
                 {time}
             </div>
@@ -105,7 +105,7 @@
         {#each dates as date}
             <!-- Date column -->
             <div
-                class="flex items-center justify-center text-zinc-600 font-pretendard text-[1rem] font-semibold text-center w-full h-full px-[0.625rem] whitespace-nowrap"
+                class="flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-pretendard text-[1rem] font-semibold text-center w-full h-full px-[0.625rem] whitespace-nowrap"
                 style="grid-column-start: 1;"
             >
                 {formatDateDisplay(date)}
@@ -155,7 +155,7 @@
 {:else}
     <div class="flex items-center justify-center w-full h-full py-12">
         <p
-            class="font-pretendard font-normal text-zinc-400 text-[0.875rem] m-0"
+            class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0"
         >
             해당 종목의 일정이 아직 등록되지 않았어요.
         </p>

@@ -10,12 +10,12 @@
             class="content-stretch flex flex-col gap-[0.625rem] items-start justify-center leading-tight relative shrink-0"
         >
             <h1
-                class="font-pretendard font-bold relative shrink-0 text-zinc-800 text-[2rem] m-0"
+                class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[2rem] m-0"
             >
                 규정 읽기
             </h1>
             <div
-                class="font-pretendard font-normal relative shrink-0 text-zinc-600 text-[0.875rem] whitespace-nowrap"
+                class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
             >
                 <p class="m-0">
                     공정한 경기 운영을 위해 아래 규정을 반드시 확인해주세요.
@@ -29,7 +29,7 @@
     </div>
 
     <div
-        class="bg-white content-stretch flex flex-[1_0_0] flex-col items-center min-h-px min-w-px overflow-hidden relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] w-full"
+        class="bg-white dark:bg-zinc-900 content-stretch flex flex-[1_0_0] flex-col items-center min-h-px min-w-px overflow-hidden relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none w-full"
     >
         <div
             class="flex-[1_0_0] min-h-px min-w-px overflow-hidden relative w-full p-[3rem]"
@@ -38,7 +38,7 @@
                 class="flex-[1_0_0] min-h-px min-w-px overflow-hidden overflow-y-auto relative w-full h-full"
             >
                 <div
-                    class="flex flex-col gap-[0.625rem] items-start leading-[normal] text-zinc-800 w-full"
+                    class="flex flex-col gap-[0.625rem] items-start leading-[normal] text-zinc-800 dark:text-zinc-100 w-full"
                 >
                     <h2
                         class="font-pretendard font-bold relative shrink-0 text-[2rem] m-0 mb-[0.625rem]"

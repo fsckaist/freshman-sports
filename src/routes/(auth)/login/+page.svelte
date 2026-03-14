@@ -4,7 +4,7 @@
 </script>
 
 <div
-    class="relative size-full min-h-screen bg-white overflow-hidden flex justify-center"
+    class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
     <!-- Centered 90rem wrapper so the absolute watermark is properly anchored -->
     <div
@@ -12,7 +12,7 @@
     >
         <!-- Glowing Right Side Watermark -->
         <div
-            class="absolute -translate-y-1/2 blur-[0.625rem] opacity-20 right-[-12.8125rem] size-[65.3125rem] top-[calc(50%+7.65625rem)] pointer-events-none select-none mix-blend-multiply z-0"
+            class="absolute -translate-y-1/2 blur-[0.625rem] opacity-20 dark:opacity-10 right-[-12.8125rem] size-[65.3125rem] top-[calc(50%+7.65625rem)] pointer-events-none select-none mix-blend-multiply dark:mix-blend-plus-lighter z-0"
         >
             <img
                 src="/logo.png"
@@ -36,7 +36,7 @@
             </div>
 
             <div
-                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800"
+                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100"
             >
                 <p
                     class="font-pretendard font-semibold relative shrink-0 text-[1.5rem]"
@@ -60,9 +60,9 @@
                 action="?/login"
                 use:enhance
                 novalidate
-                class="bg-zinc-100 content-stretch flex h-[3.125rem] items-center justify-between pl-[1.25rem] pr-[0.4375rem] py-[0.4375rem] relative rounded-[6.25rem] shrink-0 w-full max-w-[25rem] border transition-colors {form?.error
+                class="bg-zinc-100 dark:bg-zinc-900 content-stretch flex h-[3.125rem] items-center justify-between pl-[1.25rem] pr-[0.4375rem] py-[0.4375rem] relative rounded-[6.25rem] shrink-0 w-full max-w-[25rem] border transition-colors {form?.error
                     ? 'border-red-500 focus-within:border-red-500'
-                    : 'border-zinc-100 focus-within:border-amber-500/30'}"
+                    : 'border-zinc-100 dark:border-zinc-800 focus-within:border-amber-500/30'}"
             >
                 <input
                     type="text"
@@ -70,7 +70,7 @@
                     name="student_number"
                     placeholder="학번을 입력하세요"
                     required
-                    class="flex-1 font-pretendard font-normal leading-[normal] min-w-0 relative shrink text-zinc-800 text-[1.125rem] bg-transparent outline-none h-full placeholder:text-zinc-400 mr-[0.625rem]"
+                    class="flex-1 font-pretendard font-normal leading-[normal] min-w-0 relative shrink text-zinc-800 dark:text-zinc-100 text-[1.125rem] bg-transparent outline-none h-full placeholder:text-zinc-400 dark:placeholder:text-zinc-500 mr-[0.625rem]"
                 />
                 <button
                     type="submit"
@@ -105,7 +105,7 @@
             </form>
 
             <p
-                class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800"
+                class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100"
             >
                 제23대 새내기학생회 <span class="text-amber-500">샛별</span>
             </p>

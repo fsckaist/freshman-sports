@@ -49,23 +49,23 @@
 <div class="flex flex-col w-full h-full">
     <!-- Event Tabs (Tab UI rendering inside the dynamic Bracket component) -->
     <div
-        class="border-zinc-300 border-b border-solid flex items-start overflow-clip sticky top-0 w-full bg-zinc-100 z-10 m-0 p-0"
+        class="border-zinc-300 dark:border-zinc-800 border-b border-solid flex items-start overflow-clip sticky top-0 w-full bg-zinc-100 dark:bg-zinc-950 z-10 m-0 p-0"
     >
         {#each [{ id: "futsal", label: "풋살" }, { id: "basketball", label: "농구" }, { id: "badminton-m", label: "남자 배드민턴" }, { id: "badminton-w", label: "여자 배드민턴" }] as tab, index}
             <button
                 on:click={() => (activeTab = tab.id)}
-                class="flex flex-[1_0_0] flex-col h-[3.125rem] items-center justify-center min-h-px min-w-px px-[2.1875rem] py-[0.5rem] relative outline-none cursor-pointer hover:bg-zinc-200 transition-colors m-0
+                class="flex flex-[1_0_0] flex-col h-[3.125rem] items-center justify-center min-h-px min-w-px px-[2.1875rem] py-[0.5rem] relative outline-none cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors m-0
                 {activeTab === tab.id
-                    ? 'bg-white border-none'
-                    : 'bg-zinc-100 border-zinc-300 ' +
+                    ? 'bg-white dark:bg-zinc-900 border-none'
+                    : 'bg-zinc-100 dark:bg-zinc-950 border-zinc-300 dark:border-zinc-800 ' +
                       (index > 0 ? 'border-l ' : '') +
                       'border-solid border-t-0 border-b-0 border-r-0'}"
             >
                 <p
                     class="font-pretendard font-semibold leading-tight relative shrink-0 text-[1rem] m-0 {activeTab ===
                     tab.id
-                        ? 'text-zinc-800'
-                        : 'text-zinc-600'}"
+                        ? 'text-zinc-800 dark:text-zinc-100'
+                        : 'text-zinc-600 dark:text-zinc-400'}"
                 >
                     {tab.label}
                 </p>
@@ -81,7 +81,7 @@
             <div
                 class="w-full h-full flex flex-col items-center justify-center p-[5rem]"
             >
-                <p class="text-zinc-500 font-pretendard">
+                <p class="text-zinc-500 dark:text-zinc-400 font-pretendard">
                     선택된 종목의 대진표 데이터가 없어요.
                 </p>
             </div>

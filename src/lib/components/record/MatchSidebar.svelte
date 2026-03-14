@@ -68,12 +68,12 @@
 
     function getCardStyles(status: string | null, isSelected: boolean) {
         if (isSelected) {
-            return "bg-zinc-100 border border-amber-500 border-solid";
+            return "bg-zinc-100 dark:bg-zinc-800 border border-amber-500 border-solid";
         }
         if (status === "ONGOING") {
-            return "bg-white border border-red-500 border-solid";
+            return "bg-white dark:bg-zinc-900 border border-red-500 border-solid shadow-[0_0_10px_rgba(239,68,68,0.2)]";
         }
-        return "bg-white border border-transparent";
+        return "bg-white dark:bg-zinc-900 border border-transparent dark:border-zinc-800";
     }
 
     function getBadgeStyles(status: string | null) {
@@ -122,14 +122,14 @@
                     class="content-stretch flex flex-col gap-[0.625rem] items-start relative shrink-0"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 text-[1.5rem] whitespace-nowrap"
+                        class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] whitespace-nowrap"
                     >
                         {match.sportName}{match.name &&
                         match.name.includes("조")
                             ? ` ${match.name.split(" ")[0]}조`
                             : ""}
                         {#if match.name && !match.name.includes("조")}
-                            <span class="text-lg text-zinc-500 ml-2"
+                            <span class="text-lg text-zinc-500 dark:text-zinc-400 ml-2"
                                 >{match.name}</span
                             >
                         {/if}
@@ -138,12 +138,12 @@
                         class="content-stretch flex gap-[0.3125rem] items-center justify-center relative shrink-0"
                     >
                         <div
-                            class="shrink-0 size-[0.75rem] relative text-zinc-800 flex items-center justify-center"
+                            class="shrink-0 size-[0.75rem] relative text-zinc-800 dark:text-zinc-300 flex items-center justify-center"
                         >
                             {@html DateIcon}
                         </div>
                         <p
-                            class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-800 text-[0.875rem] whitespace-nowrap"
+                            class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-300 text-[0.875rem] whitespace-nowrap"
                         >
                             {formatFigmaDate(match.startTime)}
                         </p>
@@ -164,7 +164,7 @@
                         </p>
                     </div>
                     <p
-                        class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-800 text-[0.875rem] whitespace-nowrap"
+                        class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
                     >
                         담당자 : {match.managerName || "미정"}
                     </p>
@@ -172,7 +172,7 @@
             </div>
 
             <!-- Divider Line -->
-            <div class="h-px w-full bg-zinc-200 shrink-0"></div>
+            <div class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0"></div>
 
             <!-- Content -->
             <div
@@ -185,7 +185,7 @@
                         class="content-stretch flex gap-[0.3125rem] items-center justify-center relative shrink-0"
                     >
                         <p
-                            class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-500 text-[0.875rem] whitespace-nowrap"
+                            class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
                         >
                             {match.classA ? `${match.classA}반` : "미정"}
                         </p>
@@ -199,7 +199,7 @@
                             </p>
                         </div>
                         <p
-                            class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-500 text-[0.875rem] whitespace-nowrap"
+                            class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
                         >
                             {match.classB ? `${match.classB}반` : "미정"}
                         </p>
@@ -213,7 +213,7 @@
                             {@html LocationIcon}
                         </div>
                         <p
-                            class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-500 text-[0.75rem] whitespace-nowrap"
+                            class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.75rem] whitespace-nowrap"
                         >
                             {match.location || "북측 풋살장 A (임시)"}
                         </p>
@@ -221,7 +221,7 @@
                 </div>
 
                 <div
-                    class="content-stretch flex flex-col font-['Pretendard_Variable'] font-normal gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-500 text-[0.625rem]"
+                    class="content-stretch flex flex-col font-['Pretendard_Variable'] font-normal gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.625rem]"
                 >
                     <p
                         class="relative shrink-0 whitespace-nowrap truncate w-full max-w-[30rem]"
@@ -264,7 +264,7 @@
 
     {#if matches.length === 0}
         <div
-            class="text-center p-8 w-full rounded-lg bg-white border border-zinc-200 border-dashed text-zinc-500 text-sm"
+            class="text-center p-8 w-full rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 border-dashed text-zinc-500 dark:text-zinc-400 text-sm"
         >
             등록된 경기가 없습니다.
         </div>

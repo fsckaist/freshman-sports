@@ -13,7 +13,7 @@
 </script>
 
 <div
-    class="flex flex-col bg-white rounded-[1.25rem] w-full flex-[1_0_0] relative overflow-hidden shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] h-full"
+    class="flex flex-col bg-white dark:bg-zinc-900 rounded-[1.25rem] w-full flex-[1_0_0] relative overflow-hidden shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none h-full"
 >
     <!-- Sport Selection Tabs (Secondary) -->
     <div class="flex items-center shrink-0 w-full border-b border-zinc-200">
@@ -22,9 +22,9 @@
                 href="?sportId={sport.id}"
                 class="flex flex-[1_0_0] items-center justify-center h-[3.125rem] cursor-pointer outline-none transition-colors duration-200 no-underline
                 {activeSportId === sport.id
-                    ? 'bg-amber-50 text-amber-600 zinc-800 border-amber-500'
-                    : 'bg-white hover:bg-zinc-50 text-zinc-600 zinc-800 border-transparent'}
-                {i !== sports.length - 1 ? 'border-r border-zinc-200' : ''}"
+                    ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-500'
+                    : 'bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent'}
+                {i !== sports.length - 1 ? 'border-r border-zinc-200 dark:border-zinc-800' : ''}"
             >
                 <p
                     class="font-pretendard font-semibold text-[1rem] m-0 transition-colors duration-200"
@@ -37,11 +37,11 @@
 
     <!-- Configuration Header -->
     <div
-        class="flex justify-between items-center px-[1.875rem] py-4 shrink-0 border-b border-zinc-100"
+        class="flex justify-between items-center px-[1.875rem] py-4 shrink-0 border-b border-zinc-100 dark:border-zinc-800"
     >
         <div class="flex flex-col">
             <h2
-                class="font-pretendard font-bold text-zinc-800 text-[1.25rem] m-0"
+                class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[1.25rem] m-0"
             >
                 종목별 일정 세팅
             </h2>
@@ -63,7 +63,7 @@
                     class="flex items-center justify-center w-full h-full py-12"
                 >
                     <p
-                        class="font-pretendard font-normal text-zinc-400 text-[0.875rem] m-0 text-center"
+                        class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0 text-center"
                     >
                         현재 저장된 일정이 없습니다.
                     </p>

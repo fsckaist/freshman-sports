@@ -13,7 +13,7 @@
 </svelte:head>
 
 <div
-    class="relative size-full min-h-screen bg-white overflow-hidden flex justify-center"
+    class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
     <!-- Centered 90rem wrapper so the absolute watermark is properly anchored -->
     <div
@@ -21,7 +21,7 @@
     >
         <!-- Glowing Right Side Watermark -->
         <div
-            class="absolute -translate-y-1/2 blur-[0.625rem] opacity-20 right-[-12.8125rem] size-[65.3125rem] top-[calc(50%+7.65625rem)] pointer-events-none select-none mix-blend-multiply z-0"
+            class="absolute -translate-y-1/2 blur-[0.625rem] opacity-20 dark:opacity-10 right-[-12.8125rem] size-[65.3125rem] top-[calc(50%+7.65625rem)] pointer-events-none select-none mix-blend-multiply dark:mix-blend-plus-lighter z-0"
         >
             <img
                 src="/logo.png"
@@ -35,7 +35,7 @@
             class="content-stretch flex items-end justify-between p-[0.625rem] relative shrink-0 w-full z-10"
         >
             <div
-                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800"
+                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100"
             >
                 <p
                     class="font-pretendard font-semibold relative shrink-0 text-[1.5rem] m-0"
@@ -65,7 +65,7 @@
             class="content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-px overflow-x-hidden overflow-y-auto p-[0.625rem] relative w-full"
         >
             <div
-                class="flex-[1_0_0] font-pretendard font-medium leading-[1.6] min-h-px min-w-px relative text-zinc-800 text-[1.25rem] w-full"
+                class="flex-[1_0_0] font-pretendard font-medium leading-[1.6] min-h-px min-w-px relative text-zinc-800 dark:text-zinc-300 text-[1.25rem] w-full"
             >
                 <p class="mb-4">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -158,7 +158,7 @@
             class="content-stretch flex items-center p-[0.625rem] relative shrink-0 w-full"
         >
             <p
-                class="font-pretendard font-medium text-zinc-800 m-0 p-0 text-[1.125rem]"
+                class="font-pretendard font-medium text-zinc-800 dark:text-zinc-100 m-0 p-0 text-[1.125rem]"
             >
                 제23대 새내기학생회 <span class="text-amber-500">샛별</span>
             </p>
