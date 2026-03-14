@@ -16,6 +16,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     if (!user) throw redirect(302, '/login');
     if (!user.isManager && !user.isAdmin) throw redirect(302, '/dashboard');
 
+    // Fetch all sports for tabs
+    const allSportsList = await db
+        .select({
+            id: sports.id,
+            name: sports.name,
+        })
+        .from(sports)
+        .orderBy(asc(sports.displayOrder));
+
     // Fetch all matches for the sidebar
     const allMatches = await db
         .select({
@@ -24,6 +33,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             name: matches.name,
             location: matches.location,
             matchNotes: matches.matchNotes,
+            sportId: matches.sportId,
             sportName: sports.name,
             startTime: schedules.startTime,
             classA: classA.classNumber,
@@ -215,6 +225,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
     return {
         allMatches: matchesWithAttendance,
+        allSports: allSportsList,
         activeMatchDetails
     };
 };

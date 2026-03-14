@@ -9,6 +9,14 @@
 
     // Derived activeMatchId from URL search params using Svelte 5's $page.url
     let activeMatchId = $derived(page.url.searchParams.get("matchId"));
+
+    // Sport sidebar tab management
+    let activeSportId = $state(data.allSports?.[0]?.id || null);
+    let filteredMatches = $derived(
+        activeSportId
+            ? data.allMatches.filter((m) => m.sportId === activeSportId)
+            : data.allMatches,
+    );
 </script>
 
 <div
@@ -26,12 +34,29 @@
             <div class="flex-1 bg-zinc-300 h-px rounded-full"></div>
         </div>
 
+        <!-- Sport Tabs -->
+        <div
+            class="flex items-center gap-2 mb-4 overflow-x-auto hide-scrollbar shrink-0"
+        >
+            {#each data.allSports as sport}
+                <button
+                    onclick={() => (activeSportId = sport.id)}
+                    class="px-4 py-2 rounded-full whitespace-nowrap font-pretendard font-semibold text-sm transition-all border
+                    {activeSportId === sport.id
+                        ? 'bg-amber-500 text-white border-amber-500'
+                        : 'bg-white text-zinc-500 border-zinc-200 hover:bg-zinc-50'}"
+                >
+                    {sport.name}
+                </button>
+            {/each}
+        </div>
+
         <!-- Scrollable Sidebar Container -->
         <div
             class="flex-1 min-h-0 bg-zinc-50 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-transparent p-[0.625rem] overflow-hidden flex flex-col"
         >
             <div class="flex-1 overflow-y-auto hide-scrollbar p-[0.625rem]">
-                <MatchSidebar matches={data.allMatches} {activeMatchId} />
+                <MatchSidebar matches={filteredMatches} {activeMatchId} />
             </div>
         </div>
     </div>
