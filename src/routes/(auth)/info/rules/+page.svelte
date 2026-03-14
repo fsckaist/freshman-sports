@@ -8,10 +8,6 @@
     }
 </script>
 
-<svelte:head>
-    <title>규정 | 새내기 체육 대회</title>
-</svelte:head>
-
 <div
     class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >

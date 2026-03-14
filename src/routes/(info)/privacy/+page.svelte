@@ -1,7 +1,3 @@
-<svelte:head>
-    <title>새내기 체육 대회 - 개인정보 처리방침</title>
-</svelte:head>
-
 <div
     class="content-stretch flex flex-[1_0_0] flex-col gap-[1.5625rem] h-full items-start min-h-px min-w-px relative"
 >
