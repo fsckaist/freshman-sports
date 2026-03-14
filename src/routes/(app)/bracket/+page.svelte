@@ -12,7 +12,7 @@
             class="content-stretch flex flex-col gap-[0.625rem] items-start justify-center leading-tight relative shrink-0"
         >
             <p
-                class="font-pretendard font-bold relative shrink-0 text-zinc-900 text-[2rem] m-0"
+                class="font-pretendard font-bold relative shrink-0 text-zinc-800 text-[2rem] m-0"
             >
                 대진표 보기
             </p>

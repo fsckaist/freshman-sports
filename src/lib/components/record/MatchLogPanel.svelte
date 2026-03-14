@@ -304,17 +304,17 @@
                             경고 및 퇴장
                         </p>
                         <div
-                            class="w-full border border-zinc-200 p-[15px] rounded-[20px] gap-[5px] grid grid-cols-3"
+                            class="w-full border border-zinc-200 p-[0.9375rem] rounded-[1.25rem] gap-[0.3125rem] grid grid-cols-3"
                         >
                             {#each activeMatch.attendance.teamA as player}
                                 <button
                                     type="button"
                                     on:click={() =>
                                         toggleCard("A", player.name)}
-                                    class="bg-white border border-[#e4e4e7] border-solid content-stretch flex flex-col items-center justify-center px-[10px] py-[5px] relative rounded-[8px] transition-colors hover:bg-zinc-50"
+                                    class="bg-white border border-[#e4e4e7] border-solid content-stretch flex flex-col items-center justify-center px-[0.625rem] py-[0.3125rem] relative rounded-[0.5rem] transition-colors hover:bg-zinc-50"
                                 >
                                     <p
-                                        class="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] not-italic relative shrink-0 text-[14px] whitespace-nowrap {cardsA[
+                                        class="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] not-italic relative shrink-0 text-[0.875rem] whitespace-nowrap {cardsA[
                                             player.name
                                         ] === 2
                                             ? 'text-red-500'
@@ -539,17 +539,17 @@
                             경고 및 퇴장
                         </p>
                         <div
-                            class="w-full border border-zinc-200 p-[15px] rounded-[20px] gap-[5px] grid grid-cols-3"
+                            class="w-full border border-zinc-200 p-[0.9375rem] rounded-[1.25rem] gap-[0.3125rem] grid grid-cols-3"
                         >
                             {#each activeMatch.attendance.teamB as player}
                                 <button
                                     type="button"
                                     on:click={() =>
                                         toggleCard("B", player.name)}
-                                    class="bg-white border border-[#e4e4e7] border-solid content-stretch flex flex-col items-center justify-center px-[10px] py-[5px] relative rounded-[8px] transition-colors hover:bg-zinc-50"
+                                    class="bg-white border border-[#e4e4e7] border-solid content-stretch flex flex-col items-center justify-center px-[0.625rem] py-[0.3125rem] relative rounded-[0.5rem] transition-colors hover:bg-zinc-50"
                                 >
                                     <p
-                                        class="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] not-italic relative shrink-0 text-[14px] whitespace-nowrap {cardsB[
+                                        class="font-['Inter:Regular','Noto_Sans_KR:Regular',sans-serif] font-normal leading-[normal] not-italic relative shrink-0 text-[0.875rem] whitespace-nowrap {cardsB[
                                             player.name
                                         ] === 2
                                             ? 'text-red-500'
@@ -645,18 +645,18 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[20px] shadow-[0_0_30px_0_rgba(0,0,0,0.05)] shrink-0 w-[501px] max-w-full"
+            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
         >
             <div
-                class="flex flex-col gap-5 items-center justify-center p-[50px] relative shrink-0 w-full text-center"
+                class="flex flex-col gap-5 items-center justify-center p-[3.125rem] relative shrink-0 w-full text-center"
             >
                 <p
-                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-900 text-[24px]"
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.5rem]"
                 >
                     정말로 기권패 / 몰수패 처리가 맞나요?
                 </p>
                 <p
-                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[18px]"
+                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[1.125rem]"
                 >
                     시스템 상 결과를 번복할 수 없습니다.
                 </p>
@@ -666,10 +666,10 @@
             >
                 <button
                     on:click={() => (showForfeitConfirm = false)}
-                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[50px] items-center justify-center px-[35px] py-2 relative rounded-[15px] w-full"
+                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[16px] text-white whitespace-nowrap"
+                        class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                     >
                         돌아가기
                     </p>
@@ -695,10 +695,10 @@
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors w-full flex flex-col h-[50px] items-center justify-center px-[35px] py-2 relative rounded-[15px] disabled:opacity-50"
+                        class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors w-full flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] disabled:opacity-50"
                     >
                         <p
-                            class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[16px] text-white whitespace-nowrap"
+                            class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                         >
                             기권패 / 몰수패 처리하기
                         </p>
@@ -715,18 +715,18 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[20px] shadow-[0_0_30px_0_rgba(0,0,0,0.05)] shrink-0 w-[501px] max-w-full"
+            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
         >
             <div
-                class="flex flex-col gap-5 items-center justify-center p-[50px] relative shrink-0 w-full text-center"
+                class="flex flex-col gap-5 items-center justify-center p-[3.125rem] relative shrink-0 w-full text-center"
             >
                 <p
-                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-900 text-[24px]"
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.5rem]"
                 >
                     정말로 경기를 시작할까요?
                 </p>
                 <p
-                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[18px]"
+                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[1.125rem]"
                 >
                     시스템 상 결과를 번복할 수 없습니다.
                 </p>
@@ -736,10 +736,10 @@
             >
                 <button
                     on:click={() => (showStartConfirm = false)}
-                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[50px] items-center justify-center px-[35px] py-2 relative rounded-[15px] w-full"
+                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[16px] text-white whitespace-nowrap"
+                        class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                     >
                         돌아가기
                     </p>
@@ -767,10 +767,10 @@
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors flex-1 flex flex-col h-[50px] items-center justify-center px-[35px] py-2 relative rounded-[15px] w-full disabled:opacity-50"
+                        class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full disabled:opacity-50"
                     >
                         <p
-                            class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[16px] text-white whitespace-nowrap"
+                            class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                         >
                             경기 시작하기
                         </p>
@@ -787,13 +787,13 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[20px] shadow-[0_0_30px_0_rgba(0,0,0,0.05)] shrink-0 w-[569px] max-w-full"
+            class="bg-zinc-50 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[35.5625rem] max-w-full"
         >
             <div
-                class="flex flex-col items-center justify-center p-[50px] pb-[50px] relative shrink-0 w-full text-center"
+                class="flex flex-col items-center justify-center p-[3.125rem] pb-[3.125rem] relative shrink-0 w-full text-center"
             >
                 <p
-                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-900 text-[24px]"
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.5rem]"
                 >
                     정말로 경기가 끝났나요?
                 </p>
@@ -801,12 +801,12 @@
                     class="flex flex-col mt-5 gap-1.5 items-center justify-center"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[18px]"
+                        class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[1.125rem]"
                     >
                         시스템 상 결과를 번복할 수 없습니다.
                     </p>
                     <p
-                        class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-red-600 text-[18px] break-keep leading-tight"
+                        class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-red-600 text-[1.125rem] break-keep leading-tight"
                     >
                         반드시 모든 선수의 결과 확인을 받은 후 경기를
                         종료해주세요.
@@ -818,10 +818,10 @@
             >
                 <button
                     on:click={() => (showEndConfirm = false)}
-                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[50px] items-center justify-center px-[35px] py-2 relative rounded-[15px] w-full"
+                    class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[16px] text-white whitespace-nowrap"
+                        class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                     >
                         돌아가기
                     </p>
@@ -835,10 +835,10 @@
                         ) as HTMLFormElement | null;
                         if (form) form.requestSubmit();
                     }}
-                    class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors w-full flex-1 flex flex-col h-[50px] items-center justify-center px-[35px] py-2 relative rounded-[15px] disabled:opacity-50"
+                    class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors w-full flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] disabled:opacity-50"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[16px] text-white whitespace-nowrap"
+                        class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                     >
                         경기 종료하기
                     </p>

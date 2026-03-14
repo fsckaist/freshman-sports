@@ -110,7 +110,7 @@
                     href={item.path}
                     class="group flex h-[3rem] items-center justify-end gap-[0.625rem] overflow-clip px-[1.25rem] py-[0.75rem] rounded-l-[0.625rem] shrink-0 w-[10.625rem] decoration-transparent transition-colors cursor-pointer {isActive
                         ? 'bg-zinc-100 text-zinc-600'
-                        : 'bg-transparent text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 active:bg-zinc-300 active:text-zinc-900'}"
+                        : 'bg-transparent text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 active:bg-zinc-300 active:text-zinc-800'}"
                 >
                     <div
                         class="overflow-clip relative shrink-0 size-[1.5rem] text-current transition-colors"
@@ -137,7 +137,7 @@
                     href={item.path}
                     class="group flex h-[3rem] items-center justify-end gap-[0.625rem] overflow-clip px-[1.25rem] py-[0.75rem] rounded-l-[0.625rem] shrink-0 w-[10.625rem] decoration-transparent transition-colors cursor-pointer {isActive
                         ? 'bg-zinc-100 text-zinc-600'
-                        : 'bg-transparent text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 active:bg-zinc-300 active:text-zinc-900'}"
+                        : 'bg-transparent text-zinc-600 hover:bg-zinc-200 hover:text-zinc-800 active:bg-zinc-300 active:text-zinc-800'}"
                 >
                     <div
                         class="overflow-clip relative shrink-0 size-[1.5rem] text-current transition-colors"
@@ -170,16 +170,16 @@
                 class="decoration-solid underline shrink-0 transition-colors cursor-pointer m-0 text-[0.75rem] {$page.url.pathname.startsWith(
                     '/contact',
                 )
-                    ? 'text-zinc-900 font-semibold'
-                    : 'text-zinc-600 hover:text-zinc-900'}">문의 하기</a
+                    ? 'text-zinc-800 font-semibold'
+                    : 'text-zinc-600 hover:text-zinc-800'}">문의 하기</a
             >
             <a
                 href="/privacy"
                 class="decoration-solid underline shrink-0 transition-colors cursor-pointer m-0 text-[0.75rem] {$page.url.pathname.startsWith(
                     '/privacy',
                 )
-                    ? 'text-zinc-900 font-semibold'
-                    : 'text-zinc-600 hover:text-zinc-900'}">개인정보 처리방침</a
+                    ? 'text-zinc-800 font-semibold'
+                    : 'text-zinc-600 hover:text-zinc-800'}">개인정보 처리방침</a
             >
             <form
                 action="/logout"
@@ -189,7 +189,7 @@
             >
                 <button
                     type="submit"
-                    class="decoration-solid underline shrink-0 text-zinc-600 hover:text-zinc-900 transition-colors cursor-pointer m-0 bg-transparent border-0 p-0 font-pretendard text-[0.75rem]"
+                    class="decoration-solid underline shrink-0 text-zinc-600 hover:text-zinc-800 transition-colors cursor-pointer m-0 bg-transparent border-0 p-0 font-pretendard text-[0.75rem]"
                     >로그아웃</button
                 >
             </form>
@@ -198,7 +198,7 @@
         <p
             class="font-pretendard font-medium leading-tight shrink-0 text-black text-[0.75rem] m-0 w-max relative"
         >
-            <span class="text-zinc-900">제23대 새내기학생회 </span>
+            <span class="text-zinc-800">제23대 새내기학생회 </span>
             <span class="text-amber-500">샛별</span>
         </p>
     </div>

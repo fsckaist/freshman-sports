@@ -86,7 +86,7 @@
                     href="?tab=confirm&sportId={activeSportId}&matchId={matchPair.id}"
                     class="flex flex-[0_0_auto] flex-col gap-1 items-center justify-center py-4 px-4 rounded-xl border transition-all cursor-pointer no-underline
                     {activeMatch?.id === matchPair.id
-                        ? 'border-amber-500 bg-amber-50 shadow-[0_0_10px_rgba(245,158,11,0.1)]'
+                        ? 'border-amber-500 bg-amber-50 shadow-[0_0_0.625rem_rgba(245,158,11,0.1)]'
                         : 'border-zinc-200 bg-white hover:bg-zinc-50 hover:shadow-sm'}"
                 >
                     <div

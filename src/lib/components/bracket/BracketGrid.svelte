@@ -64,7 +64,7 @@
                 <p
                     class="font-pretendard font-semibold leading-tight relative shrink-0 text-[1rem] m-0 {activeTab ===
                     tab.id
-                        ? 'text-zinc-900'
+                        ? 'text-zinc-800'
                         : 'text-zinc-600'}"
                 >
                     {tab.label}

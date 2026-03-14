@@ -20,6 +20,8 @@
     let scanningTarget = "";
     let studentNumberInput = "";
     let isSubmitting = false;
+    $: isMatchFinished = activeMatch.status === "FINISHED";
+
 
     $: teamATracker = {
         label: `${activeMatch.classA}반 선수`,
@@ -109,8 +111,9 @@
         </div>
         <button
             type="button"
+            disabled={isMatchFinished}
             on:click={() => openScan("Team A")}
-            class="bg-amber-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-amber-600 transition-colors"
+            class="bg-amber-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:bg-zinc-400"
         >
             <p
                 class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-white whitespace-nowrap"
@@ -146,8 +149,9 @@
         </div>
         <button
             type="button"
+            disabled={isMatchFinished}
             on:click={() => openScan("Team B")}
-            class="bg-amber-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-amber-600 transition-colors"
+            class="bg-amber-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:bg-zinc-400"
         >
             <p
                 class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-white whitespace-nowrap"
@@ -180,8 +184,9 @@
         </div>
         <button
             type="button"
+            disabled={isMatchFinished}
             on:click={() => openScan("Cheering")}
-            class="bg-zinc-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-zinc-600 transition-colors"
+            class="bg-zinc-500 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full hover:bg-zinc-600 transition-colors disabled:opacity-50 disabled:bg-zinc-400"
         >
             <p
                 class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-white whitespace-nowrap"
@@ -199,18 +204,18 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 flex flex-col gap-[30px] items-center justify-center overflow-clip p-[30px] relative rounded-[20px] shadow-[0_0_30px_0_rgba(0,0,0,0.05)] shrink-0 w-[501px] max-w-full"
+            class="bg-zinc-50 flex flex-col gap-[1.875rem] items-center justify-center overflow-clip p-[1.875rem] relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
         >
             <div
                 class="flex flex-col gap-2 items-center justify-center relative shrink-0 w-full text-center"
             >
                 <p
-                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-900 text-[24px]"
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 text-[1.5rem]"
                 >
                     {scanningTarget === "Cheering" ? "응원 스캔" : "선수 스캔"}
                 </p>
                 <p
-                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[16px]"
+                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 text-[1rem]"
                 >
                     QR 코드를 스캔하거나 학번을 입력해주세요.
                 </p>
@@ -255,7 +260,7 @@
                 <div class="w-full flex flex-col gap-2">
                     <label
                         for="studentNumber"
-                        class="font-['Pretendard_Variable'] font-semibold text-zinc-700 text-[14px]"
+                        class="font-['Pretendard_Variable'] font-semibold text-zinc-700 text-[0.875rem]"
                     >
                         학번 수동 입력
                     </label>
@@ -266,7 +271,7 @@
                         bind:value={studentNumberInput}
                         required
                         placeholder="예: 20240001"
-                        class="w-full h-[50px] bg-white border border-zinc-200 rounded-[15px] px-4 font-['Pretendard_Variable'] text-[16px] text-zinc-900 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                        class="w-full h-[3.125rem] bg-white border border-zinc-200 rounded-[0.9375rem] px-4 font-['Pretendard_Variable'] text-[1rem] text-zinc-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
                     />
                 </div>
 
@@ -276,10 +281,10 @@
                     <button
                         type="button"
                         on:click={closeScan}
-                        class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[50px] items-center justify-center px-[35px] py-2 relative rounded-[15px] w-full"
+                        class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
                     >
                         <p
-                            class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[16px] text-white whitespace-nowrap"
+                            class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                         >
                             돌아가기
                         </p>
@@ -287,7 +292,7 @@
                     <button
                         type="submit"
                         disabled={isSubmitting || !studentNumberInput}
-                        class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors w-full flex-1 flex flex-col h-[50px] items-center justify-center px-[35px] py-2 relative rounded-[15px] disabled:opacity-50"
+                        class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors w-full flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] disabled:opacity-50"
                     >
                         {#if isSubmitting}
                             <svg
@@ -312,7 +317,7 @@
                             </svg>
                         {:else}
                             <p
-                                class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[16px] text-white whitespace-nowrap"
+                                class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                             >
                                 등록하기
                             </p>

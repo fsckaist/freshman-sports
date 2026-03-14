@@ -58,7 +58,7 @@
     >
         <div class="flex flex-col gap-[0.5rem] items-start shrink-0 relative">
             <h3
-                class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-900 text-[1.5rem] m-0"
+                class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-800 text-[1.5rem] m-0"
             >
                 {title}
             </h3>
@@ -66,12 +66,12 @@
                 class="flex gap-[0.3125rem] items-center justify-center shrink-0"
             >
                 <div
-                    class="shrink-0 size-[0.75rem] relative text-zinc-900 flex items-center justify-center"
+                    class="shrink-0 size-[0.75rem] relative text-zinc-800 flex items-center justify-center"
                 >
                     {@html DateIcon}
                 </div>
                 <p
-                    class="font-pretendard font-normal leading-tight shrink-0 text-zinc-900 text-[0.875rem] m-0"
+                    class="font-pretendard font-normal leading-tight shrink-0 text-zinc-800 text-[0.875rem] m-0"
                 >
                     {time}
                 </p>

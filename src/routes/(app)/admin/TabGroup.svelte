@@ -22,7 +22,7 @@
             class={cx([
                 "flex flex-[1_0_0] items-center justify-center h-[3.125rem] cursor-pointer outline-none transition-colors duration-200",
                 activeTab === tab.id
-                    ? "bg-white text-zinc-900 zinc-800 border-amber-500"
+                    ? "bg-white text-zinc-800 zinc-800 border-amber-500"
                     : "bg-zinc-100 hover:bg-zinc-200 text-zinc-600 zinc-800 border-transparent border-t-0 border-l-0",
                 i !== tabs.length - 1 ? "border-r border-zinc-200" : "",
             ])}

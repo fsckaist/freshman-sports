@@ -54,7 +54,7 @@
             </div>
 
             <div
-                class="flex flex-[1_0_0] flex-col font-pretendard font-medium gap-[0.9375rem] items-start justify-center leading-[normal] min-w-px overflow-clip p-[1.25rem] text-zinc-900 text-[1.125rem]"
+                class="flex flex-[1_0_0] flex-col font-pretendard font-medium gap-[0.9375rem] items-start justify-center leading-[normal] min-w-px overflow-clip p-[1.25rem] text-zinc-800 text-[1.125rem]"
             >
                 <p class="shrink-0 m-0">{name}</p>
                 <p class="shrink-0 m-0">{studentNumber}</p>

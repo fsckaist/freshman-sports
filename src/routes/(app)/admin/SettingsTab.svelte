@@ -186,7 +186,7 @@
                                 <span
                                     class="font-pretendard font-bold text-[1rem]
                                     {currentState === option.value
-                                        ? 'text-zinc-900'
+                                        ? 'text-zinc-800'
                                         : 'text-zinc-500'}"
                                 >
                                     {option.label}
@@ -241,7 +241,7 @@
                             onclick={() => (activeSportTab = sport.id)}
                             class="font-pretendard text-[0.875rem] font-medium px-4 py-2.5 border-b-2 transition-colors
                             {activeSportTab === sport.id
-                                ? 'border-zinc-800 text-zinc-900'
+                                ? 'border-zinc-800 text-zinc-800'
                                 : 'border-transparent text-zinc-400 hover:text-zinc-600'}"
                         >
                             {sport.name}
@@ -464,7 +464,7 @@
                                 <button
                                     type="submit"
                                     disabled={isScheduleUpdating[sport.id]}
-                                    class="font-pretendard font-medium text-[0.875rem] bg-zinc-800 text-white px-4 py-2 rounded-lg hover:bg-zinc-700 active:bg-zinc-900 transition-colors disabled:opacity-50"
+                                    class="font-pretendard font-medium text-[0.875rem] bg-zinc-800 text-white px-4 py-2 rounded-lg hover:bg-zinc-700 active:bg-zinc-800 transition-colors disabled:opacity-50"
                                 >
                                     {isScheduleUpdating[sport.id]
                                         ? "저장 중..."

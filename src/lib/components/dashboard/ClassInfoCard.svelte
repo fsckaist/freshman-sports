@@ -41,7 +41,7 @@
 
         <!-- Right Info -->
         <div
-            class="flex flex-[1_0_0] flex-col gap-[0.9375rem] items-start justify-center min-w-px overflow-clip p-[1.25rem] text-zinc-900 font-medium"
+            class="flex flex-[1_0_0] flex-col gap-[0.9375rem] items-start justify-center min-w-px overflow-clip p-[1.25rem] text-zinc-800 font-medium"
         >
             <p class="shrink-0 m-0">{classNumber}반</p>
             <p class="shrink-0 m-0">{proctors}</p>
@@ -74,7 +74,7 @@
                         class="bg-white border border-zinc-100 flex flex-col gap-[0.625rem] items-center justify-center overflow-clip p-[1.25rem] rounded-[1.25rem] self-start shrink-0 relative"
                     >
                         <h4
-                            class="font-pretendard font-medium leading-[normal] shrink-0 text-zinc-900 text-[1.125rem] m-0 text-center"
+                            class="font-pretendard font-medium leading-[normal] shrink-0 text-zinc-800 text-[1.125rem] m-0 text-center"
                         >
                             {roster.sport}
                         </h4>

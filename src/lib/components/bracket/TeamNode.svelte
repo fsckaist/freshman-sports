@@ -16,7 +16,7 @@
           : "bg-amber-500";
 
     // Determine text color
-    $: textClass = isDefault ? "text-zinc-900" : "text-white";
+    $: textClass = isDefault ? "text-zinc-800" : "text-white";
 
     $: gapClass =
         (isDefault || isLose || isWin) && ourTeam

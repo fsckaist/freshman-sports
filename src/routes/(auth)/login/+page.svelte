@@ -36,7 +36,7 @@
             </div>
 
             <div
-                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-900"
+                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800"
             >
                 <p
                     class="font-pretendard font-semibold relative shrink-0 text-[1.5rem]"
@@ -70,7 +70,7 @@
                     name="student_number"
                     placeholder="학번을 입력하세요"
                     required
-                    class="flex-1 font-pretendard font-normal leading-[normal] min-w-0 relative shrink text-zinc-900 text-[1.125rem] bg-transparent outline-none h-full placeholder:text-zinc-400 mr-[0.625rem]"
+                    class="flex-1 font-pretendard font-normal leading-[normal] min-w-0 relative shrink text-zinc-800 text-[1.125rem] bg-transparent outline-none h-full placeholder:text-zinc-400 mr-[0.625rem]"
                 />
                 <button
                     type="submit"
@@ -105,7 +105,7 @@
             </form>
 
             <p
-                class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-900"
+                class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800"
             >
                 제23대 새내기학생회 <span class="text-amber-500">샛별</span>
             </p>
