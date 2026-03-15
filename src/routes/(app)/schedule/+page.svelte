@@ -13,19 +13,19 @@
 </script>
 
 <div
-    class="flex flex-col gap-[1.5625rem] h-full items-start min-h-px min-w-px w-full relative"
+    class="flex flex-col gap-6 md:gap-[1.5625rem] h-full items-start min-h-px min-w-px w-full relative"
 >
     <!-- Header -->
     <div
         class="flex flex-col gap-[0.625rem] items-start justify-center relative shrink-0 w-full"
     >
         <h1
-            class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[2rem] m-0 leading-tight"
+            class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0 leading-tight"
         >
             일정 정하기
         </h1>
         <div
-            class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap m-0 leading-tight"
+            class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-sm md:text-[0.875rem] m-0 leading-tight"
         >
             <p class="m-0">
                 아래 선택지 중 가능한 시간을 최대한 많이 선택해 주세요. 최소
@@ -40,23 +40,23 @@
 
     <!-- Main Card Container -->
     <div
-        class="flex flex-col bg-white dark:bg-zinc-900 rounded-[1.25rem] w-full gap-[1.25rem] pb-[1.25rem] flex-[1_0_0] relative overflow-hidden shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none"
+        class="flex flex-col bg-white dark:bg-zinc-900 rounded-[1.25rem] w-full gap-[1.25rem] pb-[1.25rem] flex-1 relative overflow-hidden shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none"
     >
         <!-- Tabs -->
-        <div class="flex items-center shrink-0 w-full">
+        <div class="flex items-stretch shrink-0 w-full overflow-x-auto hide-scrollbar border-b border-zinc-200 dark:border-zinc-800">
             {#each data.sports as sport, i}
                 <a
                     href="?sportId={sport.id}"
-                    class="flex flex-[1_0_0] items-center justify-center h-[3.125rem] cursor-pointer outline-none border-t-0 border-l-0 border-b border-solid transition-colors duration-200 no-underline
+                    class="flex flex-1 items-center justify-center p-2 min-h-[3.125rem] cursor-pointer outline-none border-t-0 border-l-0 border-solid transition-colors duration-200 no-underline
                 {data.activeSportId === sport.id
-                        ? 'bg-white dark:bg-zinc-900 border-white dark:border-zinc-900 text-zinc-600 dark:text-zinc-300'
-                        : 'bg-zinc-100 dark:bg-zinc-950 hover:bg-zinc-300 dark:hover:bg-zinc-800 active:bg-zinc-400 dark:active:bg-zinc-700 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'}
+                        ? 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-100'
+                        : 'bg-zinc-100 dark:bg-zinc-950 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'}
                 {i !== data.sports.length - 1
                         ? 'border-r border-zinc-200 dark:border-zinc-800'
                         : 'border-r-0'}"
                 >
                     <p
-                        class="font-pretendard font-semibold text-[1rem] m-0 transition-colors duration-200"
+                        class="font-pretendard font-semibold text-[0.9375rem] md:text-[1rem] m-0 transition-colors duration-200 break-keep whitespace-normal text-center"
                     >
                         {sport.name}
                     </p>

@@ -45,7 +45,7 @@
 </script>
 
 <div
-    class="bg-white dark:bg-zinc-900 flex flex-[1_0_0] flex-col gap-[0.9375rem] h-full items-center justify-start overflow-clip p-[1.875rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none {borderClass} transition-all duration-200"
+    class="bg-white dark:bg-zinc-900 flex lg:flex-[1_0_0] flex-col gap-[0.9375rem] lg:h-full items-center justify-start lg:overflow-clip p-[1.875rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none {borderClass} transition-all duration-200 w-full"
 >
     <div
         class="flex flex-col gap-[0.625rem] items-start justify-center leading-tight relative shrink-0 w-full"
@@ -78,7 +78,7 @@
     ></div>
 
     <div
-        class="flex flex-[1_0_0] flex-col gap-[0.625rem] items-center justify-start relative w-full overflow-y-auto hide-scrollbar min-h-0"
+        class="flex lg:flex-[1_0_0] flex-col gap-[0.625rem] items-center justify-start relative w-full lg:overflow-y-auto lg:hide-scrollbar lg:min-h-0"
     >
         {#if rosters.length > 0}
             <div class="flex flex-col gap-[0.625rem] w-full pb-[0.625rem]">

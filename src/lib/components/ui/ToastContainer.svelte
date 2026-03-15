@@ -56,6 +56,14 @@
         color: #1f2937;
         font-size: 0.95rem;
         font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    :global(.dark) .toast {
+        background: rgba(24, 24, 27, 0.8);
+        border: 1px solid rgba(63, 63, 70, 0.5);
+        color: #f4f4f5;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
 
     .toast.success {
@@ -94,5 +102,10 @@
     .close:hover {
         background: rgba(0, 0, 0, 0.05);
         color: #4b5563;
+    }
+
+    :global(.dark) .close:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #d1d5db;
     }
 </style>

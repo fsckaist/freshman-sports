@@ -4,6 +4,8 @@
     import AttendanceTracker from "$lib/components/record/AttendanceTracker.svelte";
     import MatchLogPanel from "$lib/components/record/MatchLogPanel.svelte";
     import type { PageData } from "./$types";
+    import { slide } from "svelte/transition";
+    import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
 
     let { data }: { data: PageData } = $props();
 
@@ -12,6 +14,11 @@
 
     // Sport sidebar tab management
     let activeSportId = $state<string | null>(null);
+
+    // Section collapse states
+    let isScheduleCollapsed = $state(false);
+    let isAttendanceCollapsed = $state(false);
+    let isLogCollapsed = $state(false);
 
     $effect(() => {
         if (activeSportId === null && data.allSports?.length > 0) {
@@ -26,95 +33,158 @@
 </script>
 
 <div
-    class="flex flex-row gap-[1.875rem] w-full h-full relative overflow-hidden"
+    class="flex flex-col lg:flex-row gap-6 lg:gap-[1.875rem] w-full h-full relative lg:overflow-hidden"
 >
     <!-- Left Column: Match Sidebar Area -->
-    <div class="flex-1 w-[25rem] flex flex-col h-full overflow-hidden">
-        <!-- Sidebar Title -->
-        <div class="flex items-center gap-[0.625rem] mb-[1.25rem] shrink-0">
+    <div
+        class="flex flex-col flex-1 lg:w-[25rem] lg:h-full lg:overflow-hidden min-w-0"
+    >
+        <!-- Sidebar Title (Toggleable) -->
+        <button
+            class="group flex items-center gap-[0.625rem] mb-[1.25rem] shrink-0 w-full border-none bg-transparent p-0 cursor-pointer text-left"
+            onclick={() => (isScheduleCollapsed = !isScheduleCollapsed)}
+        >
             <h1
                 class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
             >
                 경기 일정
             </h1>
             <div
+                class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isScheduleCollapsed
+                    ? ''
+                    : 'rotate-180'}"
+            >
+                {@html chevronDownIcon}
+            </div>
+            <div
                 class="flex-1 bg-zinc-300 dark:bg-zinc-700 h-px rounded-full"
             ></div>
-        </div>
+        </button>
 
-        <!-- Sport Tabs -->
-        <div
-            class="flex items-center gap-2 mb-4 overflow-x-auto hide-scrollbar shrink-0"
-        >
-            {#each data.allSports as sport}
-                <button
-                    onclick={() => (activeSportId = sport.id)}
-                    class="px-4 py-2 rounded-full whitespace-nowrap font-pretendard font-semibold text-sm transition-all border
-                    {activeSportId === sport.id
-                        ? 'bg-amber-500 text-white border-amber-500 shadow-md'
-                        : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700'}"
+        {#if !isScheduleCollapsed}
+            <div
+                transition:slide
+                class="flex flex-col lg:h-full lg:overflow-hidden min-h-0"
+            >
+                <!-- Sport Tabs -->
+                <div
+                    class="flex items-center gap-2 mb-4 overflow-x-auto hide-scrollbar shrink-0"
                 >
-                    {sport.name}
-                </button>
-            {/each}
-        </div>
+                    {#each data.allSports as sport}
+                        <button
+                            onclick={() => (activeSportId = sport.id)}
+                            class="px-4 py-2 rounded-full whitespace-nowrap font-pretendard font-semibold text-sm transition-all border
+                            {activeSportId === sport.id
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-md'
+                                : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700'}"
+                        >
+                            {sport.name}
+                        </button>
+                    {/each}
+                </div>
 
-        <!-- Scrollable Sidebar Container -->
-        <div
-            class="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-900/50 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-transparent dark:border-zinc-800 p-[0.625rem] overflow-hidden flex flex-col"
-        >
-            <div class="flex-1 overflow-y-auto hide-scrollbar p-[0.625rem]">
-                <MatchSidebar matches={filteredMatches} {activeMatchId} />
+                <!-- Scrollable Sidebar Container -->
+                <div
+                    class="flex-1 min-h-0 bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none border border-zinc-200 dark:border-zinc-800 p-[0.625rem] overflow-hidden flex flex-col"
+                >
+                    <div
+                        class="flex-1 lg:overflow-y-auto hide-scrollbar p-[0.625rem]"
+                    >
+                        <MatchSidebar
+                            matches={filteredMatches}
+                            {activeMatchId}
+                        />
+                    </div>
+                </div>
             </div>
-        </div>
+        {/if}
     </div>
 
     <!-- Right Column: Active Match Details Area -->
-    <div class="flex-1 flex flex-col h-full min-h-0 relative overflow-hidden">
+    <div
+        class="flex-1 flex flex-col lg:h-full min-h-0 relative lg:overflow-hidden gap-6"
+    >
         {#if data.activeMatchDetails}
             <!-- Attendance Management Section -->
-            <div class="flex flex-col shrink-0">
-                <div class="flex items-center gap-[0.625rem] mb-[1.25rem]">
+            <div class="flex flex-col shrink-0 min-w-0">
+                <button
+                    class="group flex items-center gap-[0.625rem] mb-[1.25rem] w-full border-none bg-transparent p-0 cursor-pointer text-left"
+                    onclick={() =>
+                        (isAttendanceCollapsed = !isAttendanceCollapsed)}
+                >
                     <h2
                         class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
                     >
                         인원 관리
                     </h2>
-                    <div class="flex-1 bg-zinc-300 dark:bg-zinc-700 h-px rounded-full"></div>
-                </div>
-                <div
-                    class="bg-zinc-50 dark:bg-zinc-900/50 rounded-[1.25rem] p-[1rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-transparent dark:border-zinc-800 mb-[1.875rem]"
-                >
-                    <AttendanceTracker activeMatch={data.activeMatchDetails} />
-                </div>
+                    <div
+                        class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isAttendanceCollapsed
+                            ? ''
+                            : 'rotate-180'}"
+                    >
+                        {@html chevronDownIcon}
+                    </div>
+                    <div
+                        class="flex-1 bg-zinc-300 dark:bg-zinc-700 h-px rounded-full"
+                    ></div>
+                </button>
+                {#if !isAttendanceCollapsed}
+                    <div
+                        transition:slide
+                        class="bg-white dark:bg-zinc-900 rounded-[1.25rem] p-[1rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none border border-zinc-200 dark:border-zinc-800"
+                    >
+                        <AttendanceTracker
+                            activeMatch={data.activeMatchDetails}
+                        />
+                    </div>
+                {/if}
             </div>
 
             <!-- Match Log/Record Section -->
-            <div class="flex-1 flex flex-col min-h-0">
-                <div
-                    class="flex items-center gap-[0.625rem] mb-[1.25rem] shrink-0"
+            <div
+                class="flex-1 flex flex-col lg:h-full lg:overflow-hidden min-h-0 min-w-0"
+            >
+                <button
+                    class="group flex items-center gap-[0.625rem] mb-[1.25rem] shrink-0 w-full border-none bg-transparent p-0 cursor-pointer text-left"
+                    onclick={() => (isLogCollapsed = !isLogCollapsed)}
                 >
                     <h2
                         class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
                     >
                         경기 기록지
                     </h2>
-                    <div class="flex-1 bg-zinc-300 dark:bg-zinc-700 h-px rounded-full"></div>
-                </div>
-                <div
-                    class="flex-1 min-h-0 bg-zinc-50 dark:bg-zinc-900/50 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] border border-transparent dark:border-zinc-800 overflow-hidden"
-                >
-                    <div class="h-full overflow-y-auto hide-scrollbar">
-                        <MatchLogPanel activeMatch={data.activeMatchDetails} />
+                    <div
+                        class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isLogCollapsed
+                            ? ''
+                            : 'rotate-180'}"
+                    >
+                        {@html chevronDownIcon}
                     </div>
-                </div>
+                    <div
+                        class="flex-1 bg-zinc-300 dark:bg-zinc-700 h-px rounded-full"
+                    ></div>
+                </button>
+                {#if !isLogCollapsed}
+                    <div
+                        transition:slide
+                        class="flex-1 flex flex-col lg:h-full lg:overflow-hidden min-h-0 bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none border border-zinc-200 dark:border-zinc-800"
+                    >
+                        <div class="flex-1 lg:overflow-y-auto hide-scrollbar">
+                            <MatchLogPanel
+                                activeMatch={data.activeMatchDetails}
+                            />
+                        </div>
+                    </div>
+                {/if}
             </div>
         {:else}
             <!-- Empty State Case: No Match Selected -->
             <div
                 class="flex-1 flex flex-col items-center justify-center p-[3.125rem] text-center"
             >
-                <div class="w-[5rem] h-[5rem] text-zinc-600 dark:text-zinc-500 mb-[1.25rem]">
+                <div
+                    class="w-[5rem] h-[5rem] text-zinc-600 dark:text-zinc-500 mb-[1.25rem]"
+                >
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
                             stroke-linecap="round"

@@ -16,7 +16,9 @@
           : "bg-amber-500";
 
     // Determine text color
-    $: textClass = isDefault ? "text-zinc-800 dark:text-zinc-200" : "text-white";
+    $: textClass = isDefault
+        ? "text-zinc-800 dark:text-zinc-200"
+        : "text-white";
 
     $: gapClass =
         (isDefault || isLose || isWin) && ourTeam
@@ -86,7 +88,7 @@
 
     {#if !notAvailable && className !== "0"}
         <div
-            class="content-stretch flex font-pretendard font-semibold items-center leading-tight relative shrink-0 text-[1rem] {gapClass} {textClass}"
+            class="content-stretch flex font-pretendard font-semibold items-center leading-tight relative shrink-0 text-[1rem] gap-[0.0625rem] {textClass}"
         >
             <p class="relative shrink-0 m-0">{className}</p>
             <p class="relative shrink-0 m-0">반</p>

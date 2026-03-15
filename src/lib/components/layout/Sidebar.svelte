@@ -11,7 +11,9 @@
     import rawAdminIcon from "@gravity-ui/icons/svgs/wrench.svg?raw";
     import rawSunIcon from "@gravity-ui/icons/svgs/sun.svg?raw";
     import rawMoonIcon from "@gravity-ui/icons/svgs/moon.svg?raw";
+    import rawXmarkIcon from "@gravity-ui/icons/svgs/xmark.svg?raw";
     import { themeManager } from "$lib/theme.svelte";
+    import { isMenuOpen } from "$lib/stores/nav";
 
     const resizeSvg = (svg: string) =>
         svg.replace('width="16" height="16"', 'width="24" height="24"');
@@ -98,8 +100,18 @@
 </script>
 
 <aside
-    class="bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col gap-[1.875rem] h-full items-start overflow-hidden py-[3.125rem] relative shrink-0 w-[12.5rem]"
+    class="bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col gap-[1.875rem] h-full items-start overflow-hidden py-[3.125rem] relative shrink-0 w-full md:w-[12.5rem]"
 >
+    <!-- Mobile Close Button -->
+    <button
+        onclick={() => isMenuOpen.set(false)}
+        class="absolute top-4 left-4 md:hidden p-2 text-zinc-400 dark:text-zinc-600 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
+        aria-label="Close menu"
+    >
+        <div class="size-6">
+            {@html resizeSvg(rawXmarkIcon)}
+        </div>
+    </button>
     <!-- Brand -->
     <div
         class="flex flex-col items-end justify-center px-[1.875rem] shrink-0 w-full relative"

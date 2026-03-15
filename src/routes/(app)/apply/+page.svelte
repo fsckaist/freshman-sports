@@ -6,22 +6,22 @@
 </script>
 
 <div
-    class="flex flex-col gap-[1.5625rem] h-full items-start min-h-px min-w-px w-full relative"
+    class="flex flex-col gap-6 md:gap-[1.5625rem] h-full lg:items-start min-h-px min-w-px w-full relative"
 >
     <!-- Header -->
     <div
-        class="flex items-start justify-between leading-[normal] relative shrink-0 w-full"
+        class="flex flex-col md:flex-row items-start justify-between gap-4 leading-[normal] relative shrink-0 w-full"
     >
         <div
             class="flex flex-col gap-[0.625rem] items-start justify-center relative shrink-0"
         >
             <h1
-                class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[2rem] m-0 leading-tight"
+                class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0 leading-tight"
             >
                 선수 지원하기
             </h1>
             <div
-                class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap m-0 leading-tight"
+                class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-sm md:text-[0.875rem] m-0 leading-tight"
             >
                 <p class="m-0">
                     새내기 체육 대회는 총 4가지의 종목으로 구성 돼요. 자신이
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div
-            class="flex flex-col font-pretendard font-normal gap-[0.1875rem] items-end relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem]"
+            class="flex flex-col font-pretendard font-normal gap-[0.1875rem] items-start md:items-end relative shrink-0 text-zinc-600 dark:text-zinc-400 text-sm md:text-[0.875rem]"
         >
             <p class="relative shrink-0 m-0">
                 종목 지원은 {data.deadlineDate}까지 할 수 있어요.
@@ -47,7 +47,7 @@
 
     <!-- Apply Cards Container -->
     <div
-        class="flex flex-[1_0_0] gap-[1.25rem] items-start min-h-px min-w-px relative w-full h-full pb-[0.625rem]"
+        class="flex flex-col lg:flex-[1_0_0] gap-5 lg:items-start lg:min-h-px lg:min-w-px lg:relative w-full lg:h-full lg:pb-[0.625rem] lg:flex-row"
     >
         {#each data.sports as sport}
             <SportApplyCard

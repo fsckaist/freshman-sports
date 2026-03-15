@@ -4,20 +4,20 @@
 </script>
 
 <div
-    class="content-stretch flex flex-[1_0_0] flex-col gap-[1.5625rem] h-[56.25rem] items-start min-h-px min-w-px relative"
+    class="flex-1 flex flex-col gap-6 md:gap-[1.5625rem] h-full items-start min-h-px min-w-px relative w-full"
 >
     <!-- Header -->
-    <div class="content-stretch flex items-start relative shrink-0 w-full">
+    <div class="flex items-start relative shrink-0 w-full">
         <div
-            class="content-stretch flex flex-col gap-[0.625rem] items-start justify-center leading-tight relative shrink-0"
+            class="flex flex-col gap-[0.625rem] items-start justify-center leading-tight relative shrink-0"
         >
-            <p
-                class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[2rem] m-0"
+            <h1
+                class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0"
             >
                 대진표 보기
-            </p>
+            </h1>
             <div
-                class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
+                class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-sm md:text-[0.875rem] m-0 leading-tight"
             >
                 <p class="m-0">
                     아래 화면에서 새내기 체육대회 대진표를 확인하세요.

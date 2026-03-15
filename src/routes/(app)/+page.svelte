@@ -3,11 +3,14 @@
     import ClassInfoCard from "$lib/components/dashboard/ClassInfoCard.svelte";
     import ScheduleCard from "$lib/components/schedule/ScheduleCard.svelte";
     import noticeIconSvg from "@gravity-ui/icons/svgs/circle-exclamation.svg?raw";
+    import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
+    import { slide } from "svelte/transition";
 
     let { data } = $props();
+    let isScheduleCollapsed = $state(false);
 </script>
 
-<div class="flex flex-col gap-[1.25rem] w-full h-full relative">
+<div class="flex flex-col gap-8 md:gap-[1.25rem] w-full lg:h-full relative">
     <!-- Notice Card on top -->
     {#if data.pendingMatches && data.pendingMatches.length > 0}
         <div class="flex flex-col gap-[0.625rem] shrink-0 w-full">
@@ -39,13 +42,13 @@
         </div>
     {/if}
 
-    <!-- Original Horizontal Layout -->
+    <!-- Main Layout: Vertical on mobile, Horizontal on desktop -->
     <div
-        class="flex flex-[1_0_0] gap-[1.875rem] items-start min-h-px min-w-px relative w-full h-full"
+        class="flex flex-col lg:flex-row lg:flex-1 gap-6 md:gap-[1.875rem] items-start min-h-px min-w-px relative w-full lg:h-full"
     >
         <!-- Left Column (Profile & Class Info) -->
         <div
-            class="flex flex-[1_0_0] flex-col gap-[1.875rem] h-full items-start relative hide-scrollbar"
+            class="flex lg:flex-1 flex-col gap-6 md:gap-[1.875rem] lg:h-full items-start relative lg:hide-scrollbar w-full"
         >
             <ProfileCard
                 name={data?.dashboardUser?.username || "DummyName"}
@@ -63,17 +66,25 @@
 
         <!-- Right Column (Schedules) -->
         <div
-            class="flex flex-1 flex-col gap-[0.625rem] items-start relative w-full h-full"
+            class="flex lg:flex-1 flex-col gap-[0.625rem] items-start relative w-full lg:h-full"
         >
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
             <!-- Title Area -->
             <div
-                class="flex gap-[0.625rem] items-center justify-center shrink-0 w-full relative"
+                class="flex gap-[0.625rem] items-center justify-center shrink-0 w-full relative cursor-pointer group"
+                onclick={() => (isScheduleCollapsed = !isScheduleCollapsed)}
             >
                 <h2
                     class="font-pretendard font-bold leading-[normal] shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0"
                 >
                     경기 일정
                 </h2>
+                <div
+                    class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isScheduleCollapsed ? '' : 'rotate-180'}"
+                >
+                    {@html chevronDownIcon}
+                </div>
                 <div
                     class="flex flex-[1_0_0] h-px items-center justify-center min-w-px relative"
                 >
@@ -84,26 +95,35 @@
             </div>
 
             <!-- Scrollable Cards Container -->
-            <div
-                class="bg-zinc-50 dark:bg-zinc-900/50 flex flex-[1_0_0] flex-col gap-[0.625rem] items-start min-h-px min-w-px p-[1.25rem] rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none w-full relative hide-scrollbar overflow-auto"
-            >
-                {#if data.confirmedSchedules && data.confirmedSchedules.length > 0}
-                    {#each data.confirmedSchedules as schedule}
-                        <ScheduleCard {...schedule} />
-                    {/each}
-                {/if}
-            </div>
+            {#if !isScheduleCollapsed}
+                <div
+                    transition:slide={{ duration: 300 }}
+                    class="bg-zinc-50 dark:bg-zinc-900/50 flex flex-col gap-[0.625rem] items-start min-h-px min-w-px p-4 md:p-[1.25rem] rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none w-full relative lg:hide-scrollbar overflow-auto lg:flex-1"
+                >
+                    {#if data.confirmedSchedules && data.confirmedSchedules.length > 0}
+                        {#each data.confirmedSchedules as schedule}
+                            <ScheduleCard {...schedule} />
+                        {/each}
+                    {:else}
+                        <div class="flex items-center justify-center w-full py-12 text-zinc-500 font-pretendard">
+                            확정된 경기 일정이 없습니다.
+                        </div>
+                    {/if}
+                </div>
+            {/if}
         </div>
     </div>
 </div>
 
 <style>
-    /* Hide scrollbar for layout columns to match Figma's seamless look while still allowing scroll */
-    .hide-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    /* Hide scrollbar for layout columns on desktop to match Figma's seamless look */
+    @media (min-width: 1024px) {
+        .lg\:hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .lg\:hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     }
 </style>

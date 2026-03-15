@@ -169,7 +169,9 @@
             class="bg-white dark:bg-zinc-900 flex flex-col gap-6 items-center justify-start overflow-clip p-6 relative rounded-[1.25rem] shadow-2xl shrink-0 w-[45rem] max-w-full max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-800"
         >
             <div class="w-full flex justify-between items-center">
-                <h2 class="text-[1.5rem] font-bold text-zinc-800 dark:text-zinc-100">
+                <h2
+                    class="text-[1.5rem] font-bold text-zinc-800 dark:text-zinc-100"
+                >
                     경기 상세 정보
                 </h2>
                 <button
@@ -203,18 +205,23 @@
                     <span class="text-zinc-500 dark:text-zinc-400 text-sm mb-1"
                         >{activeMatch.classA}반</span
                     >
-                    <span class="text-3xl font-black text-zinc-800 dark:text-zinc-100"
+                    <span
+                        class="text-3xl font-black text-zinc-800 dark:text-zinc-100"
                         >{activeMatch.scoreA}</span
                     >
                 </div>
                 <div class="col-span-1 flex items-center justify-center">
-                    <span class="text-2xl font-bold text-zinc-300 dark:text-zinc-600">VS</span>
+                    <span
+                        class="text-2xl font-bold text-zinc-300 dark:text-zinc-600"
+                        >VS</span
+                    >
                 </div>
                 <div class="col-span-1 flex flex-col items-center">
                     <span class="text-zinc-500 dark:text-zinc-400 text-sm mb-1"
                         >{activeMatch.classB}반</span
                     >
-                    <span class="text-3xl font-black text-zinc-800 dark:text-zinc-100"
+                    <span
+                        class="text-3xl font-black text-zinc-800 dark:text-zinc-100"
                         >{activeMatch.scoreB}</span
                     >
                 </div>
@@ -226,7 +233,9 @@
             <div class="w-full grid grid-cols-2 gap-8">
                 <!-- Team A Details -->
                 <div class="flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-zinc-700 dark:text-zinc-200">
+                    <h3
+                        class="text-lg font-bold text-zinc-700 dark:text-zinc-200"
+                    >
                         {activeMatch.classA}반 상세
                     </h3>
 
@@ -234,30 +243,45 @@
                         class="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
                     >
                         <div class="grid grid-cols-2 gap-y-2 text-sm">
-                            <span class="text-zinc-400 dark:text-zinc-500">전반전 득점</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >전반전 득점</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.FirstScore}</span
                             >
-                            <span class="text-zinc-400 dark:text-zinc-500">전반전 파울</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >전반전 파울</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.FirstFoul}</span
                             >
                             <div
                                 class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
                             ></div>
-                            <span class="text-zinc-400 dark:text-zinc-500">후반전 득점</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >후반전 득점</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.SecondScore}</span
                             >
-                            <span class="text-zinc-400 dark:text-zinc-500">후반전 파울</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >후반전 파울</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.SecondFoul}</span
                             >
                             <div
                                 class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
                             ></div>
-                            <span class="text-zinc-400 dark:text-zinc-500">승부차기</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >승부차기</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamA.scores.PenScore}</span
                             >
                         </div>
@@ -292,7 +316,9 @@
 
                 <!-- Team B Details -->
                 <div class="flex flex-col gap-4">
-                    <h3 class="text-lg font-bold text-zinc-700 dark:text-zinc-200">
+                    <h3
+                        class="text-lg font-bold text-zinc-700 dark:text-zinc-200"
+                    >
                         {activeMatch.classB}반 상세
                     </h3>
 
@@ -300,30 +326,45 @@
                         class="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
                     >
                         <div class="grid grid-cols-2 gap-y-2 text-sm">
-                            <span class="text-zinc-400 dark:text-zinc-500">전반전 득점</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >전반전 득점</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.FirstScore}</span
                             >
-                            <span class="text-zinc-400 dark:text-zinc-500">전반전 파울</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >전반전 파울</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.FirstFoul}</span
                             >
                             <div
                                 class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
                             ></div>
-                            <span class="text-zinc-400 dark:text-zinc-500">후반전 득점</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >후반전 득점</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.SecondScore}</span
                             >
-                            <span class="text-zinc-400 dark:text-zinc-500">후반전 파울</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >후반전 파울</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.SecondFoul}</span
                             >
                             <div
                                 class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
                             ></div>
-                            <span class="text-zinc-400 dark:text-zinc-500">승부차기</span>
-                            <span class="font-bold text-right text-zinc-800 dark:text-zinc-200"
+                            <span class="text-zinc-400 dark:text-zinc-500"
+                                >승부차기</span
+                            >
+                            <span
+                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
                                 >{parsedNotes.teamB.scores.PenScore}</span
                             >
                         </div>
@@ -374,7 +415,9 @@
                 {#if rawNotes}
                     <div class="w-full h-px bg-zinc-200 dark:bg-zinc-800"></div>
                     <div class="w-full flex flex-col gap-2">
-                        <h3 class="text-lg font-bold text-zinc-700 dark:text-zinc-200">
+                        <h3
+                            class="text-lg font-bold text-zinc-700 dark:text-zinc-200"
+                        >
                             기타 정보
                         </h3>
                         <div
@@ -435,10 +478,14 @@
             >
                 {activeMatch.classA ? `${activeMatch.classA}반` : "Unknown"}
             </p>
-            <div class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0 my-1"></div>
+            <div
+                class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0 my-1"
+            ></div>
 
             {#if activeMatch.status === "FINISHED"}
-                <div class="text-[3.375rem] font-black text-zinc-800 dark:text-zinc-100 my-4">
+                <div
+                    class="text-[3.375rem] font-black text-zinc-800 dark:text-zinc-100 my-4"
+                >
                     {activeMatch.scoreA}
                 </div>
             {:else if activeMatch.status === "ONGOING"}
@@ -450,16 +497,24 @@
                             전반
                         </p>
                         <div
-                            class="w-full border border-zinc-200 rounded-xl flex items-center h-20 overflow-hidden"
+                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-20 overflow-hidden"
                         >
                             <div
                                 class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">파울</span>
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >득점</span
+                                >
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >파울</span
+                                >
                             </div>
                             <!-- Controls -->
-                            <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
+                            <div
+                                class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900"
+                            >
                                 <div
                                     class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
                                 >
@@ -470,7 +525,8 @@
                                         class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                    <span
+                                        class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataA.FirstScore}</span
                                     >
                                     <button
@@ -491,7 +547,8 @@
                                         class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                    <span
+                                        class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataA.FirstFoul}</span
                                     >
                                     <button
@@ -517,10 +574,18 @@
                             <div
                                 class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">파울</span>
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >득점</span
+                                >
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >파울</span
+                                >
                             </div>
-                            <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
+                            <div
+                                class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900"
+                            >
                                 <div
                                     class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
                                 >
@@ -531,7 +596,8 @@
                                         class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                    <span
+                                        class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataA.SecondScore}</span
                                     >
                                     <button
@@ -552,7 +618,8 @@
                                         class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                    <span
+                                        class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataA.SecondFoul}</span
                                     >
                                     <button
@@ -578,7 +645,10 @@
                             <div
                                 class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >득점</span
+                                >
                             </div>
                             <div
                                 class="flex-1 flex items-center justify-between px-4 bg-white dark:bg-zinc-900 h-full"
@@ -590,7 +660,8 @@
                                     class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                     >{@html Minus}</button
                                 >
-                                <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                <span
+                                    class="font-medium text-zinc-700 dark:text-zinc-200"
                                     >{scoreDataA.PenScore}</span
                                 >
                                 <button
@@ -669,10 +740,14 @@
             >
                 {activeMatch.classB ? `${activeMatch.classB}반` : "Unknown"}
             </p>
-            <div class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0 my-1"></div>
+            <div
+                class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0 my-1"
+            ></div>
 
             {#if activeMatch.status === "FINISHED"}
-                <div class="text-[3.375rem] font-black text-zinc-800 dark:text-zinc-100 my-4">
+                <div
+                    class="text-[3.375rem] font-black text-zinc-800 dark:text-zinc-100 my-4"
+                >
                     {activeMatch.scoreB}
                 </div>
             {:else if activeMatch.status === "ONGOING"}
@@ -689,11 +764,19 @@
                             <div
                                 class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">파울</span>
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >득점</span
+                                >
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >파울</span
+                                >
                             </div>
                             <!-- Controls -->
-                            <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
+                            <div
+                                class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900"
+                            >
                                 <div
                                     class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
                                 >
@@ -704,7 +787,8 @@
                                         class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                    <span
+                                        class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataB.FirstScore}</span
                                     >
                                     <button
@@ -725,7 +809,8 @@
                                         class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                    <span
+                                        class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataB.FirstFoul}</span
                                     >
                                     <button
@@ -751,10 +836,18 @@
                             <div
                                 class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">파울</span>
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >득점</span
+                                >
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >파울</span
+                                >
                             </div>
-                            <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
+                            <div
+                                class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900"
+                            >
                                 <div
                                     class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
                                 >
@@ -765,7 +858,8 @@
                                         class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                    <span
+                                        class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataB.SecondScore}</span
                                     >
                                     <button
@@ -786,7 +880,8 @@
                                         class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                         >{@html Minus}</button
                                     >
-                                    <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                    <span
+                                        class="font-medium text-zinc-700 dark:text-zinc-200"
                                         >{scoreDataB.SecondFoul}</span
                                     >
                                     <button
@@ -812,7 +907,10 @@
                             <div
                                 class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
                             >
-                                <span class="text-sm text-zinc-600 dark:text-zinc-400">득점</span>
+                                <span
+                                    class="text-sm text-zinc-600 dark:text-zinc-400"
+                                    >득점</span
+                                >
                             </div>
                             <div
                                 class="flex-1 flex items-center justify-between px-4 bg-white dark:bg-zinc-900 h-full"
@@ -824,7 +922,8 @@
                                     class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
                                     >{@html Minus}</button
                                 >
-                                <span class="font-medium text-zinc-700 dark:text-zinc-200"
+                                <span
+                                    class="font-medium text-zinc-700 dark:text-zinc-200"
                                     >{scoreDataB.PenScore}</span
                                 >
                                 <button
