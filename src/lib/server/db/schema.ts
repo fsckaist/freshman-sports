@@ -129,5 +129,11 @@ export const system_config = pgTable("system_config", {
     updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const sport_locations = pgTable("sport_locations", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sportId: uuid("sport_id").references(() => sports.id).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+});
+
 export type EventState = (typeof eventStateEnum.enumValues)[number];
 

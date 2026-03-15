@@ -13,11 +13,11 @@
 >
     <!-- Centered 90rem wrapper so the absolute watermark is properly anchored -->
     <div
-        class="relative flex flex-col gap-[1.875rem] h-screen items-start w-full max-w-[90rem] px-[12.5rem] py-[6.25rem]"
+        class="relative flex flex-col gap-[1.875rem] h-screen items-start w-full max-w-[90rem] px-6 py-12 md:px-[12.5rem] md:py-[6.25rem]"
     >
         <!-- Glowing Right Side Watermark -->
         <div
-            class="absolute -translate-y-1/2 blur-[0.625rem] opacity-20 dark:opacity-10 right-[-12.8125rem] size-[65.3125rem] top-[calc(50%+7.65625rem)] pointer-events-none select-none mix-blend-multiply dark:mix-blend-plus-lighter z-0"
+            class="absolute -translate-y-1/2 blur-[0.625rem] opacity-20 dark:opacity-10 right-[-12.8125rem] size-[40rem] md:size-[65.3125rem] top-[calc(50%+7.65625rem)] pointer-events-none select-none mix-blend-multiply dark:mix-blend-plus-lighter z-0"
         >
             <img
                 src="/logo.png"
@@ -28,18 +28,18 @@
 
         <!-- Title & Button Frame -->
         <div
-            class="content-stretch flex items-end justify-between p-[0.625rem] relative shrink-0 w-full z-10 border-b border-transparent dark:border-zinc-800/50 pb-[1.25rem]"
+            class="content-stretch flex flex-col md:flex-row items-start md:items-end justify-between p-[0.625rem] relative shrink-0 w-full z-10 border-b border-transparent dark:border-zinc-800/50 pb-[1.25rem] gap-4"
         >
             <div
                 class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100"
             >
                 <p
-                    class="font-pretendard font-semibold relative shrink-0 text-[1.5rem] m-0"
+                    class="font-pretendard font-semibold relative shrink-0 text-lg md:text-[1.5rem] m-0"
                 >
                     2026 봄학기 새내기 체육 대회
                 </p>
                 <h1
-                    class="font-pretendard font-bold relative shrink-0 text-[4rem] leading-[1.1] m-0"
+                    class="font-pretendard font-bold relative shrink-0 text-4xl md:text-[4rem] leading-[1.1] m-0"
                 >
                     개인정보 처리방침
                 </h1>
@@ -47,10 +47,10 @@
             <button
                 onclick={handleClose}
                 aria-label="Confirm and close"
-                class="bg-amber-500 hover:bg-amber-600 active:bg-amber-800 transition-colors cursor-pointer content-stretch flex flex-col items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[6.25rem] shrink-0"
+                class="bg-amber-500 hover:bg-amber-600 active:bg-amber-800 transition-colors cursor-pointer content-stretch flex flex-col items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[6.25rem] shrink-0 w-full md:w-auto"
             >
                 <span
-                    class="font-pretendard font-semibold leading-[normal] relative shrink-0 text-[1.25rem] text-white whitespace-pre-wrap"
+                    class="font-pretendard font-semibold leading-[normal] relative shrink-0 text-lg md:text-[1.25rem] text-white whitespace-pre-wrap"
                     >확인</span
                 >
             </button>
@@ -61,7 +61,7 @@
             class="content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-px overflow-x-hidden overflow-y-auto p-[0.625rem] relative w-full"
         >
             <div
-                class="flex-[1_0_0] font-pretendard font-medium leading-[1.6] min-h-px min-w-px relative text-zinc-800 dark:text-zinc-300 text-[1.25rem] w-full"
+                class="flex-[1_0_0] font-pretendard font-medium leading-[1.6] min-h-px min-w-px relative text-zinc-800 dark:text-zinc-300 text-lg md:text-[1.25rem] w-full"
             >
                 <p class="mb-4">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.

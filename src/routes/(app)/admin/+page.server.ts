@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import { sports, schedules, registers, users, rosters, matches, classes, tournament_brackets, system_config, type EventState } from '$lib/server/db/schema';
-import { eq, and, asc, isNull, or } from 'drizzle-orm';
+import { sports, schedules, registers, users, rosters, matches, classes, tournament_brackets, system_config, sport_locations, type EventState } from '$lib/server/db/schema';
+import { eq, and, asc, isNull, isNotNull, or } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad, Actions } from './$types';
 import { computeOrUpdateNextMatchWindow, propagateByeWindow, addWeekdays, ensureScheduleSlots } from '$lib/server/scheduleWindowHelper';
@@ -28,6 +28,19 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         let requestedSportId = url.searchParams.get('sportId');
 
         const allSports = await db.select().from(sports).orderBy(asc(sports.displayOrder));
+        const allLocations = await db.select().from(sport_locations);
+
+        // Group locations by sportId
+        const locationsMap = new Map<string, any[]>();
+        for (const loc of allLocations) {
+            if (!locationsMap.has(loc.sportId)) locationsMap.set(loc.sportId, []);
+            locationsMap.get(loc.sportId)!.push(loc);
+        }
+
+        const sportsWithLocations = allSports.map(s => ({
+            ...s,
+            locations: locationsMap.get(s.id) || []
+        }));
         if (allSports.length === 0) {
             return {
                 sports: [], activeSportId: null, gridData: {}, periodStart: null, periodEnd: null,
@@ -36,7 +49,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             };
         }
 
-        let activeSport = allSports.find(s => s.id === requestedSportId) || allSports[0];
+        let activeSport = sportsWithLocations.find(s => s.id === requestedSportId) || sportsWithLocations[0];
 
         // Fetch all schedules for grid (Dynamically bounded by DB data)
         const rawSchedules = await db.select()
@@ -123,7 +136,9 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             .where(
                 and(
                     eq(matches.sportId, activeSport.id),
-                    eq(matches.status, 'PENDING_SCHEDULE')
+                    eq(matches.status, 'PENDING_SCHEDULE'),
+                    isNotNull(matches.classAId),
+                    isNotNull(matches.classBId)
                 )
             );
 
@@ -302,7 +317,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         }
 
         return {
-            sports: allSports,
+            sports: sportsWithLocations,
             activeSportId: activeSport.id,
             gridData: formattedGrid,
             activeTab: url.searchParams.get('tab'),
@@ -501,6 +516,7 @@ export const actions: Actions = {
             const scheduleId = formData.get('scheduleId')?.toString();
             const refereeId = formData.get('refereeId')?.toString();
             const managerId = formData.get('managerId')?.toString();
+            const location = formData.get('location')?.toString();
 
             if (!matchId || !scheduleId) return fail(400, { message: "매치 ID 또는 스케줄 ID가 없습니다." });
 
@@ -521,6 +537,7 @@ export const actions: Actions = {
                 scheduleId,
                 status: 'SCHEDULED',
                 scheduledAt,
+                location: location || null,
                 refereeId: refereeId || null,
                 managerId: managerId || null
             }).where(eq(matches.id, matchId));
@@ -894,6 +911,46 @@ export const actions: Actions = {
             return { success: true };
         } catch (e) {
             console.error('setRegistrationDeadline error:', e);
+            return fail(500);
+        }
+    },
+    addSportLocation: async ({ request, locals }) => {
+        try {
+            const user = locals.user;
+            if (!user?.isAdmin) return fail(403);
+
+            const formData = await request.formData();
+            const sportId = formData.get('sportId')?.toString();
+            const name = formData.get('name')?.toString();
+
+            if (!sportId || !name) return fail(400, { message: '종목 ID와 장소 이름을 모두 입력해주세요.' });
+
+            await db.insert(sport_locations).values({
+                sportId,
+                name
+            });
+
+            return { success: true };
+        } catch (e) {
+            console.error('addSportLocation error:', e);
+            return fail(500);
+        }
+    },
+    deleteSportLocation: async ({ request, locals }) => {
+        try {
+            const user = locals.user;
+            if (!user?.isAdmin) return fail(403);
+
+            const formData = await request.formData();
+            const locationId = formData.get('locationId')?.toString();
+
+            if (!locationId) return fail(400, { message: '장소 ID가 누락되었습니다.' });
+
+            await db.delete(sport_locations).where(eq(sport_locations.id, locationId));
+
+            return { success: true };
+        } catch (e) {
+            console.error('deleteSportLocation error:', e);
             return fail(500);
         }
     }

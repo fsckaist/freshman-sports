@@ -233,7 +233,7 @@
             {/if}
         {:else}
             <!-- EMPTY USER MODE -->
-            <div class="w-full h-full bg-white dark:bg-zinc-950"></div>
+            <div class="w-full h-full bg-white dark:bg-zinc-900"></div>
         {/if}
     {/if}
 </button>

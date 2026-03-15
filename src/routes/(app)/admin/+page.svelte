@@ -75,6 +75,7 @@
                     | "COMPLETED"}
                 sports={data.sports ?? []}
                 registrationDeadline={data.registrationDeadline}
+                activeSportId={data.activeSportId ?? undefined}
             />
         {/if}
     </div>

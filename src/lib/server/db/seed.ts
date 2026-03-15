@@ -24,6 +24,8 @@ async function main() {
         await db.delete(schema.schedules);
         console.log("   - Deleting rosters...");
         await db.delete(schema.rosters);
+        console.log("   - Deleting sport_locations...");
+        await db.delete(schema.sport_locations);
         console.log("   - Deleting users...");
         await db.delete(schema.users);
         console.log("   - Deleting sports...");
@@ -122,6 +124,24 @@ async function main() {
                 requiredGender: 'FEMALE_ONLY'
             }
         ]).returning();
+        
+        // --- 4.5. Sport Locations ---
+        console.log("📍 Inserting default sport locations...");
+        const locationData: typeof schema.sport_locations.$inferInsert[] = [];
+        for (const sport of insertedSports) {
+            if (sport.slug === 'futsal') {
+                locationData.push({ sportId: sport.id, name: '풋살장 A' });
+                locationData.push({ sportId: sport.id, name: '풋살장 B' });
+            } else if (sport.slug === 'basketball') {
+                locationData.push({ sportId: sport.id, name: '실내체육관 농구장' });
+                locationData.push({ sportId: sport.id, name: '야외 농구장' });
+            } else {
+                locationData.push({ sportId: sport.id, name: '체육관 코트 1' });
+                locationData.push({ sportId: sport.id, name: '체육관 코트 2' });
+                locationData.push({ sportId: sport.id, name: '체육관 코트 3' });
+            }
+        }
+        await db.insert(schema.sport_locations).values(locationData);
 
         // --- 5. Users ---
         console.log("👤 Inserting Users (Role-based Student Numbers)...");

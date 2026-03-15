@@ -38,7 +38,9 @@
     class="flex flex-col bg-white dark:bg-zinc-900 rounded-[1.25rem] w-full flex-[1_0_0] relative overflow-hidden shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none h-full"
 >
     <!-- Sport Selection Tabs (Secondary) -->
-    <div class="flex items-center shrink-0 w-full border-b border-zinc-200">
+    <div
+        class="flex items-center shrink-0 w-full border-b border-zinc-200 dark:border-zinc-800"
+    >
         {#each sports as sport, i}
             <a
                 href="?tab=confirm&sportId={sport.id}"
@@ -46,7 +48,9 @@
                 {activeSportId === sport.id
                     ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-500'
                     : 'bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent'}
-                {i !== sports.length - 1 ? 'border-r border-zinc-200 dark:border-zinc-800' : ''}"
+                {i !== sports.length - 1
+                    ? 'border-r border-zinc-200 dark:border-zinc-800'
+                    : ''}"
             >
                 <p
                     class="font-pretendard font-semibold text-[1rem] m-0 transition-colors duration-200"
@@ -103,13 +107,18 @@
                         class="flex gap-2 items-center font-bold text-lg text-zinc-800 dark:text-zinc-100"
                     >
                         <span>{matchPair.classA}반</span>
-                        <span class="text-[0.6rem] text-zinc-400 dark:text-zinc-500">VS</span>
+                        <span
+                            class="text-[0.6rem] text-zinc-400 dark:text-zinc-500"
+                            >VS</span
+                        >
                         <span>{matchPair.classB}반</span>
                     </div>
                 </a>
             {/each}
             {#if completedClasses.length === 0}
-                <div class="text-zinc-400 dark:text-zinc-500 text-sm py-4 text-center">
+                <div
+                    class="text-zinc-400 dark:text-zinc-500 text-sm py-4 text-center"
+                >
                     경기 확정 대기 중인 매치가 없습니다.
                 </div>
             {/if}
@@ -194,6 +203,26 @@
             >
                 <input type="hidden" name="matchId" value={activeMatch?.id} />
                 <input type="hidden" name="scheduleId" value={selectedSlotId} />
+
+                <div class="flex flex-col gap-2 w-full">
+                    <label
+                        for="location"
+                        class="text-sm font-semibold text-zinc-700 dark:text-zinc-300"
+                        >경기 장소 선택</label
+                    >
+                    <select
+                        id="location"
+                        name="location"
+                        class="w-full text-base p-3 border border-zinc-300 dark:border-zinc-700 rounded-xl outline-none focus:border-amber-500 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 transition-colors"
+                    >
+                        <option value="">장소 선택 안 함</option>
+                        {#if activeSportId && sports.find((s) => s.id === activeSportId)?.locations}
+                            {#each sports.find((s) => s.id === activeSportId).locations as loc}
+                                <option value={loc.name}>{loc.name}</option>
+                            {/each}
+                        {/if}
+                    </select>
+                </div>
 
                 <div class="flex flex-col gap-2 w-full">
                     <label

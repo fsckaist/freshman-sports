@@ -5,6 +5,7 @@
         eventState = "REGISTRATION",
         sports = [],
         registrationDeadline = null,
+        activeSportId = "",
     }: {
         eventState?: "REGISTRATION" | "ONGOING" | "COMPLETED";
         sports?: Array<{
@@ -20,8 +21,10 @@
             timeSlotInterval: number | null;
             maxParallelMatches: number | null;
             requiredGender: "MALE_ONLY" | "FEMALE_ONLY" | "MIXED";
+            locations: Array<{ id: string; name: string }>;
         }>;
         registrationDeadline?: string | Date | null;
+        activeSportId?: string;
     } = $props();
 
     let isUpdating = $state(false);
@@ -30,11 +33,13 @@
     let isScheduleUpdating: Record<string, boolean> = $state({});
     let currentState = $derived(eventState);
 
-    let activeSportTab = $state("");
+    let activeSportTab = $state(activeSportId);
 
     // Sync active sport tab if not set (especially on first load)
     $effect(() => {
-        if (!activeSportTab && sports.length > 0) {
+        if (activeSportId) {
+            activeSportTab = activeSportId;
+        } else if (!activeSportTab && sports.length > 0) {
             activeSportTab = sports[0].id;
         }
     });
@@ -155,9 +160,10 @@
                     체육대회 상태
                 </h3>
                 <p
-                    class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.8125rem] m-0"
+                    class="font-pretendard font-normal text-zinc-300 dark:text-zinc-500 text-[0.8125rem] m-0"
                 >
-                    현재 상태: <span class="font-semibold text-zinc-700 dark:text-zinc-300"
+                    현재 상태: <span
+                        class="font-semibold text-zinc-700 dark:text-zinc-300"
                         >{stateLabels[currentState]}</span
                     >
                 </p>
@@ -188,7 +194,7 @@
                             class="flex flex-col gap-1.5 w-52 p-4 rounded-xl border-2 text-left transition-all cursor-pointer disabled:cursor-default
                             {currentState === option.value
                                 ? 'border-zinc-800 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
-                                : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-400 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800'}"
+                                : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800'}"
                         >
                             <div
                                 class="flex items-center justify-between w-full"
@@ -197,7 +203,7 @@
                                     class="font-pretendard font-bold text-[1rem]
                                     {currentState === option.value
                                         ? 'text-zinc-800 dark:text-zinc-100'
-                                        : 'text-zinc-500 dark:text-zinc-400'}"
+                                        : 'text-zinc-500 dark:text-zinc-300'}"
                                 >
                                     {option.label}
                                 </span>
@@ -212,7 +218,7 @@
                                 {/if}
                             </div>
                             <p
-                                class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.75rem] m-0 leading-snug"
+                                class="font-pretendard font-normal text-zinc-300 dark:text-zinc-500 text-[0.75rem] m-0 leading-snug"
                             >
                                 {option.description}
                             </p>
@@ -231,7 +237,7 @@
                     종목 지원 마감 기한
                 </h3>
                 <p
-                    class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.8125rem] m-0"
+                    class="font-pretendard font-normal text-zinc-300 dark:text-zinc-500 text-[0.8125rem] m-0"
                 >
                     학생들이 종목에 지원할 수 있는 최종 기한을 설정합니다.
                 </p>
@@ -259,7 +265,7 @@
                         type="datetime-local"
                         name="registrationDeadline"
                         bind:value={localRegistrationDeadline}
-                        class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
+                        class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                     />
                 </div>
                 <button
@@ -281,7 +287,7 @@
                     종목별 세부 설정
                 </h3>
                 <p
-                    class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.8125rem] m-0"
+                    class="font-pretendard font-normal text-zinc-300 dark:text-zinc-500 text-[0.8125rem] m-0"
                 >
                     종목별 전체 게임 기간 및 첫 라운드 일정 선택 기간과 마감
                     기한을 설정합니다.
@@ -289,23 +295,24 @@
             </div>
 
             {#if sports.length === 0}
-                <p class="font-pretendard text-zinc-400 text-[0.875rem]">
+                <p class="font-pretendard text-zinc-300 text-[0.875rem]">
                     등록된 종목이 없습니다.
                 </p>
             {:else}
                 <!-- Sport Tabs -->
-                <div class="flex gap-0 border-b border-zinc-200 dark:border-zinc-800">
+                <div
+                    class="flex gap-0 border-b border-zinc-200 dark:border-zinc-800"
+                >
                     {#each sports as sport, i}
-                        <button
-                            type="button"
-                            onclick={() => (activeSportTab = sport.id)}
-                            class="font-pretendard text-[0.875rem] font-medium px-4 py-2.5 border-b-2 transition-colors
+                        <a
+                            href="?tab=settings&sportId={sport.id}"
+                            class="font-pretendard text-[0.875rem] font-medium px-4 py-2.5 border-b-2 transition-colors no-underline
                             {activeSportTab === sport.id
                                 ? 'border-zinc-800 dark:border-zinc-100 text-zinc-800 dark:text-zinc-100'
-                                : 'border-transparent text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'}"
+                                : 'border-transparent text-zinc-300 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'}"
                         >
                             {sport.name}
-                        </button>
+                        </a>
                     {/each}
                 </div>
 
@@ -314,14 +321,29 @@
                         <form
                             method="POST"
                             action="?/setRound1Schedule"
-                            use:enhance={() => {
+                            use:enhance={({ action }) => {
                                 isScheduleUpdating[sport.id] = true;
-                                return async ({ update }) => {
+                                return async ({ update, result }) => {
                                     isScheduleUpdating[sport.id] = false;
+
+                                    // Special handling for adding a location: clear the specific input
+                                    if (
+                                        action.search.includes(
+                                            "addSportLocation",
+                                        ) &&
+                                        result.type === "success"
+                                    ) {
+                                        const nameInput =
+                                            document.getElementById(
+                                                `new-loc-${sport.id}`,
+                                            ) as HTMLInputElement;
+                                        if (nameInput) nameInput.value = "";
+                                    }
+
                                     update({ reset: false });
                                 };
                             }}
-                            class="flex flex-col gap-5"
+                            class="flex flex-col gap-8"
                         >
                             <input
                                 type="hidden"
@@ -329,229 +351,340 @@
                                 value={sport.id}
                             />
 
-                            <p
-                                class="font-pretendard font-medium text-zinc-600 text-[0.875rem] m-0"
-                            >
-                                경기장 개수 설정
-                            </p>
-                            <div class="grid grid-cols-3 gap-3">
-                                <div class="flex flex-col gap-1.5">
-                                    <label
-                                        class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                        for="d-parallel-{sport.id}"
-                                        >동시 경기 가능 수</label
-                                    >
-                                    <input
-                                        id="d-parallel-{sport.id}"
-                                        type="number"
-                                        name="maxParallelMatches"
-                                        min="1"
-                                        bind:value={
-                                            sportForms[sport.id]
-                                                .maxParallelMatches
-                                        }
-                                        class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
-                                    />
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col gap-2">
+                            <!-- Section 1: Venue Configuration -->
+                            <div class="flex flex-col gap-4">
                                 <p
-                                    class="font-pretendard font-medium text-zinc-600 dark:text-zinc-400 text-[0.875rem] m-0"
+                                    class="font-pretendard font-medium text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
                                 >
-                                    성별 제한 설정
-                                </p>
-                                <div class="flex gap-4">
-                                    <label class="flex items-center gap-2 cursor-pointer group">
-                                        <input type="radio" name="requiredGender" value="MALE_ONLY" bind:group={sportForms[sport.id].requiredGender} class="accent-zinc-800 dark:accent-zinc-100" />
-                                        <span class="font-pretendard text-[0.875rem] text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">남성만</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer group">
-                                        <input type="radio" name="requiredGender" value="FEMALE_ONLY" bind:group={sportForms[sport.id].requiredGender} class="accent-zinc-800 dark:accent-zinc-100" />
-                                        <span class="font-pretendard text-[0.875rem] text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">여성만</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer group">
-                                        <input type="radio" name="requiredGender" value="MIXED" bind:group={sportForms[sport.id].requiredGender} class="accent-zinc-800 dark:accent-zinc-100" />
-                                        <span class="font-pretendard text-[0.875rem] text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors">양성</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Daily timing config -->
-                            <div class="flex flex-col gap-2">
-                                <p
-                                    class="font-pretendard font-medium text-zinc-600 text-[0.875rem] m-0"
-                                >
-                                    시간 설정
+                                    경기장 개수 설정
                                 </p>
                                 <div class="grid grid-cols-3 gap-3">
                                     <div class="flex flex-col gap-1.5">
                                         <label
                                             class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                            for="d-start-{sport.id}"
-                                            >매일 시작 시간</label
+                                            for="d-parallel-{sport.id}"
+                                            >동시 경기 가능 수</label
                                         >
                                         <input
-                                            id="d-start-{sport.id}"
-                                            type="time"
-                                            name="dailyStartTime"
-                                            bind:value={
-                                                sportForms[sport.id]
-                                                    .dailyStartTime
-                                            }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
-                                        />
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <label
-                                            class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                            for="d-end-{sport.id}"
-                                            >매일 종료 시간</label
-                                        >
-                                        <input
-                                            id="d-end-{sport.id}"
-                                            type="time"
-                                            name="dailyEndTime"
-                                            bind:value={
-                                                sportForms[sport.id]
-                                                    .dailyEndTime
-                                            }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
-                                        />
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <label
-                                            class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                            for="d-interval-{sport.id}"
-                                            >간격 (분단위)</label
-                                        >
-                                        <input
-                                            id="d-interval-{sport.id}"
+                                            id="d-parallel-{sport.id}"
                                             type="number"
-                                            name="timeSlotInterval"
-                                            step="5"
+                                            name="maxParallelMatches"
+                                            min="1"
                                             bind:value={
                                                 sportForms[sport.id]
-                                                    .timeSlotInterval
+                                                    .maxParallelMatches
                                             }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
+                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Full game period -->
-                            <div class="flex flex-col gap-2">
-                                <p
-                                    class="font-pretendard font-medium text-zinc-600 text-[0.875rem] m-0"
-                                >
-                                    전체 게임 기간
-                                </p>
-                                <div class="grid grid-cols-3 gap-3">
-                                    <div class="flex flex-col gap-1.5">
-                                        <label
-                                            class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                            for="p-start-{sport.id}">시작</label
-                                        >
-                                        <input
-                                            id="p-start-{sport.id}"
-                                            type="datetime-local"
-                                            name="periodStart"
-                                            bind:value={
-                                                sportForms[sport.id].periodStart
-                                            }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
-                                        />
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <label
-                                            class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                            for="p-end-{sport.id}">종료</label
-                                        >
-                                        <input
-                                            id="p-end-{sport.id}"
-                                            type="datetime-local"
-                                            name="periodEnd"
-                                            bind:value={
-                                                sportForms[sport.id].periodEnd
-                                            }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                            <hr class="border-zinc-100 dark:border-zinc-800" />
 
-                            <!-- Round-1 window -->
+                            <!-- Section 2: Location Management -->
                             <div class="flex flex-col gap-2">
                                 <p
-                                    class="font-pretendard font-medium text-zinc-600 text-[0.875rem] m-0"
+                                    class="font-pretendard font-medium text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
                                 >
-                                    첫 라운드 일정 선택 기간
+                                    장소 관리
                                 </p>
                                 <div
-                                    class="grid grid-cols-1 gap-3 sm:grid-cols-3"
+                                    class="flex flex-col gap-2 border border-zinc-100 dark:border-zinc-800 rounded-xl p-4 bg-zinc-50/50 dark:bg-zinc-900/50"
                                 >
-                                    <div class="flex flex-col gap-1.5">
-                                        <label
-                                            class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                            for="s-start-{sport.id}"
-                                            >첫 라운드 기간 시작일</label
-                                        >
-                                        <input
-                                            id="s-start-{sport.id}"
-                                            type="datetime-local"
-                                            name="selectionStart"
-                                            bind:value={
-                                                sportForms[sport.id].selStart
-                                            }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
-                                        />
+                                    <div class="flex flex-wrap gap-2">
+                                        {#if sport.locations && sport.locations.length > 0}
+                                            {#each sport.locations as loc}
+                                                <div
+                                                    class="flex items-center gap-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-lg shadow-sm"
+                                                >
+                                                    <span
+                                                        class="font-pretendard text-[0.875rem] text-zinc-700 dark:text-zinc-300"
+                                                        >{loc.name}</span
+                                                    >
+                                                    <button
+                                                        type="submit"
+                                                        name="locationId"
+                                                        value={loc.id}
+                                                        formaction="?/deleteSportLocation"
+                                                        title="삭제"
+                                                        class="text-zinc-300 hover:text-rose-500 transition-colors flex items-center justify-center p-0.5"
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="14"
+                                                            height="14"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            ><path
+                                                                d="M18 6 6 18"
+                                                            /><path
+                                                                d="m6 6 12 12"
+                                                            /></svg
+                                                        >
+                                                    </button>
+                                                </div>
+                                            {/each}
+                                        {:else}
+                                            <p
+                                                class="font-pretendard text-zinc-300 text-[0.8125rem] m-0"
+                                            >
+                                                등록된 장소가 없습니다.
+                                            </p>
+                                        {/if}
                                     </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <label
-                                            class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                            for="s-end-{sport.id}"
-                                            >첫 라운드 기간 종료일</label
-                                        >
-                                        <input
-                                            id="s-end-{sport.id}"
-                                            type="datetime-local"
-                                            name="selectionEnd"
-                                            bind:value={
-                                                sportForms[sport.id].selEnd
-                                            }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
-                                        />
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <label
-                                            class="font-pretendard text-zinc-500 text-[0.75rem]"
-                                            for="s-dl-{sport.id}"
-                                            >선택 마감일</label
-                                        >
-                                        <input
-                                            id="s-dl-{sport.id}"
-                                            type="datetime-local"
-                                            name="deadline"
-                                            bind:value={
-                                                sportForms[sport.id].deadline
-                                            }
-                                            class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
-                                        />
+
+                                    <div
+                                        class="mt-2 pt-3 border-t border-zinc-100 dark:border-zinc-800"
+                                    >
+                                        <div class="flex gap-2">
+                                            <input
+                                                id="new-loc-{sport.id}"
+                                                type="text"
+                                                name="name"
+                                                placeholder="새 장소 이름 (예: 대운동장)"
+                                                class="flex-1 font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 bg-white dark:bg-zinc-800 focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-600 transition-colors text-zinc-800 dark:text-zinc-200"
+                                            />
+                                            <button
+                                                type="submit"
+                                                formaction="?/addSportLocation"
+                                                class="font-pretendard font-medium text-[0.8125rem] bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 px-3 py-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-600 transition-colors"
+                                            >
+                                                추가
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="flex justify-end">
-                                <button
-                                    type="submit"
-                                    disabled={isScheduleUpdating[sport.id]}
-                                    class="font-pretendard font-medium text-[0.875rem] bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-4 py-2 rounded-lg hover:bg-zinc-700 dark:hover:bg-zinc-200 active:bg-zinc-800 dark:active:bg-zinc-300 transition-colors disabled:opacity-50"
+                            <hr class="border-zinc-100 dark:border-zinc-800" />
+
+                            <!-- Section 3: Detailed Configurations -->
+                            <div class="flex flex-col gap-5">
+                                <div class="flex flex-col gap-2">
+                                    <p
+                                        class="font-pretendard font-medium text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
+                                    >
+                                        성별 제한 설정
+                                    </p>
+                                    <div class="flex gap-4">
+                                        {#each ["MALE_ONLY", "FEMALE_ONLY", "MIXED"] as gender}
+                                            <label
+                                                class="flex items-center gap-2 cursor-pointer group"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="requiredGender"
+                                                    value={gender}
+                                                    bind:group={
+                                                        sportForms[sport.id]
+                                                            .requiredGender
+                                                    }
+                                                    class="accent-zinc-800 dark:accent-zinc-100"
+                                                />
+                                                <span
+                                                    class="font-pretendard text-[0.875rem] text-zinc-600 dark:text-zinc-300 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors"
+                                                >
+                                                    {gender === "MALE_ONLY"
+                                                        ? "남성만"
+                                                        : gender ===
+                                                            "FEMALE_ONLY"
+                                                          ? "여성만"
+                                                          : "양성"}
+                                                </span>
+                                            </label>
+                                        {/each}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-zinc-100 dark:border-zinc-800" />
+
+                            <!-- Section 4: Duration Configurations-->
+                            <div class="flex flex-col gap-5">
+                                <div class="flex flex-col gap-2">
+                                    <p
+                                        class="font-pretendard font-medium text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
+                                    >
+                                        시간 설정
+                                    </p>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div class="flex flex-col gap-1.5">
+                                            <label
+                                                class="font-pretendard text-zinc-500 text-[0.75rem]"
+                                                for="d-start-{sport.id}"
+                                                >매일 시작 시간</label
+                                            >
+                                            <input
+                                                id="d-start-{sport.id}"
+                                                type="time"
+                                                name="dailyStartTime"
+                                                bind:value={
+                                                    sportForms[sport.id]
+                                                        .dailyStartTime
+                                                }
+                                                class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                                            />
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label
+                                                class="font-pretendard text-zinc-500 text-[0.75rem]"
+                                                for="d-end-{sport.id}"
+                                                >매일 종료 시간</label
+                                            >
+                                            <input
+                                                id="d-end-{sport.id}"
+                                                type="time"
+                                                name="dailyEndTime"
+                                                bind:value={
+                                                    sportForms[sport.id]
+                                                        .dailyEndTime
+                                                }
+                                                class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                                            />
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label
+                                                class="font-pretendard text-zinc-500 text-[0.75rem]"
+                                                for="d-interval-{sport.id}"
+                                                >간격 (분단위)</label
+                                            >
+                                            <input
+                                                id="d-interval-{sport.id}"
+                                                type="number"
+                                                name="timeSlotInterval"
+                                                step="5"
+                                                bind:value={
+                                                    sportForms[sport.id]
+                                                        .timeSlotInterval
+                                                }
+                                                class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <p
+                                        class="font-pretendard font-medium text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
+                                    >
+                                        전체 게임 기간
+                                    </p>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="flex flex-col gap-1.5">
+                                            <label
+                                                class="font-pretendard text-zinc-500 text-[0.75rem]"
+                                                for="p-start-{sport.id}"
+                                                >시작</label
+                                            >
+                                            <input
+                                                id="p-start-{sport.id}"
+                                                type="datetime-local"
+                                                name="periodStart"
+                                                bind:value={
+                                                    sportForms[sport.id]
+                                                        .periodStart
+                                                }
+                                                class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                                            />
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label
+                                                class="font-pretendard text-zinc-500 text-[0.75rem]"
+                                                for="p-end-{sport.id}"
+                                                >종료</label
+                                            >
+                                            <input
+                                                id="p-end-{sport.id}"
+                                                type="datetime-local"
+                                                name="periodEnd"
+                                                bind:value={
+                                                    sportForms[sport.id]
+                                                        .periodEnd
+                                                }
+                                                class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <p
+                                        class="font-pretendard font-medium text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
+                                    >
+                                        첫 라운드 일정 선택 기간
+                                    </p>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div class="flex flex-col gap-1.5">
+                                            <label
+                                                class="font-pretendard text-zinc-500 text-[0.75rem]"
+                                                for="s-start-{sport.id}"
+                                                >시작일</label
+                                            >
+                                            <input
+                                                id="s-start-{sport.id}"
+                                                type="datetime-local"
+                                                name="selectionStart"
+                                                bind:value={
+                                                    sportForms[sport.id]
+                                                        .selStart
+                                                }
+                                                class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                                            />
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label
+                                                class="font-pretendard text-zinc-500 text-[0.75rem]"
+                                                for="s-end-{sport.id}"
+                                                >종료일</label
+                                            >
+                                            <input
+                                                id="s-end-{sport.id}"
+                                                type="datetime-local"
+                                                name="selectionEnd"
+                                                bind:value={
+                                                    sportForms[sport.id].selEnd
+                                                }
+                                                class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                                            />
+                                        </div>
+                                        <div class="flex flex-col gap-1.5">
+                                            <label
+                                                class="font-pretendard text-zinc-500 text-[0.75rem]"
+                                                for="s-dl-{sport.id}"
+                                                >마감일</label
+                                            >
+                                            <input
+                                                id="s-dl-{sport.id}"
+                                                type="datetime-local"
+                                                name="deadline"
+                                                bind:value={
+                                                    sportForms[sport.id]
+                                                        .deadline
+                                                }
+                                                class="font-pretendard text-[0.875rem] border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800"
                                 >
-                                    {isScheduleUpdating[sport.id]
-                                        ? "저장 중..."
-                                        : "저장하기"}
-                                </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isScheduleUpdating[sport.id]}
+                                        class="font-pretendard font-medium text-[0.875rem] bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-[1.5rem] py-2.5 rounded-xl hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-all disabled:opacity-50"
+                                    >
+                                        {isScheduleUpdating[sport.id]
+                                            ? "저장 중..."
+                                            : "설정 저장하기"}
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     {/if}

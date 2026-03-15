@@ -23,7 +23,9 @@
     class="flex flex-col bg-white dark:bg-zinc-900 rounded-[1.25rem] w-full flex-[1_0_0] relative overflow-hidden shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none h-full"
 >
     <!-- Sport Selection Tabs (Secondary) -->
-    <div class="flex items-center shrink-0 w-full border-b border-zinc-200">
+    <div
+        class="flex items-center shrink-0 w-full border-b border-zinc-200 dark:border-zinc-800"
+    >
         {#each sports as sport, i}
             <a
                 href="?tab=result&sportId={sport.id}"
@@ -31,7 +33,9 @@
                 {activeSportId === sport.id
                     ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-500'
                     : 'bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-transparent'}
-                {i !== sports.length - 1 ? 'border-r border-zinc-200 dark:border-zinc-800' : ''}"
+                {i !== sports.length - 1
+                    ? 'border-r border-zinc-200 dark:border-zinc-800'
+                    : ''}"
             >
                 <p
                     class="font-pretendard font-semibold text-[1rem] m-0 transition-colors duration-200"
@@ -137,7 +141,9 @@
                 </a>
             {/each}
             {#if finishedMatches.length === 0}
-                <div class="text-zinc-400 dark:text-zinc-500 text-sm py-4 text-center">
+                <div
+                    class="text-zinc-400 dark:text-zinc-500 text-sm py-4 text-center"
+                >
                     결과 확정이 필요한 경기가 없습니다.
                 </div>
             {/if}
@@ -162,7 +168,9 @@
                     >
                         승리 팀 확정하기
                     </h3>
-                    <p class="text-sm text-zinc-500 dark:text-zinc-400 text-center m-0">
+                    <p
+                        class="text-sm text-zinc-500 dark:text-zinc-400 text-center m-0"
+                    >
                         위 기록을 바탕으로 어느 팀을 승리 팀으로
                         기록하시겠습니까? (이 결정은 되돌릴 수 없습니다)
                     </p>
