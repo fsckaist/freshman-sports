@@ -256,12 +256,17 @@ export async function computeOrUpdateNextMatchWindow(triggerMatchId: string): Pr
     if (!sport) return;
     const durationMs = (sport.timeSlotInterval || 60) * 60 * 1000;
 
-    // 2. Find bracket nodes for this match to identify what follows
+    // 2. Delegate to internal helper (avoids duplicated bracket-traversal logic)
+    await propagateWindowForMatch(triggerMatchId, sportId, durationMs);
+}
+
+/** Internal helper: propagate schedule windows from a match to its next-round match(es). */
+async function propagateWindowForMatch(matchId: string, sportId: string, durationMs: number): Promise<void> {
     const relatedNodes = await db.select()
         .from(tournament_brackets)
         .where(and(
             eq(tournament_brackets.sportId, sportId),
-            eq(tournament_brackets.matchId, triggerMatchId)
+            eq(tournament_brackets.matchId, matchId)
         ));
 
     const nextMatchIdsToUpdate = new Set<string>();
@@ -286,24 +291,19 @@ export async function computeOrUpdateNextMatchWindow(triggerMatchId: string): Pr
             .where(eq(tournament_brackets.matchId, nextMatchId));
 
         if (targetNodes.length === 0) continue;
-        const round = targetNodes[0].round;
-        const prevRound = round - 1;
+        const prevRound = targetNodes[0].round - 1;
 
         const feederEndTimes: Date[] = [];
         let canCompute = true;
 
         for (const node of targetNodes) {
-            const compTime = await getBranchCompletionTime(sportId, prevRound, node.position * 2, durationMs);
-            if (compTime === "undetermined") {
-                canCompute = false; break;
-            }
-            if (compTime) feederEndTimes.push(compTime);
+            const c1 = await getBranchCompletionTime(sportId, prevRound, node.position * 2, durationMs);
+            if (c1 === "undetermined") { canCompute = false; break; }
+            if (c1) feederEndTimes.push(c1);
 
-            const compTime2 = await getBranchCompletionTime(sportId, prevRound, node.position * 2 + 1, durationMs);
-            if (compTime2 === "undetermined") {
-                canCompute = false; break;
-            }
-            if (compTime2) feederEndTimes.push(compTime2);
+            const c2 = await getBranchCompletionTime(sportId, prevRound, node.position * 2 + 1, durationMs);
+            if (c2 === "undetermined") { canCompute = false; break; }
+            if (c2) feederEndTimes.push(c2);
         }
 
         if (canCompute && feederEndTimes.length > 0) {
@@ -317,60 +317,13 @@ export async function computeOrUpdateNextMatchWindow(triggerMatchId: string): Pr
 
                 await ensureScheduleSlots(sportId, window.start, window.end);
 
-                // RECURSION: This match now potentially has a completion time (if it's a bye)
-                // or just had its window set. Actually, recursion is needed if we want to 
-                // ripple THROUGH matches that don't need scheduling (Byes).
-                await computeOrUpdateNextMatchWindowForMatch(nextMatchId, sportId, durationMs);
+                // Recurse: propagate to subsequent rounds (needed for Byes)
+                await propagateWindowForMatch(nextMatchId, sportId, durationMs);
             }
         } else {
             await db.update(matches).set({
                 scheduleWindowStart: null, scheduleWindowEnd: null, scheduleWindowDeadline: null
             }).where(eq(matches.id, nextMatchId));
-        }
-    }
-}
-
-/** Internal version to avoid re-fetching sport info */
-async function computeOrUpdateNextMatchWindowForMatch(matchId: string, sportId: string, durationMs: number): Promise<void> {
-    // Similar to above but uses the pre-fetched info
-    const relatedNodes = await db.select()
-        .from(tournament_brackets)
-        .where(and(
-            eq(tournament_brackets.sportId, sportId),
-            eq(tournament_brackets.matchId, matchId)
-        ));
-
-    const nextMatchIdsToUpdate = new Set<string>();
-    for (const node of relatedNodes) {
-        const nextRound = node.round + 1;
-        const nextPosition = Math.floor(node.position / 2);
-        const [nextNode] = await db.select({ matchId: tournament_brackets.matchId }).from(tournament_brackets)
-            .where(and(eq(tournament_brackets.sportId, sportId), eq(tournament_brackets.round, nextRound), eq(tournament_brackets.position, nextPosition))).limit(1);
-        if (nextNode?.matchId) nextMatchIdsToUpdate.add(nextNode.matchId);
-    }
-
-    for (const nextMatchId of nextMatchIdsToUpdate) {
-        const targetNodes = await db.select({ position: tournament_brackets.position, round: tournament_brackets.round }).from(tournament_brackets).where(eq(tournament_brackets.matchId, nextMatchId));
-        if (targetNodes.length === 0) continue;
-        const prevRound = targetNodes[0].round - 1;
-        const feederEndTimes: Date[] = [];
-        let canCompute = true;
-        for (const node of targetNodes) {
-            const c1 = await getBranchCompletionTime(sportId, prevRound, node.position * 2, durationMs);
-            if (c1 === "undetermined") { canCompute = false; break; }
-            if (c1) feederEndTimes.push(c1);
-            const c2 = await getBranchCompletionTime(sportId, prevRound, node.position * 2 + 1, durationMs);
-            if (c2 === "undetermined") { canCompute = false; break; }
-            if (c2) feederEndTimes.push(c2);
-        }
-
-        if (canCompute && feederEndTimes.length > 0) {
-            const window = computeWindowFromEnds(feederEndTimes);
-            if (window) {
-                await db.update(matches).set({ scheduleWindowStart: window.start, scheduleWindowEnd: window.end, scheduleWindowDeadline: window.deadline }).where(eq(matches.id, nextMatchId));
-                await ensureScheduleSlots(sportId, window.start, window.end);
-                await computeOrUpdateNextMatchWindowForMatch(nextMatchId, sportId, durationMs);
-            }
         }
     }
 }

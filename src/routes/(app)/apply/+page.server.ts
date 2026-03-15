@@ -74,7 +74,6 @@ export const load: PageServerLoad = async ({ locals }) => {
             buttonState = "cancel";
         } else if (isGenderMismatched) {
             buttonState = "disabled";
-            const reqLabel = sport.requiredGender === 'MALE_ONLY' ? "남성" : "여성";
         } else if (currentSpots >= sport.maxPlayers) {
             buttonState = "closed";
         }

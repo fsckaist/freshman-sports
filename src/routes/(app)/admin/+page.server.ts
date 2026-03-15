@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { sports, schedules, registers, users, rosters, matches, classes, tournament_brackets, system_config, sport_locations, type EventState } from '$lib/server/db/schema';
-import { eq, and, asc, isNull, isNotNull, or } from 'drizzle-orm';
+import { eq, and, asc, isNull, isNotNull, or, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad, Actions } from './$types';
 import { computeOrUpdateNextMatchWindow, propagateByeWindow, addWeekdays, ensureScheduleSlots } from '$lib/server/scheduleWindowHelper';
@@ -846,10 +846,21 @@ export const actions: Actions = {
                 const allPendingMatches = await db.select({ id: matches.id }).from(matches)
                     .where(and(eq(matches.status, 'PENDING_SCHEDULE'), eq(matches.sportId, sId)));
 
+                // Bulk-fetch bracket nodes for all pending matches to avoid N+1 queries
+                const pendingMatchIds = allPendingMatches.map(m => m.id);
+                const allBracketNodes = pendingMatchIds.length > 0
+                    ? await db.select({ matchId: tournament_brackets.matchId, round: tournament_brackets.round })
+                        .from(tournament_brackets)
+                        .where(inArray(tournament_brackets.matchId, pendingMatchIds))
+                    : [];
+
+                const bracketRoundMap = new Map<string, number>();
+                for (const node of allBracketNodes) {
+                    if (node.matchId) bracketRoundMap.set(node.matchId, node.round);
+                }
+
                 for (const m of allPendingMatches) {
-                    // Only update if it's round 1 (checked via tournament_brackets)
-                    const node = await db.select().from(tournament_brackets).where(eq(tournament_brackets.matchId, m.id)).limit(1);
-                    if (node[0]?.round === 1) {
+                    if (bracketRoundMap.get(m.id) === 1) {
                         await db.update(matches).set({
                             scheduleWindowStart: startDate,
                             scheduleWindowEnd: endDate,

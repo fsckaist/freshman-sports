@@ -10,8 +10,6 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
     // Get the session token from cookies
     const sessionToken = cookies.get('session');
 
-    // Add logging to debug the incoming session cookie
-    console.log('Session Cookie in Dashboard:', sessionToken);
 
     if (!sessionToken) {
         throw redirect(302, '/login');
@@ -173,55 +171,54 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
             hour12: false
         });
 
-        // QUERY 4: Fetch Players matching the specific roster for each match concurrently
-        const formattedAllMatches = await Promise.all(
-            userMatches.map(async (match) => {
-                let playersString = '';
-
-                if (userProfile.classId) {
-                    const playersInSport = await db.select({
-                        name: users.name
-                    })
-                        .from(rosters)
-                        .innerJoin(users, eq(rosters.userId, users.id))
-                        .where(and(
-                            eq(rosters.classId, userProfile.classId),
-                            eq(rosters.sportId, match.sportId)
-                        ));
-
-                    playersString = playersInSport.map(p => p.name || '알수없음').join(', ');
-                }
-
-                // Format the startTime to "03월 15일 14시 00분" format
-                // Intl.DateTimeFormat gives: "03. 15. 14:00" -> string replacement to match expectations
-                const d = match.time ? new Date(match.time) : new Date();
-                const mo = String(d.getMonth() + 1).padStart(2, '0');
-                const da = String(d.getDate()).padStart(2, '0');
-                const ho = String(d.getHours()).padStart(2, '0');
-                const mi = String(d.getMinutes()).padStart(2, '0');
-
-                const formattedTime = match.time ? `${mo}월 ${da}일 ${ho}시 ${mi}분` : "시간 조율 필요";
-
-                // Map status enum to Korean string
-                let statusKo = "예정";
-                if (match.status === "ONGOING") statusKo = "진행";
-                else if (match.status === "FINISHED") statusKo = "종료";
-                else if (match.status === "CANCELED") statusKo = "취소";
-                else if (match.status === "PENDING_SCHEDULE") statusKo = "일정 조율 필요";
-
-                return {
-                    id: match.id,
-                    statusOriginal: match.status,
-                    title: `${match.sportName} ${match.name || ''}`.trim(),
-                    time: formattedTime,
-                    status: statusKo,
-                    teamA: `${match.teamA}반`,
-                    teamB: `${match.teamB}반`,
-                    location: match.location || '미정',
-                    players: playersString || '선수 없음'
-                };
+        // QUERY 4: Pre-fetch all class rosters once to avoid N+1 queries per match
+        let rosterBySport = new Map<string, string[]>();
+        if (userProfile.classId) {
+            const allClassRosters = await db.select({
+                sportId: rosters.sportId,
+                playerName: users.name
             })
-        );
+                .from(rosters)
+                .innerJoin(users, eq(rosters.userId, users.id))
+                .where(eq(rosters.classId, userProfile.classId));
+
+            for (const r of allClassRosters) {
+                if (!rosterBySport.has(r.sportId)) rosterBySport.set(r.sportId, []);
+                if (r.playerName) rosterBySport.get(r.sportId)!.push(r.playerName);
+            }
+        }
+
+        const formattedAllMatches = userMatches.map((match) => {
+            const playersString = (rosterBySport.get(match.sportId) || []).join(', ');
+
+            // Format the startTime to "03월 15일 14시 00분" format
+            const d = match.time ? new Date(match.time) : new Date();
+            const mo = String(d.getMonth() + 1).padStart(2, '0');
+            const da = String(d.getDate()).padStart(2, '0');
+            const ho = String(d.getHours()).padStart(2, '0');
+            const mi = String(d.getMinutes()).padStart(2, '0');
+
+            const formattedTime = match.time ? `${mo}월 ${da}일 ${ho}시 ${mi}분` : "시간 조율 필요";
+
+            // Map status enum to Korean string
+            let statusKo = "예정";
+            if (match.status === "ONGOING") statusKo = "진행";
+            else if (match.status === "FINISHED") statusKo = "종료";
+            else if (match.status === "CANCELED") statusKo = "취소";
+            else if (match.status === "PENDING_SCHEDULE") statusKo = "일정 조율 필요";
+
+            return {
+                id: match.id,
+                statusOriginal: match.status,
+                title: `${match.sportName} ${match.name || ''}`.trim(),
+                time: formattedTime,
+                status: statusKo,
+                teamA: `${match.teamA}반`,
+                teamB: `${match.teamB}반`,
+                location: match.location || '미정',
+                players: playersString || '선수 없음'
+            };
+        });
 
         // Split into confirmed and pending
         const confirmedSchedules = formattedAllMatches.filter(m => m.statusOriginal !== "PENDING_SCHEDULE");

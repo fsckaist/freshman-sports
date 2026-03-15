@@ -327,13 +327,8 @@ export const actions: Actions = {
                 return fail(403, { message: "투표가 마감되었습니다." });
             }
 
-            // 2. Schedule Existence Check
-            const scheduleRecord = await db.select().from(schedules).where(eq(schedules.id, slotId)).limit(1);
-            if (scheduleRecord.length === 0) {
-                return fail(404, { message: "존재하지 않는 일정입니다." });
-            }
-
-            const targetSchedule = scheduleRecord[0];
+            // 2. Schedule Existence Check (reuse currentSchedule from above)
+            const targetSchedule = currentSchedule[0];
 
             // 3. Roster Check (Security)
             const isRostered = await db.select().from(rosters)

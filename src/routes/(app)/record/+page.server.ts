@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { matches, schedules, sports, classes, registers, rosters, users } from '$lib/server/db/schema';
-import { eq, and, or, sql, asc, isNotNull } from 'drizzle-orm';
+import { eq, and, or, sql, asc, isNotNull, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
@@ -63,7 +63,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
     // Fetch attendance for ALL matches to show in sidebar
     const allMatchIds = allMatches.map(m => m.id);
-    const allRegisters = await db
+    const allRegisters = allMatchIds.length > 0 ? await db
         .select({
             matchId: matches.id,
             userId: users.id,
@@ -78,10 +78,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         .innerJoin(matches, eq(matches.scheduleId, schedules.id))
         .where(
             and(
-                or(...allMatchIds.map(id => eq(matches.id, id))),
+                inArray(matches.id, allMatchIds),
                 isNotNull(matches.scheduleId)
             )
-        );
+        ) : [];
 
     // Map registers back to matches
     const matchesWithAttendance = allMatches.map(m => {

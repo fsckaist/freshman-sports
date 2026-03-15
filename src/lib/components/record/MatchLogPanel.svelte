@@ -1059,7 +1059,7 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 max-w-full"
         >
             <div
                 class="flex flex-col gap-5 items-center justify-center p-[3.125rem] relative shrink-0 w-full text-center"
@@ -1129,7 +1129,7 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[31.3125rem] max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 max-w-full"
         >
             <div
                 class="flex flex-col gap-5 items-center justify-center p-[3.125rem] relative shrink-0 w-full text-center"
