@@ -132,7 +132,14 @@ export const actions: Actions = {
             return fail(400, { message: "종목 아이디가 제공되지 않았어요." });
         }
 
-        // Check 1: User is already in the roster for this sport
+        // Check 1: Event State Check (Registration must be ONGOING)
+        const configs = await db.select().from(system_config).limit(1);
+        const eventState = configs[0]?.eventState ?? 'REGISTRATION';
+        if (eventState !== 'REGISTRATION') {
+            return fail(403, { message: "지금은 신청 기간이 아니에요." });
+        }
+
+        // Check 2: User is already in the roster for this sport
         const existingRoster = await db.select()
             .from(rosters)
             .where(
@@ -207,6 +214,13 @@ export const actions: Actions = {
 
         if (!sportId) {
             return fail(400, { message: "종목 아이디가 제공되지 않았어요." });
+        }
+
+        // State Check: Only allow apply/cancel during REGISTRATION
+        const configs = await db.select().from(system_config).limit(1);
+        const eventState = configs[0]?.eventState ?? 'REGISTRATION';
+        if (eventState !== 'REGISTRATION') {
+            return fail(403, { message: "지금은 신청 취소 기간이 아니에요." });
         }
 
         // Delete from rosters

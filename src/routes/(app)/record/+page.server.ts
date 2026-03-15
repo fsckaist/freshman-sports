@@ -231,7 +231,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 };
 
 export const actions: Actions = {
-    registerPlayer: async ({ request }) => {
+    registerPlayer: async ({ request, locals }) => {
+        const userAction = locals.user;
+        if (!userAction || (!userAction.isManager && !userAction.isAdmin)) {
+            return fail(403, { message: '권한이 없습니다.' });
+        }
+
         const data = await request.formData();
         const matchId = data.get('matchId')?.toString();
         const scanType = data.get('scanType')?.toString();
@@ -333,7 +338,12 @@ export const actions: Actions = {
         };
     },
 
-    startMatch: async ({ request }) => {
+    startMatch: async ({ request, locals }) => {
+        const userAction = locals.user;
+        if (!userAction || (!userAction.isManager && !userAction.isAdmin)) {
+            return fail(403, { message: '권한이 없습니다.' });
+        }
+
         const data = await request.formData();
         const matchId = data.get('matchId')?.toString();
 
@@ -346,7 +356,12 @@ export const actions: Actions = {
         return { success: true };
     },
 
-    finalizeMatch: async ({ request }) => {
+    finalizeMatch: async ({ request, locals }) => {
+        const userAction = locals.user;
+        if (!userAction || (!userAction.isManager && !userAction.isAdmin)) {
+            return fail(403, { message: '권한이 없습니다.' });
+        }
+
         const data = await request.formData();
         const matchId = data.get('matchId')?.toString();
         const scoreA = parseInt(data.get('scoreA')?.toString() || '0');
@@ -368,7 +383,12 @@ export const actions: Actions = {
         return { success: true };
     },
 
-    forfeitMatch: async ({ request }) => {
+    forfeitMatch: async ({ request, locals }) => {
+        const userAction = locals.user;
+        if (!userAction || (!userAction.isManager && !userAction.isAdmin)) {
+            return fail(403, { message: '권한이 없습니다.' });
+        }
+
         const data = await request.formData();
         const matchId = data.get('matchId')?.toString();
 
