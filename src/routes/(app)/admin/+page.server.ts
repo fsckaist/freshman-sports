@@ -6,6 +6,135 @@ import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad, Actions } from './$types';
 import { computeOrUpdateNextMatchWindow, propagateByeWindow, addWeekdays, ensureScheduleSlots } from '$lib/server/scheduleWindowHelper';
 
+/** 
+ * Shared helper to ensure a Match object exists and is synchronized with the bracket nodes 
+ * for a specific round and position. Handles automated GF/BM naming and bye propagation.
+ */
+async function syncBracketMatch(sportId: string, targetRound: number, targetPosition: number) {
+    if (targetRound >= 6) return; // No matches for the result podium
+
+    const pIdx = Math.floor(targetPosition / 2);
+    const s1Pos = pIdx * 2;
+    const s2Pos = pIdx * 2 + 1;
+
+    // Get both slots in this match
+    const matchSlots = await db.select().from(tournament_brackets).where(and(
+        eq(tournament_brackets.sportId, sportId),
+        eq(tournament_brackets.round, targetRound),
+        or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
+    ));
+
+    if (matchSlots.length !== 2) return;
+
+    const s1 = matchSlots.find(s => s.position === s1Pos)!;
+    const s2 = matchSlots.find(s => s.position === s2Pos)!;
+
+    const classA = s1.classId;
+    const classB = s2.classId;
+    const isAExcl = s1.isEliminatedSlot;
+    const isBExcl = s2.isEliminatedSlot;
+
+    let autoWinnerId: string | null = null;
+    let bothEliminated = false;
+    let hasInertOpponent = false;
+
+    // Support BYE/Automatic logic
+    if (classA && isBExcl) {
+        autoWinnerId = classA;
+        hasInertOpponent = true;
+    } else if (classB && isAExcl) {
+        autoWinnerId = classB;
+        hasInertOpponent = true;
+    } else if (isAExcl && isBExcl) {
+        bothEliminated = true;
+        hasInertOpponent = true;
+    }
+
+    let mId = s1.matchId || s2.matchId;
+    const roundPrefixes: Record<number, string> = { 1: 'R32', 2: 'R16', 3: 'QF', 4: 'SF', 5: 'GF' };
+    let prefix = roundPrefixes[targetRound] || `R${targetRound}`;
+    if (targetRound === 5 && pIdx === 1) prefix = 'BM'; // Bronze Match
+
+    if (hasInertOpponent) {
+        const winnerId = bothEliminated ? null : autoWinnerId;
+        if (!mId) {
+            const [newMatch] = await db.insert(matches).values({
+                sportId,
+                status: 'FINISHED',
+                isVerified: true,
+                name: `${prefix}-M${pIdx + 1}`,
+                classAId: classA,
+                classBId: classB,
+                winnerClassId: winnerId,
+                matchNotes: bothEliminated ? '양측 우승자 없음으로 인한 동시 탈락' : '상대측 우승자 없음으로 인한 부전승/자동승리'
+            }).returning({ id: matches.id });
+            mId = newMatch.id;
+
+            await db.update(tournament_brackets).set({ matchId: mId }).where(and(
+                eq(tournament_brackets.sportId, sportId),
+                eq(tournament_brackets.round, targetRound),
+                or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
+            ));
+        } else {
+            await db.update(matches).set({
+                status: 'FINISHED',
+                isVerified: true,
+                classAId: classA,
+                classBId: classB,
+                winnerClassId: winnerId,
+            }).where(eq(matches.id, mId));
+        }
+
+        // Propagate further if needed
+        const nextTargetRound = targetRound + 1;
+        let nextTargetPosition = Math.floor(targetPosition / 2);
+        if (targetRound === 5) {
+            if (targetPosition < 2) nextTargetPosition = 0; // GF Winner -> 1st
+            else nextTargetPosition = 2; // BM Winner -> 3rd
+        }
+
+        const [grandTargetNode] = await db.select().from(tournament_brackets).where(and(
+            eq(tournament_brackets.sportId, sportId),
+            eq(tournament_brackets.round, nextTargetRound),
+            eq(tournament_brackets.position, nextTargetPosition)
+        )).limit(1);
+
+        if (grandTargetNode) {
+            await db.update(tournament_brackets).set({
+                classId: winnerId,
+                isEliminatedSlot: bothEliminated,
+                status: bothEliminated ? 'lose' : 'default'
+            }).where(eq(tournament_brackets.id, grandTargetNode.id));
+            await db.update(tournament_brackets).set({ status: (classA === winnerId && winnerId) ? 'win' : 'lose' }).where(eq(tournament_brackets.id, s1.id));
+            await db.update(tournament_brackets).set({ status: (classB === winnerId && winnerId) ? 'win' : 'lose' }).where(eq(tournament_brackets.id, s2.id));
+            
+            await syncBracketMatch(sportId, nextTargetRound, nextTargetPosition);
+        }
+        if (mId) {
+            try { await propagateByeWindow(mId); } catch (e) { console.error('propagateByeWindow error:', e); }
+        }
+    } else if (classA || classB) {
+        if (!mId) {
+            const [newMatch] = await db.insert(matches).values({
+                sportId,
+                status: 'PENDING_SCHEDULE',
+                name: `${prefix}-M${pIdx + 1}`,
+                classAId: classA,
+                classBId: classB,
+            }).returning({ id: matches.id });
+            mId = newMatch.id;
+            await db.update(tournament_brackets).set({ matchId: mId }).where(and(
+                eq(tournament_brackets.sportId, sportId),
+                eq(tournament_brackets.round, targetRound),
+                or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
+            ));
+        } else {
+            await db.update(matches).set({ classAId: classA, classBId: classB }).where(eq(matches.id, mId));
+        }
+        if (mId) await computeOrUpdateNextMatchWindow(mId);
+    }
+}
+
 export const load: PageServerLoad = async ({ url, locals }) => {
     try {
         const user = locals.user;
@@ -312,7 +441,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     teamATotal: activeSport.minPlayers,
                     teamBTotal: activeSport.minPlayers
                 },
-                matchNotes: matchRecord[0]?.matchNotes
+                matchNotes: matchRecord[0]?.matchNotes,
+                recordStructure: activeSport.recordStructure
             };
         }
 
@@ -439,19 +569,37 @@ export const actions: Actions = {
             const sportId = formData.get('sportId')?.toString();
             if (!sportId) return fail(400, { message: '종목 ID 누락' });
 
-            // Find all PENDING_SCHEDULE matches where exactly one class slot is null (bye match)
             const allPending = await db.select().from(matches).where(
                 and(eq(matches.sportId, sportId), eq(matches.status, 'PENDING_SCHEDULE'))
             );
 
-            const byeMatches = allPending.filter(m =>
-                (m.classAId === null && m.classBId !== null) ||
-                (m.classAId !== null && m.classBId === null)
-            );
+            if (allPending.length === 0) return { success: true, processedCount: 0 };
+
+            const matchIds = allPending.map(m => m.id).filter(id => id !== null) as string[];
+            if (matchIds.length === 0) return { success: true, processedCount: 0 };
+
+            const allNodes = await db.select().from(tournament_brackets).where(inArray(tournament_brackets.matchId, matchIds));
+            const nodesByMatch = new Map<string, typeof allNodes>();
+            for (const node of allNodes) {
+                if (node.matchId) {
+                    if (!nodesByMatch.has(node.matchId)) nodesByMatch.set(node.matchId, []);
+                    nodesByMatch.get(node.matchId)!.push(node);
+                }
+            }
+
+            const byeMatches = allPending.filter(m => {
+                const nodes = nodesByMatch.get(m.id) || [];
+                // If one side has isEliminatedSlot: true and no classId, it's a legitimate bye.
+                return nodes.some(n => n.isEliminatedSlot && n.classId === null);
+            });
 
             let count = 0;
             for (const match of byeMatches) {
-                const winnerClassId = match.classAId ?? match.classBId!;
+                const nodes = nodesByMatch.get(match.id)!;
+                const winnerNode = nodes.find(n => n.classId !== null);
+                if (!winnerNode) continue; // Both sides bye? highly unlikely but skip.
+
+                const winnerClassId = winnerNode.classId!;
 
                 // Mark the match as finished and verified with the automatic winner
                 await db.update(matches).set({
@@ -484,6 +632,9 @@ export const actions: Actions = {
                             await db.update(tournament_brackets)
                                 .set({ classId: winnerClassId })
                                 .where(eq(tournament_brackets.id, nextNodes[0].id));
+                            
+                            // CALL SHARED HELPER
+                            await syncBracketMatch(node.sportId, nextRound, nextPosition);
                         }
                     }
 
@@ -491,16 +642,16 @@ export const actions: Actions = {
                         .set({ status: newStatus })
                         .where(eq(tournament_brackets.id, node.id));
                 }
-
-                count++;
-            }
-
-            // Propagate schedule windows for bye-advanced matches
-            for (const match of byeMatches) {
-                try { await propagateByeWindow(match.id); } catch (e) { console.error('propagateByeWindow error:', e); }
-            }
-
-            return { success: true, processedCount: count };
+ 
+                 count++;
+             }
+ 
+             // Propagate schedule windows for bye-advanced matches (Optional, syncBracketMatch handles this internally too)
+             for (const match of byeMatches) {
+                 try { await propagateByeWindow(match.id); } catch (e) { console.error('propagateByeWindow error:', e); }
+             }
+ 
+             return { success: true, processedCount: count };
         } catch (e) {
             console.error('processByeMatches error:', e);
             return fail(500);
@@ -588,149 +739,7 @@ export const actions: Actions = {
                 const anyNode = currentNodes[0];
                 const sportId = anyNode.sportId;
 
-                // Bracket progression logic helper
-                const propagateBracketProgress = async (round: number, position: number) => {
-                    const nextRound = round + 1;
-                    const nextPosition = Math.floor(position / 2);
 
-                    // 1. Get the target node for the next round
-                    const [targetNode] = await db.select().from(tournament_brackets).where(and(
-                        eq(tournament_brackets.sportId, sportId),
-                        eq(tournament_brackets.round, nextRound),
-                        eq(tournament_brackets.position, nextPosition)
-                    )).limit(1);
-
-                    if (!targetNode) return; // Top of bracket reached
-
-                    // 2. Find both slots for the targetNode's level (to see if match can be formed)
-                    const pIdx = Math.floor(nextPosition / 2);
-                    const s1Pos = pIdx * 2;
-                    const s2Pos = pIdx * 2 + 1;
-
-                    const matchSlots = await db.select().from(tournament_brackets).where(and(
-                        eq(tournament_brackets.sportId, sportId),
-                        eq(tournament_brackets.round, nextRound),
-                        or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
-                    ));
-
-                    if (matchSlots.length !== 2) return;
-
-                    const s1 = matchSlots.find(s => s.position === s1Pos)!;
-                    const s2 = matchSlots.find(s => s.position === s2Pos)!;
-
-                    // 3. Check for special cases: Auto-win or Double-elimination
-                    const classA = s1.classId;
-                    const classB = s2.classId;
-                    const isAExcl = s1.isEliminatedSlot;
-                    const isBExcl = s2.isEliminatedSlot;
-
-                    let autoWinnerId: string | null = null;
-                    let bothEliminated = false;
-                    let hasInertOpponent = false;
-
-                    if (classA && isBExcl) {
-                        autoWinnerId = classA;
-                        hasInertOpponent = true;
-                    } else if (classB && isAExcl) {
-                        autoWinnerId = classB;
-                        hasInertOpponent = true;
-                    } else if (isAExcl && isBExcl) {
-                        bothEliminated = true;
-                        hasInertOpponent = true;
-                    }
-
-                    // Handle the match record for this round
-                    let mId = s1.matchId || s2.matchId;
-
-                    if (hasInertOpponent) {
-                        // This match is "Automated"
-                        const winnerId = bothEliminated ? null : autoWinnerId;
-
-                        if (!mId) {
-                            const [newMatch] = await db.insert(matches).values({
-                                sportId,
-                                status: 'FINISHED',
-                                isVerified: true,
-                                name: `Round ${nextRound} - Match ${pIdx + 1}`,
-                                classAId: classA,
-                                classBId: classB,
-                                winnerClassId: winnerId,
-                                matchNotes: bothEliminated ? '양측 우승자 없음으로 인한 동시 탈락' : '상대측 우승자 없음으로 인한 부전승/자동승리'
-                            }).returning({ id: matches.id });
-                            mId = newMatch.id;
-
-                            await db.update(tournament_brackets)
-                                .set({ matchId: mId })
-                                .where(and(
-                                    eq(tournament_brackets.sportId, sportId),
-                                    eq(tournament_brackets.round, nextRound),
-                                    or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
-                                ));
-                        } else {
-                            await db.update(matches).set({
-                                status: 'FINISHED',
-                                isVerified: true,
-                                classAId: classA,
-                                classBId: classB,
-                                winnerClassId: winnerId,
-                                matchNotes: bothEliminated ? '양측 우승자 없음으로 인한 동시 탈락' : '상대측 우승자 없음으로 인한 부전승/자동승리'
-                            }).where(eq(matches.id, mId));
-                        }
-
-                        // Advance to next round recursively
-                        const nextTargetRound = nextRound + 1;
-                        const nextTargetPosition = Math.floor(nextPosition / 2);
-                        const [grandTargetNode] = await db.select().from(tournament_brackets).where(and(
-                            eq(tournament_brackets.sportId, sportId),
-                            eq(tournament_brackets.round, nextTargetRound),
-                            eq(tournament_brackets.position, nextTargetPosition)
-                        )).limit(1);
-
-                        if (grandTargetNode) {
-                            await db.update(tournament_brackets).set({
-                                classId: winnerId,
-                                isEliminatedSlot: bothEliminated,
-                                status: bothEliminated ? 'lose' : 'default'
-                            }).where(eq(tournament_brackets.id, grandTargetNode.id));
-
-                            // Set win/lose status for current nodes
-                            await db.update(tournament_brackets).set({ status: classA === winnerId && winnerId ? 'win' : 'lose' }).where(eq(tournament_brackets.id, s1.id));
-                            await db.update(tournament_brackets).set({ status: classB === winnerId && winnerId ? 'win' : 'lose' }).where(eq(tournament_brackets.id, s2.id));
-
-                            await propagateBracketProgress(nextRound, nextPosition);
-                        }
-                        // Trigger schedule window updates for the newly finished/updated automated match
-                        if (mId) {
-                            try { await propagateByeWindow(mId); } catch (e) { console.error('propagateByeWindow error:', e); }
-                        }
-                    } else if (classA || classB) {
-                        // Create match even if only one side is decided
-                        if (!mId) {
-                            const [newMatch] = await db.insert(matches).values({
-                                sportId,
-                                status: 'PENDING_SCHEDULE',
-                                name: `Round ${nextRound} - Match ${pIdx + 1}`,
-                                classAId: classA,
-                                classBId: classB,
-                            }).returning({ id: matches.id });
-                            mId = newMatch.id;
-
-                            await db.update(tournament_brackets)
-                                .set({ matchId: mId })
-                                .where(and(
-                                    eq(tournament_brackets.sportId, sportId),
-                                    eq(tournament_brackets.round, nextRound),
-                                    or(eq(tournament_brackets.position, s1Pos), eq(tournament_brackets.position, s2Pos))
-                                ));
-                        } else {
-                            await db.update(matches)
-                                .set({ classAId: classA, classBId: classB })
-                                .where(eq(matches.id, mId));
-                        }
-                        // Trigger schedule window updates for the newly created partial match
-                        if (mId) await computeOrUpdateNextMatchWindow(mId);
-                    }
-                };
 
                 for (const node of currentNodes) {
                     let newStatus: "win" | "lose" | "default" = "lose";
@@ -738,9 +747,15 @@ export const actions: Actions = {
                     if (winnerClassId && node.classId === winnerClassId) {
                         newStatus = "win";
 
-                        // Advance to the next round slot
+                        // Advance to the next round slot (Winner's progression)
                         const nextRound = node.round + 1;
-                        const nextPosition = Math.floor(node.position / 2);
+                        let nextPosition = Math.floor(node.position / 2);
+
+                        // Special mapping for Round 6 winners
+                        if (node.round === 5) {
+                            if (node.position < 2) nextPosition = 0;      // GF Winner -> 1st place (Pos 0)
+                            else nextPosition = 2;                        // BM Winner -> 3rd place (Pos 2)
+                        }
 
                         const nextNodeResult = await db.select().from(tournament_brackets).where(and(
                             eq(tournament_brackets.sportId, sportId),
@@ -750,8 +765,51 @@ export const actions: Actions = {
 
                         if (nextNodeResult.length > 0) {
                             await db.update(tournament_brackets)
-                                .set({ classId: winnerClassId, isEliminatedSlot: false })
+                                .set({ classId: winnerClassId, isEliminatedSlot: false, status: 'default' })
                                 .where(eq(tournament_brackets.id, nextNodeResult[0].id));
+                            
+                            // CALL SHARED HELPER
+                            await syncBracketMatch(sportId, nextRound, nextPosition);
+                        }
+                    } else if (winnerClassId && node.classId !== winnerClassId) {
+                        if (node.round === 4) {
+                            // Advance Semifinal LOSERS to the Bronze Match (Round 5, Positions 2 and 3)
+                            const nextRound = 5;
+                            const nextPosition = Math.floor(node.position / 2) + 2;
+
+                            const bronzeNodeResult = await db.select().from(tournament_brackets).where(and(
+                                eq(tournament_brackets.sportId, sportId),
+                                eq(tournament_brackets.round, nextRound),
+                                eq(tournament_brackets.position, nextPosition)
+                            )).limit(1);
+
+                             if (bronzeNodeResult.length > 0) {
+                                await db.update(tournament_brackets)
+                                    .set({ classId: node.classId, isEliminatedSlot: false, status: 'default' })
+                                    .where(eq(tournament_brackets.id, bronzeNodeResult[0].id));
+
+                                // CALL SHARED HELPER
+                                await syncBracketMatch(sportId, nextRound, nextPosition);
+                            }
+                        } else if (node.round === 5 && node.position < 2) {
+                            // Advance GF LOSER to 2nd place (Round 6, Position 1)
+                            const nextRound = 6;
+                            const nextPosition = 1;
+
+                            const runnerUpNodeResult = await db.select().from(tournament_brackets).where(and(
+                                eq(tournament_brackets.sportId, sportId),
+                                eq(tournament_brackets.round, nextRound),
+                                eq(tournament_brackets.position, nextPosition)
+                            )).limit(1);
+
+                            if (runnerUpNodeResult.length > 0) {
+                                await db.update(tournament_brackets)
+                                    .set({ classId: node.classId, isEliminatedSlot: false, status: 'default' })
+                                    .where(eq(tournament_brackets.id, runnerUpNodeResult[0].id));
+                                
+                                // Result column has no matches, but we call sync for consistency (will return early)
+                                await syncBracketMatch(sportId, nextRound, nextPosition);
+                            }
                         }
                     }
 
@@ -775,11 +833,27 @@ export const actions: Actions = {
                         await db.update(tournament_brackets)
                             .set({ isEliminatedSlot: true, classId: null })
                             .where(eq(tournament_brackets.id, nextNodeResult[0].id));
+
+                        await syncBracketMatch(sportId, nextRound, nextPosition);
+                    }
+                    
+                    // If it was the semifinal and both lose, eliminate both bronze slots
+                    if (anyNode.round === 4) {
+                        const bronzePos1 = Math.floor((anyNode.position * 2) / 2) + 2; // Position 2
+                        const bronzePos2 = Math.floor(((anyNode.position * 2) + 1) / 2) + 2; // Position 3
+                        
+                        await db.update(tournament_brackets)
+                            .set({ isEliminatedSlot: true, classId: null })
+                            .where(and(
+                                eq(tournament_brackets.sportId, sportId),
+                                eq(tournament_brackets.round, 5),
+                                inArray(tournament_brackets.position, [bronzePos1, bronzePos2])
+                            ));
+
+                        await syncBracketMatch(sportId, 5, bronzePos1);
+                        await syncBracketMatch(sportId, 5, bronzePos2);
                     }
                 }
-
-                // Kick off the propagation check for the next level
-                await propagateBracketProgress(anyNode.round, anyNode.position);
             }
 
             // Auto-compute schedule window for the next-round match

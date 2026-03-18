@@ -44,7 +44,7 @@
                     2026 봄학기
                 </p>
                 <h1
-                    class="font-pretendard font-bold relative shrink-0 text-5xl md:text-[4rem] tracking-tight leading-[1.1]"
+                    class="font-pretendard font-bold relative shrink-0 text-[2.5rem] md:text-[4rem] tracking-tight leading-[1.1]"
                 >
                     새내기 체육 대회
                 </h1>

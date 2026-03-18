@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, boolean, timestamp, text, pgEnum, unique } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, integer, boolean, timestamp, text, pgEnum, unique, jsonb } from "drizzle-orm/pg-core";
 
 // Enums matching schema
 export const matchStatusEnum = pgEnum("match_status", ["PENDING_SCHEDULE", "SCHEDULED", "ONGOING", "FINISHED", "CANCELED"]);
@@ -32,6 +32,8 @@ export const sports = pgTable("sports", {
     dailyEndTime: varchar("daily_end_time").default("16:00"),   // e.g., "16:00"
     timeSlotInterval: integer("time_slot_interval").default(60), // in minutes
     maxParallelMatches: integer("max_parallel_matches").default(1),
+
+    recordStructure: jsonb("record_structure"),
 });
 
 export const users = pgTable("users", {

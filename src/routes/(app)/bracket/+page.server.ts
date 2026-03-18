@@ -66,21 +66,37 @@ export const load: PageServerLoad = async ({ locals }) => {
             const isLastRound = i === roundNumbers.length - 1;
 
             const matchCount = Math.ceil(nodes.length / 2);
-            let title = `Round ${rNum}`;
+            let title = `라운드 ${rNum}`;
 
-            if (isLastRound && nodes.length === 1) title = "Winner";
-            else if (matchCount === 1) title = "Finals";
-            else if (matchCount === 2) title = "Semifinals";
-            else if (matchCount === 4) title = "Quarterfinals";
-            else if (matchCount === 8) title = "Round of 16";
-            else if (matchCount === 16) title = "Round of 32";
+            if (isLastRound) title = "최종 결과";
+            else if (rNum === 5) title = "결승 및 3,4위전";
+            else if (matchCount === 1) title = "결승";
+            else if (matchCount === 2) title = "준결승";
+            else if (matchCount === 4) title = "8강";
+            else if (matchCount === 8) title = "16강";
+            else if (matchCount === 16) title = "32강";
 
             const matches = [];
-            if (isLastRound && nodes.length === 1) {
+            if (isLastRound) {
+                // Podium results (Round 6 with 3 slots)
+                for (let j = 0; j < nodes.length; j++) {
+                    matches.push({
+                        team1: nodes[j].data,
+                        team2: { className: "0", state: "default", notAvailable: true }
+                    });
+                }
+            } else if (rNum === 5) {
+                // Bracket Final and Bronze Match
                 matches.push({
-                    team1: nodes[0].data,
-                    team2: { className: "0", state: "default", notAvailable: true } // Visual padding
+                    team1: nodes[0]?.data || { className: "0", state: "default" },
+                    team2: nodes[1]?.data || { className: "0", state: "default" }
                 });
+                if (nodes.length > 2) {
+                    matches.push({
+                        team1: nodes[2]?.data || { className: "0", state: "default" },
+                        team2: nodes[3]?.data || { className: "0", state: "default" }
+                    });
+                }
             } else {
                 for (let j = 0; j < nodes.length; j += 2) {
                     matches.push({

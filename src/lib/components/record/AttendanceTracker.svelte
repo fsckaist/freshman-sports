@@ -66,11 +66,11 @@
 </script>
 
 <div
-    class="flex gap-4 w-full h-[10.5rem] bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden"
+    class="flex w-full h-[10.5rem] bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-100 dark:border-zinc-800 overflow-hidden"
 >
     <!-- Left: Vertical Tabs -->
     <div
-        class="flex-1 bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col"
+        class="flex-4 bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 flex flex-col"
     >
         {#each tabs as tab}
             <button
@@ -99,7 +99,7 @@
 
     <!-- Right: Content Area -->
     <div
-        class="flex-2 flex flex-col p-3 justify-between items-center text-center"
+        class="flex-6 flex flex-col p-3 justify-between items-center text-center"
     >
         <div class="flex flex-col items-center justify-center flex-1">
             <h3 class="text-[1rem] font-bold text-zinc-800 dark:text-zinc-100">

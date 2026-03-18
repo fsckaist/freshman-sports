@@ -33,11 +33,13 @@
 </script>
 
 <div
-    class="flex flex-col lg:flex-row gap-6 lg:gap-[1.875rem] w-full h-full relative lg:overflow-hidden"
+    class="flex flex-col lg:flex-row gap-6 lg:gap-[1.875rem] w-full lg:h-full relative lg:overflow-hidden"
 >
     <!-- Left Column: Match Sidebar Area -->
     <div
-        class="flex flex-col flex-1 lg:w-[25rem] lg:h-full lg:overflow-hidden min-w-0"
+        class="flex flex-col {isScheduleCollapsed
+            ? 'flex-none'
+            : 'flex-1'} lg:flex-1 lg:w-[25rem] lg:h-full lg:overflow-hidden min-w-0"
     >
         <!-- Sidebar Title (Toggleable) -->
         <button
@@ -88,7 +90,7 @@
                     class="flex-1 min-h-0 bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none border border-zinc-200 dark:border-zinc-800 p-[0.625rem] overflow-hidden flex flex-col"
                 >
                     <div
-                        class="flex-1 lg:overflow-y-auto hide-scrollbar p-[0.625rem]"
+                        class="flex-1 overflow-y-auto hide-scrollbar p-[0.625rem]"
                     >
                         <MatchSidebar
                             matches={filteredMatches}
@@ -102,7 +104,7 @@
 
     <!-- Right Column: Active Match Details Area -->
     <div
-        class="flex-1 flex flex-col lg:h-full min-h-0 relative lg:overflow-hidden gap-6"
+        class="flex-none lg:flex-1 flex flex-col lg:h-full min-h-0 relative lg:overflow-hidden gap-6"
     >
         {#if data.activeMatchDetails}
             <!-- Attendance Management Section -->
@@ -142,7 +144,9 @@
 
             <!-- Match Log/Record Section -->
             <div
-                class="flex-1 flex flex-col lg:h-full lg:overflow-hidden min-h-0 min-w-0"
+                class="{isLogCollapsed
+                    ? 'flex-none'
+                    : 'flex-none lg:flex-1'} flex flex-col lg:h-full lg:overflow-hidden min-h-0 min-w-0"
             >
                 <button
                     class="group flex items-center gap-[0.625rem] mb-[1.25rem] shrink-0 w-full border-none bg-transparent p-0 cursor-pointer text-left"
@@ -167,9 +171,9 @@
                 {#if !isLogCollapsed}
                     <div
                         transition:slide
-                        class="flex-1 flex flex-col lg:h-full lg:overflow-hidden min-h-0 bg-white dark:bg-zinc-900 rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none border border-zinc-200 dark:border-zinc-800"
+                        class="flex-none lg:flex-1 flex flex-col lg:h-full lg:overflow-hidden min-h-0"
                     >
-                        <div class="flex-1 lg:overflow-y-auto hide-scrollbar">
+                        <div class="flex-none lg:flex-1 lg:overflow-y-auto hide-scrollbar">
                             <MatchLogPanel
                                 activeMatch={data.activeMatchDetails}
                             />

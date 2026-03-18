@@ -25,9 +25,9 @@ async function main() {
             process.exit(1);
         }
 
-        // Fetch or create 12 classes
+        // Fetch or create 31 classes
         let allClasses = await db.select().from(schema.classes);
-        const requiredClassNumbers = Array.from({ length: 12 }, (_, i) => i + 1);
+        const requiredClassNumbers = Array.from({ length: 31 }, (_, i) => i + 1);
         const existingClassNumbers = new Set(allClasses.map((c) => c.classNumber));
 
         const classesToInsert = requiredClassNumbers
@@ -40,8 +40,8 @@ async function main() {
             allClasses = await db.select().from(schema.classes);
         }
 
-        const classPool = allClasses.slice(0, 12); // Use first 12 classes
-        if (classPool.length < 12) {
+        const classPool = allClasses.slice(0, 31); // Use first 31 classes
+        if (classPool.length < 31) {
             throw new Error("Not enough classes");
         }
 
@@ -50,17 +50,16 @@ async function main() {
         for (const sport of allSports) {
             console.log(`- Generating bracket for ${sport.name}`);
 
-            // We want a 16-slot Round 1
-            // 12 classes means 4 byes.
-            const slotsCount = 16;
+            // We want a 32-slot Round 1
+            // 31 classes means 1 bye at the end.
+            const slotsCount = 32;
             let currentClassIndex = 0;
 
             // Create the first round configuration
-            // A common way to place 4 byes is at specific positions.
             const round1Nodes: typeof schema.tournament_brackets.$inferInsert[] = [];
 
-            // To make it look balanced, maybe put byes at pos 1, 6, 9, 14
-            const byePositions = new Set([1, 6, 9, 14]);
+            // Bye at the very last position
+            const byePositions = new Set([31]);
 
             for (let i = 0; i < slotsCount; i++) {
                 if (byePositions.has(i)) {
@@ -158,28 +157,82 @@ async function main() {
                             classId: winnerClassId
                         });
                     }
-                    if (r < 5) fullBracket.push(nextRound);
+                    if (r < 4) fullBracket.push(nextRound);
                 } else if (r === 4) {
-                    const currentRound = fullBracket[r - 1];
+                    const currentRound = fullBracket[r - 1]; // Semifinals
                     const nextRound: typeof schema.tournament_brackets.$inferInsert[] = [];
-                    // Final winner
-                    const node1 = currentRound[0];
-                    const node2 = currentRound[1];
-                    let winnerClassId = null;
-                    if (node1.classId && node2.classId && Math.random() > 0.5) {
+                    
+                    // Match 1: Pos 0 vs Pos 1 -> Winner to GF (Pos 0), Loser to BM (Pos 2)
+                    const sf1_1 = currentRound[0];
+                    const sf1_2 = currentRound[1];
+                    let gf1_winner = null;
+                    let bm1_loser = null;
+                    
+                    if (sf1_1?.classId && sf1_2?.classId && Math.random() > 0.5) {
                         const oneWins = Math.random() > 0.5;
-                        winnerClassId = oneWins ? node1.classId : node2.classId;
-                        node1.status = oneWins ? "win" : "lose";
-                        node2.status = oneWins ? "lose" : "win";
+                        gf1_winner = oneWins ? sf1_1.classId : sf1_2.classId;
+                        bm1_loser = oneWins ? sf1_2.classId : sf1_1.classId;
+                        sf1_1.status = oneWins ? "win" : "lose";
+                        sf1_2.status = oneWins ? "lose" : "win";
                     }
-                    nextRound.push({
-                        sportId: sport.id,
-                        round: 5,
-                        position: 0,
-                        isEliminatedSlot: false,
-                        status: "default",
-                        classId: winnerClassId
-                    });
+
+                    // Match 2: Pos 2 vs Pos 3 -> Winner to GF (Pos 1), Loser to BM (Pos 3)
+                    const sf2_1 = currentRound[2];
+                    const sf2_2 = currentRound[3];
+                    let gf2_winner = null;
+                    let bm2_loser = null;
+                    
+                    if (sf2_1?.classId && sf2_2?.classId && Math.random() > 0.5) {
+                        const oneWins = Math.random() > 0.5;
+                        gf2_winner = oneWins ? sf2_1.classId : sf2_2.classId;
+                        bm2_loser = oneWins ? sf2_2.classId : sf2_1.classId;
+                        sf2_1.status = oneWins ? "win" : "lose";
+                        sf2_2.status = oneWins ? "lose" : "win";
+                    }
+
+                    // Grand Finals Slots (Pos 0, 1)
+                    nextRound.push({ sportId: sport.id, round: 5, position: 0, isEliminatedSlot: false, status: "default", classId: gf1_winner });
+                    nextRound.push({ sportId: sport.id, round: 5, position: 1, isEliminatedSlot: false, status: "default", classId: gf2_winner });
+                    // Bronze Match Slots (Pos 2, 3)
+                    nextRound.push({ sportId: sport.id, round: 5, position: 2, isEliminatedSlot: false, status: "default", classId: bm1_loser });
+                    nextRound.push({ sportId: sport.id, round: 5, position: 3, isEliminatedSlot: false, status: "default", classId: bm2_loser });
+                    
+                    fullBracket.push(nextRound);
+                } else if (r === 5) {
+                    const currentRound = fullBracket[r - 1]; // Finals & Bronze Match
+                    const nextRound: typeof schema.tournament_brackets.$inferInsert[] = [];
+                    
+                    // Grand Final
+                    const gf1 = currentRound[0];
+                    const gf2 = currentRound[1];
+                    let champion = null;
+                    let runnerUp = null;
+                    if (gf1?.classId && gf2?.classId && Math.random() > 0.5) {
+                        const oneWins = Math.random() > 0.5;
+                        champion = oneWins ? gf1.classId : gf2.classId;
+                        runnerUp = oneWins ? gf2.classId : gf1.classId;
+                        gf1.status = oneWins ? "win" : "lose";
+                        gf2.status = oneWins ? "lose" : "win";
+                    }
+
+                    // Bronze Match
+                    const bm1 = currentRound[2];
+                    const bm2 = currentRound[3];
+                    let thirdPlace = null;
+                    if (bm1?.classId && bm2?.classId && Math.random() > 0.5) {
+                        const oneWins = Math.random() > 0.5;
+                        thirdPlace = oneWins ? bm1.classId : bm2.classId;
+                        bm1.status = oneWins ? "win" : "lose";
+                        bm2.status = oneWins ? "lose" : "win";
+                    }
+
+                    // 1st Place (Pos 0)
+                    nextRound.push({ sportId: sport.id, round: 6, position: 0, isEliminatedSlot: false, status: "default", classId: champion });
+                    // 2nd Place (Pos 1)
+                    nextRound.push({ sportId: sport.id, round: 6, position: 1, isEliminatedSlot: false, status: "default", classId: runnerUp });
+                    // 3rd Place (Pos 2)
+                    nextRound.push({ sportId: sport.id, round: 6, position: 2, isEliminatedSlot: false, status: "default", classId: thirdPlace });
+                    
                     fullBracket.push(nextRound);
                 }
             }

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { untrack } from "svelte";
     import { enhance } from "$app/forms";
     import Plus from "@gravity-ui/icons/svgs/plus.svg?raw";
     import Minus from "@gravity-ui/icons/svgs/minus.svg?raw";
@@ -11,95 +12,137 @@
     let showEndConfirm = $state(false);
     let showDetailsModal = $state(false);
 
-    // Detailed Score State
-    // We'll manage state for Team A and Team B
-    let scoreDataA = $state({
-        FirstScore: 0,
-        FirstFoul: 0,
-        SecondScore: 0,
-        SecondFoul: 0,
-        PenScore: 0,
-    });
-    let scoreDataB = $state({
-        FirstScore: 0,
-        FirstFoul: 0,
-        SecondScore: 0,
-        SecondFoul: 0,
-        PenScore: 0,
-    });
+    // --- Record Structure & State ---
+    interface Stat {
+        key: string;
+        label: string;
+    }
+    interface Phase {
+        key: string;
+        label: string;
+        stats: Stat[];
+    }
+
+    const recordStructure = $derived(
+        (activeMatch.recordStructure as Phase[]) || [
+            {
+                key: "half1",
+                label: "전반",
+                stats: [
+                    { key: "score", label: "득점" },
+                    { key: "foul", label: "파울" },
+                ],
+            },
+            {
+                key: "half2",
+                label: "후반",
+                stats: [
+                    { key: "score", label: "득점" },
+                    { key: "foul", label: "파울" },
+                ],
+            },
+            {
+                key: "penalty",
+                label: "승부차기",
+                stats: [{ key: "score", label: "득점" }],
+            },
+        ],
+    );
+
+    // Dynamic Score State: { [phaseKey]: { [statKey]: number } }
+    let scoreDataA = $state<Record<string, Record<string, number>>>(createDefaultScores());
+    let scoreDataB = $state<Record<string, Record<string, number>>>(createDefaultScores());
 
     let cardsA: Record<string, number> = $state({});
     let cardsB: Record<string, number> = $state({});
+    
+    // Initial card setup
+    activeMatch.attendance.teamA.forEach((u: any) => {
+        cardsA[u.name] = 0;
+    });
+    activeMatch.attendance.teamB.forEach((u: any) => {
+        cardsB[u.name] = 0;
+    });
 
     interface DetailedNotes {
-        teamA: { scores: typeof scoreDataA; cards: Record<string, number> };
-        teamB: { scores: typeof scoreDataB; cards: Record<string, number> };
+        teamA: {
+            scores: Record<string, Record<string, number>>;
+            cards: Record<string, number>;
+        };
+        teamB: {
+            scores: Record<string, Record<string, number>>;
+            cards: Record<string, number>;
+        };
     }
 
-    function createDefaultNotes(): DetailedNotes {
-        return {
-            teamA: {
-                scores: {
-                    FirstScore: 0,
-                    FirstFoul: 0,
-                    SecondScore: 0,
-                    SecondFoul: 0,
-                    PenScore: 0,
-                },
-                cards: {},
-            },
-            teamB: {
-                scores: {
-                    FirstScore: 0,
-                    FirstFoul: 0,
-                    SecondScore: 0,
-                    SecondFoul: 0,
-                    PenScore: 0,
-                },
-                cards: {},
-            },
-        };
+    function createDefaultScores(): Record<string, Record<string, number>> {
+        const scores: Record<string, Record<string, number>> = {};
+        recordStructure.forEach((phase) => {
+            scores[phase.key] = {};
+            phase.stats.forEach((stat) => {
+                scores[phase.key][stat.key] = 0;
+            });
+        });
+        return scores;
     }
 
     const parsedNotes = $derived(
         (() => {
-            const defaultNotes = createDefaultNotes();
             try {
-                if (!activeMatch.matchNotes) return defaultNotes;
+                if (!activeMatch.matchNotes) return null;
                 const parsed = JSON.parse(activeMatch.matchNotes);
-                if (typeof parsed !== "object" || parsed === null)
-                    return defaultNotes;
-
-                // Ensure teamA and teamB exist with expected structure
-                return {
-                    teamA: {
-                        scores: {
-                            ...defaultNotes.teamA.scores,
-                            ...(parsed.teamA?.scores || {}),
-                        },
-                        cards: parsed.teamA?.cards || {},
-                    },
-                    teamB: {
-                        scores: {
-                            ...defaultNotes.teamB.scores,
-                            ...(parsed.teamB?.scores || {}),
-                        },
-                        cards: parsed.teamB?.cards || {},
-                    },
-                } as DetailedNotes;
+                if (typeof parsed !== "object" || parsed === null) return null;
+                return parsed as DetailedNotes;
             } catch {
-                return defaultNotes;
+                return null;
             }
         })(),
     );
 
+    // Initialize state when activeMatch changes
     $effect(() => {
-        // Initialize cards state for any newly loaded players
-        activeMatch.attendance.teamA.forEach((u: any) => {
-            if (cardsA[u.name] === undefined) cardsA[u.name] = 0;
-        });
-        activeMatch.attendance.teamB.forEach((u: any) => {
-            if (cardsB[u.name] === undefined) cardsB[u.name] = 0;
+        // Track these to trigger re-run when relevant data changes
+        const _id = activeMatch.id;
+        const _structure = recordStructure;
+        const _parsed = parsedNotes;
+        const _attA = activeMatch.attendance.teamA.length;
+        const _attB = activeMatch.attendance.teamB.length;
+
+        untrack(() => {
+            const initialA = createDefaultScores();
+            const initialB = createDefaultScores();
+            let initialCardsA: Record<string, number> = {};
+            let initialCardsB: Record<string, number> = {};
+
+            if (parsedNotes) {
+                // Merge existing notes into state
+                recordStructure.forEach((phase) => {
+                    phase.stats.forEach((stat) => {
+                        if (parsedNotes.teamA?.scores?.[phase.key]?.[stat.key] !== undefined) {
+                            initialA[phase.key][stat.key] = parsedNotes.teamA.scores[phase.key][stat.key];
+                        }
+                        if (parsedNotes.teamB?.scores?.[phase.key]?.[stat.key] !== undefined) {
+                            initialB[phase.key][stat.key] = parsedNotes.teamB.scores[phase.key][stat.key];
+                        }
+                    });
+                });
+                initialCardsA = { ...parsedNotes.teamA?.cards };
+                initialCardsB = { ...parsedNotes.teamB?.cards };
+            }
+
+            // Initialize cards for current players if missing
+            activeMatch.attendance.teamA.forEach((u: any) => {
+                if (initialCardsA[u.name] === undefined) initialCardsA[u.name] = 0;
+            });
+            activeMatch.attendance.teamB.forEach((u: any) => {
+                if (initialCardsB[u.name] === undefined) initialCardsB[u.name] = 0;
+            });
+
+            // Update state
+            scoreDataA = initialA;
+            scoreDataB = initialB;
+            cardsA = initialCardsA;
+            cardsB = initialCardsB;
         });
     });
 
@@ -122,12 +165,12 @@
                     activeMatch.attendance.teamBTotal),
     );
 
-    // Calculate total scores to send to the server
+    // Calculate total scores to send to the server (sums all stats with key 'score')
     const totalScoreA = $derived(
-        scoreDataA.FirstScore + scoreDataA.SecondScore + scoreDataA.PenScore,
+        Object.values(scoreDataA).reduce((acc, phase) => acc + (phase.score || 0), 0)
     );
     const totalScoreB = $derived(
-        scoreDataB.FirstScore + scoreDataB.SecondScore + scoreDataB.PenScore,
+        Object.values(scoreDataB).reduce((acc, phase) => acc + (phase.score || 0), 0)
     );
 
     const matchNotesJson = $derived(
@@ -138,13 +181,17 @@
     );
 
     // Helper to render IncDec
-    function updateScore(team: "A" | "B", field: string, delta: number) {
+    function updateScore(team: "A" | "B", phaseKey: string, statKey: string, delta: number) {
         if (team === "A") {
-            const val = scoreDataA[field as keyof typeof scoreDataA] + delta;
-            if (val >= 0) scoreDataA = { ...scoreDataA, [field]: val };
+            const val = (scoreDataA[phaseKey]?.[statKey] || 0) + delta;
+            if (val >= 0) {
+                scoreDataA[phaseKey] = { ...scoreDataA[phaseKey], [statKey]: val };
+            }
         } else {
-            const val = scoreDataB[field as keyof typeof scoreDataB] + delta;
-            if (val >= 0) scoreDataB = { ...scoreDataB, [field]: val };
+            const val = (scoreDataB[phaseKey]?.[statKey] || 0) + delta;
+            if (val >= 0) {
+                scoreDataB[phaseKey] = { ...scoreDataB[phaseKey], [statKey]: val };
+            }
         }
     }
 
@@ -242,48 +289,24 @@
                     <div
                         class="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
                     >
-                        <div class="grid grid-cols-2 gap-y-2 text-sm">
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >전반전 득점</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamA.scores.FirstScore}</span
-                            >
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >전반전 파울</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamA.scores.FirstFoul}</span
-                            >
-                            <div
-                                class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
-                            ></div>
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >후반전 득점</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamA.scores.SecondScore}</span
-                            >
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >후반전 파울</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamA.scores.SecondFoul}</span
-                            >
-                            <div
-                                class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
-                            ></div>
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >승부차기</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamA.scores.PenScore}</span
-                            >
+                        <div class="flex flex-col gap-3">
+                            {#if parsedNotes}
+                                {#each recordStructure as phase}
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-zinc-500 font-medium text-xs">{phase.label}</span>
+                                        <div class="grid grid-cols-2 gap-y-1 text-sm bg-white/50 dark:bg-white/5 rounded-lg p-2 border border-zinc-100 dark:border-zinc-800">
+                                            {#each phase.stats as stat}
+                                                <span class="text-zinc-400 dark:text-zinc-500">{stat.label}</span>
+                                                <span class="font-bold text-right text-zinc-800 dark:text-zinc-200">
+                                                    {parsedNotes.teamA.scores[phase.key]?.[stat.key] ?? 0}
+                                                </span>
+                                            {/each}
+                                        </div>
+                                    </div>
+                                {/each}
+                            {:else}
+                                <div class="text-zinc-400 text-sm italic">기록된 상세 정보가 없습니다.</div>
+                            {/if}
                         </div>
                     </div>
 
@@ -292,24 +315,26 @@
                             >경고 및 퇴장</span
                         >
                         <div class="flex flex-wrap gap-2">
-                            {#each Object.entries(parsedNotes.teamA.cards) as [name, type]}
-                                {#if type > 0}
-                                    <div
-                                        class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 {type ===
-                                        1
-                                            ? 'bg-amber-100 text-amber-700'
-                                            : 'bg-red-100 text-red-700'}"
-                                    >
+                            {#if parsedNotes}
+                                {#each Object.entries(parsedNotes.teamA.cards) as [name, type]}
+                                    {#if type > 0}
                                         <div
-                                            class="w-2 h-3 rounded-sm {type ===
+                                            class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 {type ===
                                             1
-                                                ? 'bg-amber-500'
-                                                : 'bg-red-500'}"
-                                        ></div>
-                                        {name}
-                                    </div>
-                                {/if}
-                            {/each}
+                                                ? 'bg-amber-100 text-amber-700'
+                                                : 'bg-red-100 text-red-700'}"
+                                        >
+                                            <div
+                                                class="w-2 h-3 rounded-sm {type ===
+                                                1
+                                                    ? 'bg-amber-500'
+                                                    : 'bg-red-500'}"
+                                            ></div>
+                                            {name}
+                                        </div>
+                                    {/if}
+                                {/each}
+                            {/if}
                         </div>
                     </div>
                 </div>
@@ -325,48 +350,24 @@
                     <div
                         class="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-100 dark:border-zinc-800 p-4"
                     >
-                        <div class="grid grid-cols-2 gap-y-2 text-sm">
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >전반전 득점</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamB.scores.FirstScore}</span
-                            >
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >전반전 파울</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamB.scores.FirstFoul}</span
-                            >
-                            <div
-                                class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
-                            ></div>
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >후반전 득점</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamB.scores.SecondScore}</span
-                            >
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >후반전 파울</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamB.scores.SecondFoul}</span
-                            >
-                            <div
-                                class="col-span-2 h-px bg-zinc-200/50 dark:bg-zinc-800/50 my-1"
-                            ></div>
-                            <span class="text-zinc-400 dark:text-zinc-500"
-                                >승부차기</span
-                            >
-                            <span
-                                class="font-bold text-right text-zinc-800 dark:text-zinc-200"
-                                >{parsedNotes.teamB.scores.PenScore}</span
-                            >
+                        <div class="flex flex-col gap-3">
+                            {#if parsedNotes}
+                                {#each recordStructure as phase}
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-zinc-500 font-medium text-xs">{phase.label}</span>
+                                        <div class="grid grid-cols-2 gap-y-1 text-sm bg-white/50 dark:bg-white/5 rounded-lg p-2 border border-zinc-100 dark:border-zinc-800">
+                                            {#each phase.stats as stat}
+                                                <span class="text-zinc-400 dark:text-zinc-500">{stat.label}</span>
+                                                <span class="font-bold text-right text-zinc-800 dark:text-zinc-200">
+                                                    {parsedNotes.teamB.scores[phase.key]?.[stat.key] ?? 0}
+                                                </span>
+                                            {/each}
+                                        </div>
+                                    </div>
+                                {/each}
+                            {:else}
+                                <div class="text-zinc-400 text-sm italic">기록된 상세 정보가 없습니다.</div>
+                            {/if}
                         </div>
                     </div>
 
@@ -375,24 +376,26 @@
                             >경고 및 퇴장</span
                         >
                         <div class="flex flex-wrap gap-2">
-                            {#each Object.entries(parsedNotes.teamB.cards) as [name, type]}
-                                {#if type > 0}
-                                    <div
-                                        class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 {type ===
-                                        1
-                                            ? 'bg-amber-100 text-amber-700'
-                                            : 'bg-red-100 text-red-700'}"
-                                    >
+                            {#if parsedNotes}
+                                {#each Object.entries(parsedNotes.teamB.cards) as [name, type]}
+                                    {#if type > 0}
                                         <div
-                                            class="w-2 h-3 rounded-sm {type ===
+                                            class="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-2 {type ===
                                             1
-                                                ? 'bg-amber-500'
-                                                : 'bg-red-500'}"
-                                        ></div>
-                                        {name}
-                                    </div>
-                                {/if}
-                            {/each}
+                                                ? 'bg-amber-100 text-amber-700'
+                                                : 'bg-red-100 text-red-700'}"
+                                        >
+                                            <div
+                                                class="w-2 h-3 rounded-sm {type ===
+                                                1
+                                                    ? 'bg-amber-500'
+                                                    : 'bg-red-500'}"
+                                            ></div>
+                                            {name}
+                                        </div>
+                                    {/if}
+                                {/each}
+                            {/if}
                         </div>
                     </div>
                 </div>
@@ -490,190 +493,40 @@
                 </div>
             {:else if activeMatch.status === "ONGOING"}
                 <!-- Detailed Scoring UI -> Team A -->
-                <div class="w-full flex-col gap-4 py-2 flex items-start">
-                    <!-- First Half -->
-                    <div class="w-full flex flex-col gap-1">
-                        <p class="text-zinc-500 font-medium text-[1rem]">
-                            전반
-                        </p>
-                        <div
-                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-20 overflow-hidden"
-                        >
-                            <div
-                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
-                            >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >득점</span
-                                >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >파울</span
-                                >
-                            </div>
-                            <!-- Controls -->
-                            <div
-                                class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900"
-                            >
-                                <div
-                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
-                                >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("A", "FirstScore", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Minus}</button
-                                    >
-                                    <span
-                                        class="font-medium text-zinc-700 dark:text-zinc-200"
-                                        >{scoreDataA.FirstScore}</span
-                                    >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("A", "FirstScore", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Plus}</button
-                                    >
+                <div class="w-full flex flex-col gap-4 py-2 flex items-start">
+                    {#each recordStructure as phase}
+                        <div class="w-full flex flex-col gap-1">
+                            <p class="text-zinc-500 font-medium text-[1rem]">
+                                {phase.label}
+                            </p>
+                            <div class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center overflow-hidden">
+                                <div class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 py-2 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800 min-w-[5rem]">
+                                    {#each phase.stats as stat}
+                                        <span class="text-sm text-zinc-600 dark:text-zinc-400">{stat.label}</span>
+                                    {/each}
                                 </div>
-                                <div
-                                    class="flex-1 flex items-center justify-between px-4"
-                                >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("A", "FirstFoul", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Minus}</button
-                                    >
-                                    <span
-                                        class="font-medium text-zinc-700 dark:text-zinc-200"
-                                        >{scoreDataA.FirstFoul}</span
-                                    >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("A", "FirstFoul", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Plus}</button
-                                    >
+                                <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
+                                    {#each phase.stats as stat, idx}
+                                        <div class="flex-1 flex items-center justify-between px-4 py-2 {idx < phase.stats.length - 1 ? 'border-b border-zinc-100 dark:border-zinc-800' : ''}">
+                                            <button
+                                                type="button"
+                                                onclick={() => updateScore("A", phase.key, stat.key, -1)}
+                                                class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                                            >{@html Minus}</button>
+                                            <span class="font-medium text-zinc-700 dark:text-zinc-200">
+                                                {scoreDataA[phase.key]?.[stat.key] ?? 0}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onclick={() => updateScore("A", phase.key, stat.key, 1)}
+                                                class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                                            >{@html Plus}</button>
+                                        </div>
+                                    {/each}
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Second Half -->
-                    <div class="w-full flex flex-col gap-1 mt-2">
-                        <p class="text-zinc-500 font-medium text-[1rem]">
-                            후반
-                        </p>
-                        <div
-                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-20 overflow-hidden"
-                        >
-                            <div
-                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
-                            >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >득점</span
-                                >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >파울</span
-                                >
-                            </div>
-                            <div
-                                class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900"
-                            >
-                                <div
-                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
-                                >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("A", "SecondScore", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Minus}</button
-                                    >
-                                    <span
-                                        class="font-medium text-zinc-700 dark:text-zinc-200"
-                                        >{scoreDataA.SecondScore}</span
-                                    >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("A", "SecondScore", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Plus}</button
-                                    >
-                                </div>
-                                <div
-                                    class="flex-1 flex items-center justify-between px-4"
-                                >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("A", "SecondFoul", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Minus}</button
-                                    >
-                                    <span
-                                        class="font-medium text-zinc-700 dark:text-zinc-200"
-                                        >{scoreDataA.SecondFoul}</span
-                                    >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("A", "SecondFoul", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Plus}</button
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Penalty Shootout -->
-                    <div class="w-full flex flex-col gap-1 mt-2">
-                        <p class="text-zinc-500 font-medium text-[1rem]">
-                            승부차기
-                        </p>
-                        <div
-                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-10 overflow-hidden"
-                        >
-                            <div
-                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
-                            >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >득점</span
-                                >
-                            </div>
-                            <div
-                                class="flex-1 flex items-center justify-between px-4 bg-white dark:bg-zinc-900 h-full"
-                            >
-                                <button
-                                    type="button"
-                                    onclick={() =>
-                                        updateScore("A", "PenScore", -1)}
-                                    class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                    >{@html Minus}</button
-                                >
-                                <span
-                                    class="font-medium text-zinc-700 dark:text-zinc-200"
-                                    >{scoreDataA.PenScore}</span
-                                >
-                                <button
-                                    type="button"
-                                    onclick={() =>
-                                        updateScore("A", "PenScore", 1)}
-                                    class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                    >{@html Plus}</button
-                                >
-                            </div>
-                        </div>
-                    </div>
+                    {/each}
 
                     <!-- Cards -->
                     <div class="w-full flex flex-col gap-1 mt-2">
@@ -751,191 +604,42 @@
                     {activeMatch.scoreB}
                 </div>
             {:else if activeMatch.status === "ONGOING"}
-                <!-- Detailed Scoring UI -> Team B -->
                 <div class="w-full flex-col gap-4 py-2 flex items-start">
-                    <!-- First Half -->
-                    <div class="w-full flex flex-col gap-1">
-                        <p class="text-zinc-500 font-medium text-[1rem]">
-                            전반
-                        </p>
-                        <div
-                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-20 overflow-hidden"
-                        >
-                            <div
-                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
-                            >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >득점</span
-                                >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >파울</span
-                                >
-                            </div>
-                            <!-- Controls -->
-                            <div
-                                class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900"
-                            >
-                                <div
-                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
-                                >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("B", "FirstScore", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Minus}</button
-                                    >
-                                    <span
-                                        class="font-medium text-zinc-700 dark:text-zinc-200"
-                                        >{scoreDataB.FirstScore}</span
-                                    >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("B", "FirstScore", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Plus}</button
-                                    >
+                    {#each recordStructure as phase}
+                        <div class="w-full flex flex-col gap-1">
+                            <p class="text-zinc-500 font-medium text-[1rem]">
+                                {phase.label}
+                            </p>
+                            <div class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center overflow-hidden">
+                                <div class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 py-2 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800 min-w-[5rem]">
+                                    {#each phase.stats as stat}
+                                        <span class="text-sm text-zinc-600 dark:text-zinc-400">{stat.label}</span>
+                                    {/each}
                                 </div>
-                                <div
-                                    class="flex-1 flex items-center justify-between px-4"
-                                >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("B", "FirstFoul", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Minus}</button
-                                    >
-                                    <span
-                                        class="font-medium text-zinc-700 dark:text-zinc-200"
-                                        >{scoreDataB.FirstFoul}</span
-                                    >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("B", "FirstFoul", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Plus}</button
-                                    >
+                                <div class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900">
+                                    {#each phase.stats as stat, idx}
+                                        <div class="flex-1 flex items-center justify-between px-4 py-2 {idx < phase.stats.length - 1 ? 'border-b border-zinc-100 dark:border-zinc-800' : ''}">
+                                            <button
+                                                type="button"
+                                                onclick={() => updateScore("B", phase.key, stat.key, -1)}
+                                                class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                                            >{@html Minus}</button>
+                                            <span class="font-medium text-zinc-700 dark:text-zinc-200">
+                                                {scoreDataB[phase.key]?.[stat.key] ?? 0}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onclick={() => updateScore("B", phase.key, stat.key, 1)}
+                                                class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                                            >{@html Plus}</button>
+                                        </div>
+                                    {/each}
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    {/each}
 
-                    <!-- Second Half -->
-                    <div class="w-full flex flex-col gap-1 mt-2">
-                        <p class="text-zinc-500 font-medium text-[1rem]">
-                            후반
-                        </p>
-                        <div
-                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-20 overflow-hidden"
-                        >
-                            <div
-                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center gap-2 px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
-                            >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >득점</span
-                                >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >파울</span
-                                >
-                            </div>
-                            <div
-                                class="flex-1 flex flex-col h-full bg-white dark:bg-zinc-900"
-                            >
-                                <div
-                                    class="flex-1 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800"
-                                >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("B", "SecondScore", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Minus}</button
-                                    >
-                                    <span
-                                        class="font-medium text-zinc-700 dark:text-zinc-200"
-                                        >{scoreDataB.SecondScore}</span
-                                    >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("B", "SecondScore", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Plus}</button
-                                    >
-                                </div>
-                                <div
-                                    class="flex-1 flex items-center justify-between px-4"
-                                >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("B", "SecondFoul", -1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Minus}</button
-                                    >
-                                    <span
-                                        class="font-medium text-zinc-700 dark:text-zinc-200"
-                                        >{scoreDataB.SecondFoul}</span
-                                    >
-                                    <button
-                                        type="button"
-                                        onclick={() =>
-                                            updateScore("B", "SecondFoul", 1)}
-                                        class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                        >{@html Plus}</button
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Penalty Shootout -->
-                    <div class="w-full flex flex-col gap-1 mt-2">
-                        <p class="text-zinc-500 font-medium text-[1rem]">
-                            승부차기
-                        </p>
-                        <div
-                            class="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center h-10 overflow-hidden"
-                        >
-                            <div
-                                class="bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center px-4 h-full shrink-0 border-r border-zinc-200 dark:border-zinc-800"
-                            >
-                                <span
-                                    class="text-sm text-zinc-600 dark:text-zinc-400"
-                                    >득점</span
-                                >
-                            </div>
-                            <div
-                                class="flex-1 flex items-center justify-between px-4 bg-white dark:bg-zinc-900 h-full"
-                            >
-                                <button
-                                    type="button"
-                                    onclick={() =>
-                                        updateScore("B", "PenScore", -1)}
-                                    class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                    >{@html Minus}</button
-                                >
-                                <span
-                                    class="font-medium text-zinc-700 dark:text-zinc-200"
-                                    >{scoreDataB.PenScore}</span
-                                >
-                                <button
-                                    type="button"
-                                    onclick={() =>
-                                        updateScore("B", "PenScore", 1)}
-                                    class="w-7 h-7 rounded border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                                    >{@html Plus}</button
-                                >
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Cards -->
 
                     <!-- Cards -->
                     <div class="w-full flex flex-col gap-1 mt-2">
@@ -1030,15 +734,6 @@
             </button>
         {:else if activeMatch.status === "FINISHED"}
             <div class="flex gap-2 w-full">
-                <div
-                    class="bg-zinc-100 dark:bg-zinc-800 content-stretch flex flex-4 h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem]"
-                >
-                    <p
-                        class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-[1rem] text-zinc-500 dark:text-zinc-400 whitespace-nowrap"
-                    >
-                        종료된 경기입니다
-                    </p>
-                </div>
                 <button
                     type="button"
                     onclick={() => {

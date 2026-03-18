@@ -38,7 +38,7 @@ async function main() {
 
         // --- 2. system_config ---
         console.log("⚙️  Inserting system_config...");
-        await db.insert(schema.system_config).values({ 
+        await db.insert(schema.system_config).values({
             eventState: 'REGISTRATION',
             registrationDeadline: new Date("2026-03-15T23:59:59")
         });
@@ -71,7 +71,12 @@ async function main() {
                 periodEnd: march31,
                 round1SelectionStart: march13,
                 round1SelectionEnd: march20,
-                round1Deadline: march20
+                round1Deadline: march20,
+                recordStructure: [
+                    { key: "half1", label: "전반", stats: [{ key: "score", label: "득점" }, { key: "foul", label: "파울" }] },
+                    { key: "half2", label: "후반", stats: [{ key: "score", label: "득점" }, { key: "foul", label: "파울" }] },
+                    { key: "penalty", label: "승부차기", stats: [{ key: "score", label: "득점" }] }
+                ]
             },
             {
                 name: "농구",
@@ -87,7 +92,11 @@ async function main() {
                 periodEnd: march31,
                 round1SelectionStart: march13,
                 round1SelectionEnd: march20,
-                round1Deadline: march20
+                round1Deadline: march20,
+                recordStructure: [
+                    { key: "half1", label: "전반", stats: [{ key: "score", label: "득점" }, { key: "foul", label: "파울" }] },
+                    { key: "half2", label: "후반", stats: [{ key: "score", label: "득점" }, { key: "foul", label: "파울" }] }
+                ]
             },
             {
                 name: "남자 배드민턴 복식",
@@ -104,7 +113,12 @@ async function main() {
                 round1SelectionStart: march13,
                 round1SelectionEnd: march20,
                 round1Deadline: march20,
-                requiredGender: 'MALE_ONLY'
+                requiredGender: 'MALE_ONLY',
+                recordStructure: [
+                    { key: "set1", label: "1세트", stats: [{ key: "score", label: "득점" }] },
+                    { key: "set2", label: "2세트", stats: [{ key: "score", label: "득점" }] },
+                    { key: "set3", label: "3세트", stats: [{ key: "score", label: "득점" }] }
+                ]
             },
             {
                 name: "여자 배드민턴 복식",
@@ -121,10 +135,15 @@ async function main() {
                 round1SelectionStart: march13,
                 round1SelectionEnd: march20,
                 round1Deadline: march20,
-                requiredGender: 'FEMALE_ONLY'
+                requiredGender: 'FEMALE_ONLY',
+                recordStructure: [
+                    { key: "set1", label: "1세트", stats: [{ key: "score", label: "득점" }] },
+                    { key: "set2", label: "2세트", stats: [{ key: "score", label: "득점" }] },
+                    { key: "set3", label: "3세트", stats: [{ key: "score", label: "득점" }] }
+                ]
             }
         ]).returning();
-        
+
         // --- 4.5. Sport Locations ---
         console.log("📍 Inserting default sport locations...");
         const locationData: typeof schema.sport_locations.$inferInsert[] = [];
@@ -277,7 +296,7 @@ async function seedBrackets(
                 classAId: aIdx < 31 ? insertedClasses[aIdx].id : null,
                 classBId: bIdx < 31 ? insertedClasses[bIdx].id : null,
                 status: 'PENDING_SCHEDULE',
-                name: `Round 1 - Match ${i + 1}`,
+                name: `R32-M${i + 1}`,
                 scoreA: 0,
                 scoreB: 0
             });
@@ -301,7 +320,7 @@ async function seedBrackets(
             });
         }
 
-        const rounds = [{ r: 2, n: 16 }, { r: 3, n: 8 }, { r: 4, n: 4 }, { r: 5, n: 2 }, { r: 6, n: 1 }];
+        const rounds = [{ r: 2, n: 16 }, { r: 3, n: 8 }, { r: 4, n: 4 }, { r: 5, n: 4 }, { r: 6, n: 3 }];
         for (const { r, n } of rounds) {
             for (let pos = 0; pos < n; pos++) {
                 bracketNodes.push({ sportId: sport.id, round: r, position: pos, classId: null, matchId: null, isEliminatedSlot: false, status: 'default' });

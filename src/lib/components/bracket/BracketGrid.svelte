@@ -96,20 +96,93 @@
                         roundIndex === bracketData.length - 1}
 
                     <div
-                        class="flex flex-[1_0_0] flex-col gap-[1.25rem] p-[0.625rem] relative min-h-px min-w-px {isWinnerColumn
+                        class="flex flex-[1_0_0] flex-col gap-[1.25rem] p-[0.625rem] relative min-h-px min-w-px {isWinnerColumn ||
+                        roundIndex === 4
                             ? 'justify-center'
                             : roundIndex === 0
                               ? 'h-fit self-start items-start'
                               : 'h-full'}"
                     >
-                        {#each round.matches as match}
-                            {#if isWinnerColumn}
+                        {#if isWinnerColumn}
+                            <div
+                                class="flex flex-[1_0_0] flex-col gap-[0.625rem] w-full relative shrink-0 justify-center"
+                            >
+                                {#each round.matches as match, matchIndex}
+                                    {@const medal =
+                                        matchIndex === 0
+                                            ? "gold"
+                                            : matchIndex === 1
+                                              ? "silver"
+                                              : matchIndex === 2
+                                                ? "bronze"
+                                                : undefined}
+                                    <div
+                                        class="flex flex-col w-full justify-center"
+                                    >
+                                        <TeamNode {...match.team1} {medal} />
+                                    </div>
+                                {/each}
+                            </div>
+                        {:else if roundIndex === 4}
+                            <div
+                                class="flex flex-[1_0_0] flex-col gap-[0.625rem] w-full relative shrink-0 justify-center"
+                            >
                                 <div
-                                    class="flex flex-[1_0_0] flex-col w-full justify-center"
+                                    class="flex flex-[1_0_0] flex-col w-full justify-center gap-[0.625rem]"
                                 >
-                                    <TeamNode {...match.team1} />
+                                    <div
+                                        class="flex flex-col w-full justify-center"
+                                    ></div>
+                                    <div
+                                        class="flex flex-col w-full justify-center"
+                                    >
+                                        <TeamNode
+                                            {...round.matches[0].team1}
+                                            state="win"
+                                        />
+                                    </div>
+                                    <div
+                                        class="flex flex-col w-full justify-center"
+                                    >
+                                        <TeamNode
+                                            {...round.matches[1].team1}
+                                            state="lose"
+                                        />
+                                    </div>
+                                    <div
+                                        class="flex flex-col w-full justify-center"
+                                    ></div>
                                 </div>
-                            {:else}
+
+                                <div
+                                    class="flex flex-[1_0_0] flex-col w-full justify-center gap-[0.625rem]"
+                                >
+                                    <div
+                                        class="flex flex-col w-full justify-center"
+                                    ></div>
+                                    <div
+                                        class="flex flex-col w-full justify-center"
+                                    >
+                                        <TeamNode
+                                            {...round.matches[0].team2}
+                                            state="win"
+                                        />
+                                    </div>
+                                    <div
+                                        class="flex flex-col w-full justify-center"
+                                    >
+                                        <TeamNode
+                                            {...round.matches[1].team2}
+                                            state="lose"
+                                        />
+                                    </div>
+                                </div>
+                                <MatchConnector
+                                    nodeOffset={getConnectorOffset(roundIndex)}
+                                />
+                            </div>
+                        {:else}
+                            {#each round.matches as match}
                                 <div
                                     class="flex flex-[1_0_0] flex-col gap-[0.625rem] w-full relative shrink-0"
                                 >
@@ -129,8 +202,8 @@
                                         )}
                                     />
                                 </div>
-                            {/if}
-                        {/each}
+                            {/each}
+                        {/if}
                     </div>
                 {/each}
             </div>

@@ -121,7 +121,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 minPlayers: sports.minPlayers,
                 refereeName: referee.name,
                 managerName: manager.name,
-                matchNotes: matches.matchNotes
+                matchNotes: matches.matchNotes,
+                recordStructure: sports.recordStructure
             })
             .from(matches)
             .innerJoin(sports, eq(matches.sportId, sports.id))

@@ -3,22 +3,33 @@
     export let notAvailable: boolean = false;
     export let className: string = "0";
     export let ourTeam: boolean = false;
+    export let medal: "gold" | "silver" | "bronze" | undefined = undefined;
 
     $: isDefault = state === "default";
     $: isLose = state === "lose";
     $: isWin = state === "win";
 
     // Determine background color
-    $: bgClass = isDefault
-        ? "bg-zinc-200 dark:bg-zinc-800"
-        : isLose
-          ? "bg-zinc-600 dark:bg-zinc-700"
-          : "bg-amber-500";
+    $: bgClass =
+        medal === "gold"
+            ? "bg-[#FFAE00]"
+            : medal === "silver"
+              ? "bg-[#9BB1D1]"
+              : medal === "bronze"
+                ? "bg-[#CC5D18]"
+                : isDefault
+                  ? "bg-zinc-200 dark:bg-zinc-800"
+                  : isLose
+                    ? "bg-zinc-600 dark:bg-zinc-700"
+                    : "bg-amber-500";
 
     // Determine text color
-    $: textClass = isDefault
-        ? "text-zinc-800 dark:text-zinc-200"
-        : "text-white";
+    $: textClass =
+        medal === "gold" || medal === "silver" || medal === "bronze"
+            ? "text-white font-bold"
+            : isDefault
+              ? "text-zinc-800 dark:text-zinc-200"
+              : "text-white";
 
     $: gapClass =
         (isDefault || isLose || isWin) && ourTeam
