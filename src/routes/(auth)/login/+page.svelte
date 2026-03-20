@@ -1,8 +1,3 @@
-<script lang="ts">
-    import { enhance } from "$app/forms";
-    let { form } = $props();
-</script>
-
 <div
     class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
@@ -51,58 +46,20 @@
             </div>
         </div>
 
-        <!-- Bottom Input & Footer Area -->
+        <!-- Bottom: SSO Login Button & Footer -->
         <div
             class="content-stretch flex flex-[1_0_0] flex-col items-start justify-between min-h-px min-w-px p-[0.625rem] relative w-full overflow-visible"
         >
-            <form
-                method="POST"
-                action="?/login"
-                use:enhance
-                novalidate
-                class="bg-zinc-100 dark:bg-zinc-900 content-stretch flex h-[3.125rem] items-center justify-between pl-[1.25rem] pr-[0.4375rem] py-[0.4375rem] relative rounded-[6.25rem] shrink-0 w-full max-w-[25rem] border transition-colors {form?.error
-                    ? 'border-red-500 focus-within:border-red-500'
-                    : 'border-zinc-100 dark:border-zinc-800 focus-within:border-amber-500/30'}"
+            <a
+                href="/login/sso"
+                id="sso-login-button"
+                class="inline-flex items-center justify-center gap-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-bold text-[1.125rem] rounded-[6.25rem] px-8 h-[3.125rem] transition-colors cursor-pointer no-underline shadow-md hover:shadow-lg"
             >
-                <input
-                    type="text"
-                    id="student_number"
-                    name="student_number"
-                    placeholder="학번을 입력하세요"
-                    required
-                    class="flex-1 font-pretendard font-normal leading-[normal] min-w-0 relative shrink text-zinc-800 dark:text-zinc-100 text-[1.125rem] bg-transparent outline-none h-full placeholder:text-zinc-400 dark:placeholder:text-zinc-500 mr-[0.625rem]"
-                />
-                <button
-                    type="submit"
-                    aria-label="Login"
-                    class="bg-amber-500 content-stretch flex flex-col items-center justify-center relative rounded-[6.25rem] shrink-0 size-[2.25rem] hover:bg-amber-600 active:bg-amber-800 transition-colors cursor-pointer"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        class="text-white"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 12h14m-5-5l5 5-5 5"
-                        />
-                    </svg>
-                </button>
-
-                {#if form?.error}
-                    <p
-                        class="absolute -bottom-[1.75rem] left-[1.25rem] text-rose-500 font-pretendard text-[0.875rem] font-medium whitespace-nowrap"
-                    >
-                        {form.error}
-                    </p>
-                {/if}
-            </form>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                </svg>
+                SPARCS SSO 로그인
+            </a>
 
             <p
                 class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100"

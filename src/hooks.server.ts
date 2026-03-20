@@ -3,18 +3,22 @@ import type { Handle } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { verifyToken } from '$lib/server/jwt';
 
 export const handle: Handle = async ({ event, resolve }) => {
-    const sessionId = event.cookies.get('session');
+    const token = event.cookies.get('session');
 
-    if (sessionId) {
+    if (token) {
         try {
-            const fetchedUsers = await db.select().from(users).where(eq(users.id, sessionId)).limit(1);
-            if (fetchedUsers.length > 0) {
-                event.locals.user = fetchedUsers[0];
+            const payload = verifyToken(token);
+            if (payload?.dbUserId) {
+                const fetchedUsers = await db.select().from(users).where(eq(users.id, payload.dbUserId)).limit(1);
+                if (fetchedUsers.length > 0) {
+                    event.locals.user = fetchedUsers[0];
+                }
             }
         } catch (e) {
-            console.error('Error fetching user for session:', e);
+            console.error('Error verifying JWT session:', e);
         }
     }
 
@@ -22,6 +26,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     const user = event.locals.user;
 
     if (!user) {
+        // Allow unauthenticated access to these paths
         if (!pathname.startsWith('/login') && !pathname.startsWith('/register')) {
             throw redirect(303, '/login');
         }
