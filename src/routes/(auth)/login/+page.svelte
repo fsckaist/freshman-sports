@@ -1,3 +1,9 @@
+<script lang="ts">
+    import { page } from "$app/stores";
+
+    $: errorMessage = $page.url.searchParams.get("error");
+</script>
+
 <div
     class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
@@ -50,16 +56,24 @@
         <div
             class="content-stretch flex flex-[1_0_0] flex-col items-start justify-between min-h-px min-w-px p-[0.625rem] relative w-full overflow-visible"
         >
-            <a
-                href="/login/sso"
-                id="sso-login-button"
-                class="inline-flex items-center justify-center gap-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-bold text-[1.125rem] rounded-[6.25rem] px-8 h-[3.125rem] transition-colors cursor-pointer no-underline shadow-md hover:shadow-lg"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                </svg>
-                SPARCS SSO 로그인
-            </a>
+            <div class="flex flex-col gap-3 items-start">
+                <a
+                    href="/login/sso"
+                    id="sso-login-button"
+                    class="inline-flex items-center justify-center gap-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-bold text-[1.125rem] rounded-[6.25rem] px-8 h-[3.125rem] transition-colors cursor-pointer no-underline shadow-md hover:shadow-lg"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
+                    SPARCS SSO 로그인
+                </a>
+
+                {#if errorMessage}
+                    <p class="text-rose-500 font-pretendard text-[0.875rem] font-medium m-0">
+                        {errorMessage}
+                    </p>
+                {/if}
+            </div>
 
             <p
                 class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100"
@@ -69,3 +83,4 @@
         </div>
     </div>
 </div>
+

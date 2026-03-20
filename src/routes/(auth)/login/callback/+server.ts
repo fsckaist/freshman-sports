@@ -1,4 +1,4 @@
-import { redirect, error } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { db } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
     // Validate CSRF state
     if (!code || !state || !storedState || state !== storedState) {
-        throw error(400, '잘못된 인증 요청입니다. 다시 로그인해 주세요.');
+        throw redirect(303, '/login?error=' + encodeURIComponent('잘못된 인증 요청입니다. 다시 로그인해 주세요.'));
     }
 
     // Exchange code for user info
@@ -26,14 +26,14 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
         rawUserInfo = await ssoClient.getUserInfo(code);
     } catch (e) {
         console.error('SSO getUserInfo error:', e);
-        throw error(502, 'SSO 서버와 통신 중 오류가 발생했습니다.');
+        throw redirect(303, '/login?error=' + encodeURIComponent('SSO 서버와 통신 중 오류가 발생했습니다.'));
     }
 
     // Parse KAIST-specific user data
     const userData = parseUserData(rawUserInfo);
 
     if (!userData.studentNumber) {
-        throw error(403, 'KAIST 학번 정보를 확인할 수 없습니다. 관리자에게 문의하세요.');
+        throw redirect(303, '/login?error=' + encodeURIComponent('KAIST 학번 정보를 확인할 수 없습니다. 관리자에게 문의하세요.'));
     }
 
     // Look up user in our database by student number
@@ -43,7 +43,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
         .limit(1);
 
     if (existingUsers.length === 0) {
-        throw error(403, `등록되지 않은 학번(${userData.studentNumber})입니다. 관리자에게 문의하세요.`);
+        throw redirect(303, '/login?error=' + encodeURIComponent(`등록되지 않은 학번(${userData.studentNumber})입니다. 관리자에게 문의하세요.`));
     }
 
     const dbUser = existingUsers[0];
