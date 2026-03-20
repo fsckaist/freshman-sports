@@ -29,6 +29,8 @@
         isAdmin = false,
         isConfirmMode = false,
         onSlotClick = undefined,
+        highlightPeriodStart = null,
+        highlightPeriodEnd = null,
     } = $props<{
         gridData: Record<string, ScheduleSlot[]>;
         currentUserClassId?: string | null;
@@ -39,6 +41,8 @@
         isAdmin?: boolean;
         isConfirmMode?: boolean;
         onSlotClick?: (slotId: string) => void;
+        highlightPeriodStart?: string | null;
+        highlightPeriodEnd?: string | null;
     }>();
 
     // Svelte derives sorted dates for rows
@@ -79,6 +83,21 @@
         const dayName = days[d.getDay()];
         return `${month}/${day} (${dayName})`;
     }
+
+    const highlightRange = $derived((() => {
+        if (!highlightPeriodStart || !highlightPeriodEnd) return null;
+        const s = new Date(highlightPeriodStart);
+        const e = new Date(highlightPeriodEnd);
+        
+        const startStr = `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, '0')}-${String(s.getDate()).padStart(2, '0')}`;
+        const endStr = `${e.getFullYear()}-${String(e.getMonth() + 1).padStart(2, '0')}-${String(e.getDate()).padStart(2, '0')}`;
+        return { start: startStr, end: endStr };
+    })());
+
+    function isHighlightedDate(dateStr: string) {
+        if (!highlightRange) return false;
+        return dateStr >= highlightRange.start && dateStr <= highlightRange.end;
+    }
 </script>
 
 {#if dates.length > 0}
@@ -105,7 +124,7 @@
         {#each dates as date}
             <!-- Date column -->
             <div
-                class="flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-pretendard text-[1rem] font-semibold text-center w-full h-full px-[0.625rem] whitespace-nowrap"
+                class="flex items-center justify-center font-pretendard text-[1rem] text-center w-full h-full px-[0.625rem] whitespace-nowrap {isHighlightedDate(date) ? 'text-amber-500 font-extrabold dark:text-amber-400' : 'text-zinc-600 dark:text-zinc-400 font-semibold'}"
                 style="grid-column-start: 1;"
             >
                 {formatDateDisplay(date)}

@@ -113,6 +113,20 @@
                         >
                         <span>{matchPair.classB}반</span>
                     </div>
+                    {#if matchPair.scheduleWindowDeadline}
+                        <div
+                            class="mt-1 text-[0.7rem] font-semibold text-zinc-500 dark:text-zinc-400 w-full text-center rounded py-1"
+                        >
+                            신청 마감: {new Date(
+                                matchPair.scheduleWindowDeadline,
+                            ).toLocaleString("ko-KR", {
+                                month: "numeric",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
+                        </div>
+                    {/if}
                 </a>
             {/each}
             {#if completedClasses.length === 0}
@@ -152,6 +166,8 @@
                             isAdmin={false}
                             isConfirmMode={true}
                             onSlotClick={openFinalizeModal}
+                            highlightPeriodStart={activeMatch?.scheduleWindowStart}
+                            highlightPeriodEnd={activeMatch?.scheduleWindowEnd}
                         />
                     </div>
                 </div>

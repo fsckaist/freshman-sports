@@ -281,7 +281,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
             classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
             classAId: r.match.classAId,
-            classBId: r.match.classBId
+            classBId: r.match.classBId,
+            scheduleWindowStart: r.match.scheduleWindowStart ? r.match.scheduleWindowStart.toISOString() : null,
+            scheduleWindowEnd: r.match.scheduleWindowEnd ? r.match.scheduleWindowEnd.toISOString() : null,
+            scheduleWindowDeadline: r.match.scheduleWindowDeadline ? r.match.scheduleWindowDeadline.toISOString() : null
         }));
 
         let activeMatchId = url.searchParams.get('matchId');
