@@ -53,12 +53,12 @@
                     name="studentNumber"
                     bind:value={impersonateStudentNumber}
                     placeholder="학번 입력"
-                    class="px-3 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 w-32"
+                    class="px-3 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500 w-32"
                 />
                 <button
                     type="submit"
                     disabled={!impersonateStudentNumber.trim()}
-                    class="px-3 py-1.5 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 disabled:bg-zinc-400 rounded-lg transition-colors"
+                    class="px-3 py-1.5 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-400 rounded-lg transition-colors"
                 >
                     유저 전환
                 </button>
