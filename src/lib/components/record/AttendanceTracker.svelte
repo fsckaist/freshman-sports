@@ -25,7 +25,11 @@
     let html5Qrcode: Html5Qrcode | null = null;
     let scanError = $state("");
     let formElement: HTMLFormElement | null = $state(null);
-    let scannedUser = $state<{ name: string; studentNumber: string; id: string } | null>(null);
+    let scannedUser = $state<{
+        name: string;
+        studentNumber: string;
+        id: string;
+    } | null>(null);
     let isScanPaused = $state(false);
     const isMatchFinished = $derived(activeMatch.status === "FINISHED");
 
@@ -66,7 +70,7 @@
         isScanPaused = false;
         scannedUser = null;
         scanModalOpen = true;
-        
+
         // Start scanner slightly after modal opens to ensure DOM is ready
         setTimeout(startScanner, 100);
     }
@@ -76,7 +80,7 @@
         scanModalOpen = false;
         studentNumberInput = "";
     }
-    
+
     async function startScanner() {
         if (!html5Qrcode) {
             html5Qrcode = new Html5Qrcode("qr-reader");
@@ -90,7 +94,7 @@
                 },
                 async (decodedText) => {
                     if (isSubmitting || isScanPaused || scannedUser) return;
-                    
+
                     isScanPaused = true;
                     if (html5Qrcode && html5Qrcode.isScanning) {
                         html5Qrcode.pause();
@@ -103,11 +107,15 @@
                             scannedUser = {
                                 name: data.name,
                                 studentNumber: data.studentNumber,
-                                id: data.id
+                                id: data.id,
                             };
                             studentNumberInput = data.studentNumber;
                         } else {
-                            toast.error(res.status === 404 ? "등록되지 않은 인원이거나 유효하지 않은 QR입니다." : "유저 정보를 불러올 수 없습니다.");
+                            toast.error(
+                                res.status === 404
+                                    ? "등록되지 않은 인원이거나 유효하지 않은 QR입니다."
+                                    : "유저 정보를 불러올 수 없습니다.",
+                            );
                             resumeScanning();
                         }
                     } catch (e) {
@@ -118,14 +126,14 @@
                 },
                 (errorMessage) => {
                     // Ignore continuous scan read errors
-                }
+                },
             );
         } catch (err) {
             console.error("Error starting QR scanner:", err);
             scanError = "카메라를 시작할 수 없습니다. 권한을 확인해주세요.";
         }
     }
-    
+
     async function stopScanner() {
         if (html5Qrcode && html5Qrcode.isScanning) {
             try {
@@ -139,7 +147,7 @@
             }
         }
     }
-    
+
     function resumeScanning() {
         scannedUser = null;
         studentNumberInput = "";
@@ -148,7 +156,7 @@
             html5Qrcode.resume();
         }
     }
-    
+
     onDestroy(() => {
         stopScanner();
     });
@@ -299,50 +307,45 @@
                     id="qr-reader"
                     class="w-full h-full absolute inset-0 z-0 flex items-center justify-center"
                 ></div>
-                
+
                 {#if scannedUser}
                     <!-- 2-Step Confirmation Overlay Layer -->
-                    <div class="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white">
+                    <div
+                        class="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white"
+                    >
                         <div class="flex flex-col items-center mb-6">
-                            <span class="text-[2rem] font-bold font-pretendard mb-1">{scannedUser.name}</span>
-                            <span class="text-xl text-zinc-300 font-medium">{scannedUser.studentNumber}</span>
-                        </div>
-                        <p class="text-lg font-medium mb-8">해당 인원을 등록할까요?</p>
-                        <div class="flex gap-4 w-full px-4">
-                            <button
-                                type="button"
-                                disabled={isSubmitting}
-                                onclick={resumeScanning}
-                                class="flex-1 py-3.5 bg-zinc-600 hover:bg-zinc-500 rounded-xl font-semibold transition-colors flex items-center justify-center disabled:opacity-50"
+                            <span
+                                class="text-[2rem] font-bold font-pretendard mb-1"
+                                >{scannedUser.name}</span
                             >
-                                <div class="size-5 mr-1 text-white">{@html CloseIcon}</div>
-                                <span>취소</span>
-                            </button>
-                            <button
-                                type="button"
-                                disabled={isSubmitting}
-                                onclick={() => { if (formElement) { formElement.requestSubmit(); } }}
-                                class="flex-1 py-3.5 bg-amber-500 hover:bg-amber-400 rounded-xl font-semibold transition-colors text-white disabled:opacity-50 flex items-center justify-center"
+                            <span class="text-xl text-zinc-300 font-medium"
+                                >{scannedUser.studentNumber}</span
                             >
-                                {#if isSubmitting}
-                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                {:else}
-                                    등록하기
-                                {/if}
-                            </button>
                         </div>
+                        <p class="text-lg font-medium mb-8">
+                            해당 인원을 등록할까요?
+                        </p>
                     </div>
                 {:else if scanError}
-                    <div class="z-10 bg-white/90 dark:bg-zinc-900/90 p-4 rounded-xl text-center flex flex-col items-center gap-2">
-                        <div class="text-zinc-500 w-8 h-8 flex items-center justify-center">{@html ScanIcon}</div>
-                        <p class="text-red-500 font-medium text-sm">{scanError}</p>
+                    <div
+                        class="z-10 bg-white/90 dark:bg-zinc-900/90 p-4 rounded-xl text-center flex flex-col items-center gap-2"
+                    >
+                        <div
+                            class="text-zinc-500 w-8 h-8 flex items-center justify-center"
+                        >
+                            {@html ScanIcon}
+                        </div>
+                        <p class="text-red-500 font-medium text-sm">
+                            {scanError}
+                        </p>
                     </div>
                 {:else if !scanModalOpen}
                     <!-- Placeholder when not scanning -->
-                    <div class="z-10 text-zinc-500 w-8 h-8 flex items-center justify-center">{@html ScanIcon}</div>
+                    <div
+                        class="z-10 text-zinc-500 w-8 h-8 flex items-center justify-center"
+                    >
+                        {@html ScanIcon}
+                    </div>
                 {/if}
             </div>
 
@@ -459,7 +462,7 @@
         width: 100% !important;
         height: 100% !important;
     }
-    
+
     /* Hide the annoying license/info footer from html5-qrcode */
     :global(#qr-reader__dashboard_section_swaplink) {
         display: none !important;
