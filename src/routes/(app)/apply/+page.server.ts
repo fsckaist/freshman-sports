@@ -5,13 +5,12 @@ import { eq, and, asc } from 'drizzle-orm';
 import { getRemainingTimeLabel } from '$lib/server/timeUtils';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, parent }) => {
     const user = locals.user;
     if (!user) throw redirect(302, '/login');
 
     // State guard: apply page only visible during REGISTRATION
-    const configs = await db.select().from(system_config).limit(1);
-    const eventState = configs[0]?.eventState ?? 'REGISTRATION';
+    const { eventState, registrationDeadline } = await parent();
     if (eventState !== 'REGISTRATION') throw redirect(302, '/');
 
     if (!user.classId) {
@@ -38,7 +37,6 @@ export const load: PageServerLoad = async ({ locals }) => {
         .where(eq(rosters.classId, user.classId));
 
     // Calculate deadline
-    const registrationDeadline = configs[0]?.registrationDeadline;
     let deadlineStr = "미정";
     let daysRemaining = "0";
     let timeRemaining = "0분";

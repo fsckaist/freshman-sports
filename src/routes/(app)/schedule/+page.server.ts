@@ -5,14 +5,13 @@ import { eq, and, or, asc, gte, lte } from 'drizzle-orm';
 import { getRemainingTimeLabel } from '$lib/server/timeUtils';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ url, locals }) => {
+export const load: PageServerLoad = async ({ url, locals, parent }) => {
     try {
         const user = locals.user;
         if (!user) throw redirect(302, '/login');
 
         // State guard: schedule page only visible during ONGOING
-        const configs = await db.select().from(system_config).limit(1);
-        const eventState = configs[0]?.eventState ?? 'REGISTRATION';
+        const { eventState } = await parent();
         if (eventState !== 'ONGOING') throw redirect(302, '/');
 
         // 1. URL Parameter Handling
@@ -296,29 +295,54 @@ export const actions: Actions = {
                 return fail(400, { message: "슬롯 아이디가 누락되었습니다." });
             }
 
-            // 1. Deadline Validation
-            // Fetch the sport/match info to get the specific deadline
-            const currentSchedule = await db.select().from(schedules).where(eq(schedules.id, slotId)).limit(1);
-            if (currentSchedule.length === 0) return fail(404, { message: "일정을 찾을 수 없습니다." });
-
-            const sport = await db.select().from(sports).where(eq(sports.id, currentSchedule[0].sportId)).limit(1);
-            if (sport.length === 0) return fail(404, { message: "종목 정보를 찾을 수 없습니다." });
-
-            const matchCheck = await db.select({
-                deadline: matches.scheduleWindowDeadline,
-                round: tournament_brackets.round
+            // 1. Fetch Schedule & Sport info in ONE query
+            const scheduleData = await db.select({
+                schedule: schedules,
+                sport: sports
             })
-                .from(matches)
-                .innerJoin(tournament_brackets, eq(matches.id, tournament_brackets.matchId))
-                .where(and(
-                    eq(matches.sportId, sport[0].id),
-                    eq(matches.status, 'PENDING_SCHEDULE'),
-                    or(eq(matches.classAId, user.classId), eq(matches.classBId, user.classId))
-                ))
-                .limit(1);
+            .from(schedules)
+            .innerJoin(sports, eq(schedules.sportId, sports.id))
+            .where(eq(schedules.id, slotId))
+            .limit(1);
 
-            let activeDeadline = sport[0].round1Deadline;
-            if (matchCheck.length > 0 && matchCheck[0].deadline) {
+            if (scheduleData.length === 0) return fail(404, { message: "일정 또는 종목을 찾을 수 없습니다." });
+
+            const { schedule: targetSchedule, sport } = scheduleData[0];
+
+            // 2. Fetch all dependent data in PARALLEL
+            const [matchCheck, isRostered, existingVote] = await Promise.all([
+                db.select({
+                    deadline: matches.scheduleWindowDeadline,
+                    id: matches.id,
+                    round: tournament_brackets.round
+                })
+                    .from(matches)
+                    .leftJoin(tournament_brackets, eq(matches.id, tournament_brackets.matchId))
+                    .where(and(
+                        eq(matches.sportId, sport.id),
+                        eq(matches.status, 'PENDING_SCHEDULE'),
+                        or(eq(matches.classAId, user.classId), eq(matches.classBId, user.classId))
+                    ))
+                    .limit(1),
+                db.select().from(rosters)
+                    .where(and(eq(rosters.userId, user.id), eq(rosters.sportId, sport.id)))
+                    .limit(1),
+                db.select().from(registers)
+                    .where(and(eq(registers.scheduleId, slotId), eq(registers.userId, user.id)))
+                    .limit(1)
+            ]);
+
+            // 3. Validations
+            if (isRostered.length === 0) {
+                return fail(403, { message: "해당 종목의 출전 선수가 아니므로 일정을 선택할 수 없습니다." });
+            }
+
+            if (matchCheck.length === 0) {
+                return fail(403, { message: "일정을 조율할 예정된 경기가 없습니다." });
+            }
+
+            let activeDeadline = sport.round1Deadline;
+            if (matchCheck[0].deadline) {
                 activeDeadline = matchCheck[0].deadline;
             }
 
@@ -327,58 +351,11 @@ export const actions: Actions = {
                 return fail(403, { message: "투표가 마감되었습니다." });
             }
 
-            // 2. Schedule Existence Check (reuse currentSchedule from above)
-            const targetSchedule = currentSchedule[0];
-
-            // 3. Roster Check (Security)
-            const isRostered = await db.select().from(rosters)
-                .where(
-                    and(
-                        eq(rosters.userId, user.id),
-                        eq(rosters.sportId, targetSchedule.sportId)
-                    )
-                )
-                .limit(1);
-
-            if (isRostered.length === 0) {
-                return fail(403, { message: "해당 종목의 출전 선수가 아니므로 일정을 선택할 수 없습니다." });
-            }
-
-            // 3.5. Pending Match Check (Security)
-            const pendingMatchCheck = await db.select()
-                .from(matches)
-                .where(
-                    and(
-                        eq(matches.sportId, targetSchedule.sportId),
-                        eq(matches.status, 'PENDING_SCHEDULE'),
-                        or(
-                            eq(matches.classAId, user.classId),
-                            eq(matches.classBId, user.classId)
-                        )
-                    )
-                )
-                .limit(1);
-
-            if (pendingMatchCheck.length === 0) {
-                return fail(403, { message: "일정을 조율할 예정된 경기가 없습니다." });
-            }
-
-            // 4. Toggle Logic 
-            const existingVote = await db.select()
-                .from(registers)
-                .where(
-                    and(
-                        eq(registers.scheduleId, slotId),
-                        eq(registers.userId, user.id)
-                    )
-                )
-                .limit(1);
-
+            // 4. Toggle Logic
             if (existingVote.length > 0) {
                 const vote = existingVote[0];
                 await db.delete(registers).where(eq(registers.id, vote.id));
             } else {
-                // Ensure classId is passed explicitly per schema constraint
                 await db.insert(registers).values({
                     classId: user.classId,
                     userId: user.id,

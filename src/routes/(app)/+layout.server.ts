@@ -10,11 +10,13 @@ export const load = (async ({ locals }) => {
         configs = inserted;
     }
     const eventState = configs[0].eventState as EventState;
+    const registrationDeadline = configs[0].registrationDeadline;
 
 
     return {
         user: locals.user,
         eventState,
+        registrationDeadline,
         isImpersonating: locals.isImpersonating ?? false,
     };
 }) satisfies LayoutServerLoad;

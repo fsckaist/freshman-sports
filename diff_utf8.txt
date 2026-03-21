@@ -1,0 +1,1017 @@
+﻿diff --git a/src/routes/(app)/admin/+page.server.ts b/src/routes/(app)/admin/+page.server.ts
+index 04283ad..a5baf60 100644
+--- a/src/routes/(app)/admin/+page.server.ts
++++ b/src/routes/(app)/admin/+page.server.ts
+@@ -1,4 +1,4 @@
+-import { fail, redirect } from '@sveltejs/kit';
++癤퓁mport { fail, redirect } from '@sveltejs/kit';
+ import { db } from '$lib/server/db';
+ import { sports, schedules, registers, users, rosters, matches, classes, tournament_brackets, system_config, sport_locations, type EventState } from '$lib/server/db/schema';
+ import { eq, and, asc, isNotNull, or, inArray } from 'drizzle-orm';
+@@ -68,7 +68,7 @@ async function syncBracketMatch(sportId: string, targetRound: number, targetPosi
+                 classAId: classA,
+                 classBId: classB,
+                 winnerClassId: winnerId,
+-                matchNotes: bothEliminated ? '?묒륫 ?곗듅???놁쓬?쇰줈 ?명븳 ?숈떆 ?덈씫' : '?곷?痢??곗듅???놁쓬?쇰줈 ?명븳 遺?꾩듅/?먮룞?밸━'
++                matchNotes: bothEliminated ? '?臾믩? ?怨쀫뱟????곸벉??곗쨮 ?紐낅립 ??덈뻻 ??덉뵭' : '?怨?筌??怨쀫뱟????곸벉??곗쨮 ?紐낅립 ?봔?袁⑸뱟/?癒?짗?諛멤봺'
+             }).returning({ id: matches.id });
+             mId = newMatch.id;
+ 
+@@ -149,17 +149,17 @@ export const load: PageServerLoad = async ({ url, locals }) => {
+             throw redirect(302, '/');
+         }
+ 
+-        // Fetch event state for system tab
+-        const configRows = await db.select().from(system_config).limit(1);
+-        const eventState = (configRows[0]?.eventState ?? 'REGISTRATION') as EventState;
+-        const registrationDeadline = configRows[0]?.registrationDeadline ?? null;
++        const activeTab = url.searchParams.get('tab') ?? 'schedule';
+ 
++        // --- SHARED: Always needed (lightweight, parallelized) ---
++        const [configRows, allSports, allLocations] = await Promise.all([
++            db.select().from(system_config).limit(1),
++            db.select().from(sports).orderBy(asc(sports.displayOrder)),
++            db.select().from(sport_locations),
++        ]);
+ 
+-        // --- TAB 1: Schedule Configuration Data ---
+-        let requestedSportId = url.searchParams.get('sportId');
+-
+-        const allSports = await db.select().from(sports).orderBy(asc(sports.displayOrder));
+-        const allLocations = await db.select().from(sport_locations);
++        const eventState = (configRows[0]?.eventState ?? 'REGISTRATION') as EventState;
++        const registrationDeadline = configRows[0]?.registrationDeadline ?? null;
+ 
+         // Group locations by sportId
+         const locationsMap = new Map<string, any[]>();
+@@ -172,78 +172,74 @@ export const load: PageServerLoad = async ({ url, locals }) => {
+             ...s,
+             locations: locationsMap.get(s.id) || []
+         }));
++
+         if (allSports.length === 0) {
+             return {
+-                sports: [], activeSportId: null, gridData: {}, periodStart: null, periodEnd: null,
+-                completedClasses: [], activeClassPair: null, confirmGridData: {}, allUsers: [],
+-                finishedMatches: [], activeResultMatch: null, eventState: 'REGISTRATION'
++                sports: [], activeSportId: null, gridData: {},
++                completedClasses: [], activeMatch: null, confirmGridData: {}, allUsers: [],
++                finishedMatches: [], activeResultMatch: null, eventState: 'REGISTRATION',
++                activeTab
+             };
+         }
+ 
++        let requestedSportId = url.searchParams.get('sportId');
+         let activeSport = sportsWithLocations.find(s => s.id === requestedSportId) || sportsWithLocations[0];
+ 
+-        // Fetch all schedules for grid (Dynamically bounded by DB data)
+-        const rawSchedules = await db.select()
+-            .from(schedules)
+-            .where(eq(schedules.sportId, activeSport.id))
+-            .orderBy(asc(schedules.startTime));
+-
+-        // Get count of scheduled matches for each slot
+-        const scheduledMatchesForSport = await db.select({
+-            scheduleId: matches.scheduleId,
+-        })
+-            .from(matches)
+-            .where(and(
+-                eq(matches.sportId, activeSport.id),
+-                eq(matches.status, 'SCHEDULED')
+-            ));
+-
+-        const scheduledCountMap = new Map<string, number>();
+-        for (const m of scheduledMatchesForSport) {
+-            if (m.scheduleId) {
+-                scheduledCountMap.set(m.scheduleId, (scheduledCountMap.get(m.scheduleId) || 0) + 1);
+-            }
+-        }
+-
+-        // Create date keys for grouping
+-        const dateKeys = Array.from(new Set(rawSchedules.map(rs => {
+-            const d = rs.startTime;
+-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+-        }))).sort();
+-
+-        type ScheduleSlot = {
+-            id: string;
+-            startTime: string;
+-            isSlotAvailable: boolean;
+-            registrations: any[];
+-            totalVotes: number;
+-            isVoted: boolean;
+-            scheduledMatchesCount: number;
+-            maxParallelMatches: number;
++        // Base return value with shared data + empty defaults
++        const baseReturn: Record<string, any> = {
++            sports: sportsWithLocations,
++            activeSportId: activeSport.id,
++            activeTab,
++            eventState,
++            registrationDeadline,
++            gridData: {},
++            completedClasses: [],
++            activeMatch: null,
++            confirmGridData: {},
++            allUsers: [],
++            finishedMatches: [],
++            activeResultMatch: null,
+         };
+ 
+-        const formattedGrid: Record<string, ScheduleSlot[]> = {};
+-
+-        // Calculate start and end bounds based on periodStart and periodEnd
+-        const startDate = activeSport.periodStart ? new Date(activeSport.periodStart) : new Date();
+-        const endDate = activeSport.periodEnd ? new Date(activeSport.periodEnd) : new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000);
+-        startDate.setHours(0, 0, 0, 0);
+-        endDate.setHours(23, 59, 59, 999);
++        // --- TAB 1: Schedule Configuration Data (only when schedule tab is active) ---
++        if (activeTab === 'schedule') {
++            const [rawSchedules, scheduledMatchesForSport] = await Promise.all([
++                db.select()
++                    .from(schedules)
++                    .where(eq(schedules.sportId, activeSport.id))
++                    .orderBy(asc(schedules.startTime)),
++                db.select({ scheduleId: matches.scheduleId })
++                    .from(matches)
++                    .where(and(
++                        eq(matches.sportId, activeSport.id),
++                        eq(matches.status, 'SCHEDULED')
++                    )),
++            ]);
+ 
+-        // Generate grid bounded ONLY by existing DB records
+-        // (dateKeys are already calculated above)
++            const scheduledCountMap = new Map<string, number>();
++            for (const m of scheduledMatchesForSport) {
++                if (m.scheduleId) {
++                    scheduledCountMap.set(m.scheduleId, (scheduledCountMap.get(m.scheduleId) || 0) + 1);
++                }
++            }
+ 
+-        for (const dateKey of dateKeys) {
+-            const daySlots: ScheduleSlot[] = [];
+-            // Filter schedules matching this date
+-            const matchingSchedules = rawSchedules.filter(rs => {
++            const dateKeys = Array.from(new Set(rawSchedules.map(rs => {
+                 const d = rs.startTime;
+-                const dk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+-                return dk === dateKey;
+-            }).sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
++                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
++            }))).sort();
++
++            type ScheduleSlot = {
++                id: string; startTime: string; isSlotAvailable: boolean;
++                registrations: any[]; totalVotes: number; isVoted: boolean;
++                scheduledMatchesCount: number; maxParallelMatches: number;
++            };
+ 
+-            for (const existing of matchingSchedules) {
+-                daySlots.push({
++            const formattedGrid: Record<string, ScheduleSlot[]> = {};
++            for (const dateKey of dateKeys) {
++                formattedGrid[dateKey] = rawSchedules.filter(rs => {
++                    const d = rs.startTime;
++                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` === dateKey;
++                }).sort((a, b) => a.startTime.getTime() - b.startTime.getTime()).map(existing => ({
+                     id: existing.id,
+                     startTime: existing.startTime.toISOString(),
+                     isSlotAvailable: existing.isAvailable ?? true,
+@@ -252,221 +248,182 @@ export const load: PageServerLoad = async ({ url, locals }) => {
+                     isVoted: false,
+                     scheduledMatchesCount: scheduledCountMap.get(existing.id) || 0,
+                     maxParallelMatches: activeSport.maxParallelMatches ?? 1
+-                });
++                }));
+             }
+-            formattedGrid[dateKey] = daySlots;
++            baseReturn.gridData = formattedGrid;
+         }
+ 
+         // --- TAB 2: Match Confirmation Data ---
+-        const pendingMatchesRaw = await db.select({
+-            match: matches,
+-            sport: sports,
+-        })
+-            .from(matches)
+-            .innerJoin(sports, eq(matches.sportId, sports.id))
+-            .where(
+-                and(
+-                    eq(matches.sportId, activeSport.id),
+-                    eq(matches.status, 'PENDING_SCHEDULE'),
+-                    isNotNull(matches.classAId),
+-                    isNotNull(matches.classBId)
+-                )
+-            );
+-
+-        const allClassesRaw = await db.select().from(classes);
+-        const classMap = new Map(allClassesRaw.map(c => [c.id, c.classNumber]));
+-
+-        const pendingMatches = pendingMatchesRaw.map(r => ({
+-            id: r.match.id,
+-            sportName: r.sport.name,
+-            matchName: r.match.name,
+-            classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
+-            classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
+-            classAId: r.match.classAId,
+-            classBId: r.match.classBId,
+-            scheduleWindowStart: r.match.scheduleWindowStart ? r.match.scheduleWindowStart.toISOString() : null,
+-            scheduleWindowEnd: r.match.scheduleWindowEnd ? r.match.scheduleWindowEnd.toISOString() : null,
+-            scheduleWindowDeadline: r.match.scheduleWindowDeadline ? r.match.scheduleWindowDeadline.toISOString() : null
+-        }));
++        if (activeTab === 'confirm') {
++            const [pendingMatchesRaw, allClassesRaw, staffUsers, scheduledMatchesForSport] = await Promise.all([
++                db.select({ match: matches, sport: sports })
++                    .from(matches)
++                    .innerJoin(sports, eq(matches.sportId, sports.id))
++                    .where(and(
++                        eq(matches.sportId, activeSport.id),
++                        eq(matches.status, 'PENDING_SCHEDULE'),
++                        isNotNull(matches.classAId),
++                        isNotNull(matches.classBId)
++                    )),
++                db.select().from(classes),
++                db.select({
++                    id: users.id, name: users.name, studentNumber: users.studentNumber,
++                    isManager: users.isManager, isReferee: users.isReferee,
++                }).from(users).where(or(eq(users.isManager, true), eq(users.isReferee, true))),
++                db.select({ scheduleId: matches.scheduleId })
++                    .from(matches)
++                    .where(and(eq(matches.sportId, activeSport.id), eq(matches.status, 'SCHEDULED'))),
++            ]);
+ 
+-        let activeMatchId = url.searchParams.get('matchId');
+-        let activeMatch = pendingMatches.find(m => m.id === activeMatchId);
+-        if (!activeMatch && pendingMatches.length > 0) activeMatch = pendingMatches[0];
+-
+-        let confirmGridData: Record<string, ScheduleSlot[]> = {};
+-
+-        if (activeMatch) {
+-            const confirmRawData = await db.select({
+-                schedule: schedules,
+-                register: registers,
+-                user: users
+-            })
+-                .from(schedules)
+-                .leftJoin(registers, and(
+-                    eq(schedules.id, registers.scheduleId),
+-                    eq(registers.isAvailable, true)
+-                ))
+-                .leftJoin(users, eq(registers.userId, users.id))
+-                .where(eq(schedules.sportId, activeSport.id))
+-                .orderBy(asc(schedules.startTime));
+-
+-            const confirmGridMap = new Map<string, Map<string, ScheduleSlot>>();
+-            for (const row of confirmRawData) {
+-                // Determine if this register is from classA or classB
+-                const isRelevantClass = row.register && (row.register.classId === activeMatch.classAId || row.register.classId === activeMatch.classBId);
+-
+-                const dateObj = row.schedule.startTime;
+-                const dateKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+-
+-                if (!confirmGridMap.has(dateKey)) confirmGridMap.set(dateKey, new Map());
+-                const daySlots = confirmGridMap.get(dateKey)!;
+-                const schedId = row.schedule.id;
+-
+-                if (!daySlots.has(schedId)) {
+-                    daySlots.set(schedId, {
+-                        id: schedId,
+-                        startTime: dateObj.toISOString(),
+-                        isSlotAvailable: row.schedule.isAvailable ?? true,
+-                        registrations: [],
+-                        totalVotes: 0,
+-                        isVoted: false,
+-                        scheduledMatchesCount: scheduledCountMap.get(schedId) || 0,
+-                        maxParallelMatches: activeSport.maxParallelMatches ?? 1
+-                    });
+-                }
++            const classMap = new Map(allClassesRaw.map(c => [c.id, c.classNumber]));
++            const scheduledCountMap = new Map<string, number>();
++            for (const m of scheduledMatchesForSport) {
++                if (m.scheduleId) scheduledCountMap.set(m.scheduleId, (scheduledCountMap.get(m.scheduleId) || 0) + 1);
++            }
+ 
+-                if (isRelevantClass && row.user) {
+-                    daySlots.get(schedId)!.registrations.push({
+-                        name: row.user.name ?? "?듬챸",
+-                        userId: row.user.id,
+-                        classId: row.user.classId
+-                    });
+-                    daySlots.get(schedId)!.totalVotes++;
++            const pendingMatches = pendingMatchesRaw.map(r => ({
++                id: r.match.id, sportName: r.sport.name, matchName: r.match.name,
++                classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
++                classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
++                classAId: r.match.classAId, classBId: r.match.classBId,
++                scheduleWindowStart: r.match.scheduleWindowStart?.toISOString() ?? null,
++                scheduleWindowEnd: r.match.scheduleWindowEnd?.toISOString() ?? null,
++                scheduleWindowDeadline: r.match.scheduleWindowDeadline?.toISOString() ?? null
++            }));
++
++            let activeMatchId = url.searchParams.get('matchId');
++            let activeMatch = pendingMatches.find(m => m.id === activeMatchId);
++            if (!activeMatch && pendingMatches.length > 0) activeMatch = pendingMatches[0];
++
++            type ScheduleSlot = {
++                id: string; startTime: string; isSlotAvailable: boolean;
++                registrations: any[]; totalVotes: number; isVoted: boolean;
++                scheduledMatchesCount: number; maxParallelMatches: number;
++            };
++
++            let confirmGridData: Record<string, ScheduleSlot[]> = {};
++            if (activeMatch) {
++                const confirmRawData = await db.select({ schedule: schedules, register: registers, user: users })
++                    .from(schedules)
++                    .leftJoin(registers, and(eq(schedules.id, registers.scheduleId), eq(registers.isAvailable, true)))
++                    .leftJoin(users, eq(registers.userId, users.id))
++                    .where(eq(schedules.sportId, activeSport.id))
++                    .orderBy(asc(schedules.startTime));
++
++                const confirmGridMap = new Map<string, Map<string, ScheduleSlot>>();
++                for (const row of confirmRawData) {
++                    const isRelevantClass = row.register && (row.register.classId === activeMatch.classAId || row.register.classId === activeMatch.classBId);
++                    const dateObj = row.schedule.startTime;
++                    const dateKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
++
++                    if (!confirmGridMap.has(dateKey)) confirmGridMap.set(dateKey, new Map());
++                    const daySlots = confirmGridMap.get(dateKey)!;
++                    const schedId = row.schedule.id;
++
++                    if (!daySlots.has(schedId)) {
++                        daySlots.set(schedId, {
++                            id: schedId, startTime: dateObj.toISOString(),
++                            isSlotAvailable: row.schedule.isAvailable ?? true,
++                            registrations: [], totalVotes: 0, isVoted: false,
++                            scheduledMatchesCount: scheduledCountMap.get(schedId) || 0,
++                            maxParallelMatches: activeSport.maxParallelMatches ?? 1
++                        });
++                    }
++
++                    if (isRelevantClass && row.user) {
++                        daySlots.get(schedId)!.registrations.push({
++                            name: row.user.name ?? "??ъ구", userId: row.user.id, classId: row.user.classId
++                        });
++                        daySlots.get(schedId)!.totalVotes++;
++                    }
+                 }
++                for (const [dateKey, mapSlots] of confirmGridMap.entries()) confirmGridData[dateKey] = Array.from(mapSlots.values());
+             }
+ 
+-            for (const [dateKey, mapSlots] of confirmGridMap.entries()) confirmGridData[dateKey] = Array.from(mapSlots.values());
++            baseReturn.completedClasses = pendingMatches;
++            baseReturn.activeMatch = activeMatch;
++            baseReturn.confirmGridData = confirmGridData;
++            baseReturn.allUsers = staffUsers;
+         }
+ 
+-        const staffUsers = await db.select().from(users).where(or(eq(users.isManager, true), eq(users.isReferee, true)));
+-
+         // --- TAB 3: Match Result Confirmation Data ---
+-        const finishedMatchesRaw = await db.select({
+-            match: matches,
+-            sport: sports,
+-        })
+-            .from(matches)
+-            .innerJoin(sports, eq(matches.sportId, sports.id))
+-            .where(
+-                and(
+-                    eq(matches.sportId, activeSport.id),
+-                    eq(matches.status, 'FINISHED'),
+-                    eq(matches.isVerified, false)
+-                )
+-            );
+-
+-        const finishedMatches = finishedMatchesRaw.map(r => ({
+-            id: r.match.id,
+-            sportName: r.sport.name,
+-            matchName: r.match.name,
+-            classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
+-            classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
+-            classAId: r.match.classAId,
+-            classBId: r.match.classBId,
+-            scoreA: r.match.scoreA,
+-            scoreB: r.match.scoreB
+-        }));
+-
+-        let activeResultMatchId = url.searchParams.get('resultMatchId');
+-        let baseResultMatch = finishedMatches.find(m => m.id === activeResultMatchId);
+-        if (!baseResultMatch && finishedMatches.length > 0) baseResultMatch = finishedMatches[0];
+-
+-        let activeResultMatchDetails = null;
+-
+-        if (baseResultMatch) {
+-            // Reconstruct attendance to feed to MatchLogPanel correctly
+-            const teamARoster = await db
+-                .select({ userId: rosters.userId })
+-                .from(rosters)
+-                .where(and(eq(rosters.classId, baseResultMatch.classAId!), eq(rosters.sportId, activeSport.id)));
+-
+-            const teamBRoster = await db
+-                .select({ userId: rosters.userId })
+-                .from(rosters)
+-                .where(and(eq(rosters.classId, baseResultMatch.classBId!), eq(rosters.sportId, activeSport.id)));
+-
+-            const teamAUserIds = new Set(teamARoster.map(r => r.userId));
+-            const teamBUserIds = new Set(teamBRoster.map(r => r.userId));
+-
+-            // Fetch ACTUAL registers for this specific match's schedule
+-            const matchRecord = await db.select().from(matches).where(eq(matches.id, baseResultMatch.id)).limit(1);
+-            let matchRegisters: any[] = [];
+-
+-            if (matchRecord.length > 0 && matchRecord[0].scheduleId) {
+-                matchRegisters = await db
+-                    .select({
+-                        registerId: registers.id,
+-                        userId: users.id,
+-                        name: users.name,
+-                        studentNumber: users.studentNumber,
+-                        classId: users.classId
+-                    })
+-                    .from(registers)
+-                    .innerJoin(users, eq(registers.userId, users.id))
+-                    .where(eq(registers.scheduleId, matchRecord[0].scheduleId!));
+-            }
++        if (activeTab === 'result') {
++            const [finishedMatchesRaw, allClassesRaw] = await Promise.all([
++                db.select({ match: matches, sport: sports })
++                    .from(matches)
++                    .innerJoin(sports, eq(matches.sportId, sports.id))
++                    .where(and(
++                        eq(matches.sportId, activeSport.id),
++                        eq(matches.status, 'FINISHED'),
++                        eq(matches.isVerified, false)
++                    )),
++                db.select().from(classes),
++            ]);
++
++            const classMap = new Map(allClassesRaw.map(c => [c.id, c.classNumber]));
++            const finishedMatches = finishedMatchesRaw.map(r => ({
++                id: r.match.id, sportName: r.sport.name, matchName: r.match.name,
++                classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
++                classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
++                classAId: r.match.classAId, classBId: r.match.classBId,
++                scoreA: r.match.scoreA, scoreB: r.match.scoreB
++            }));
++
++            let activeResultMatchId = url.searchParams.get('resultMatchId');
++            let baseResultMatch = finishedMatches.find(m => m.id === activeResultMatchId);
++            if (!baseResultMatch && finishedMatches.length > 0) baseResultMatch = finishedMatches[0];
++
++            let activeResultMatchDetails = null;
++            if (baseResultMatch) {
++                const [teamARoster, teamBRoster] = await Promise.all([
++                    db.select({ userId: rosters.userId }).from(rosters)
++                        .where(and(eq(rosters.classId, baseResultMatch.classAId!), eq(rosters.sportId, activeSport.id))),
++                    db.select({ userId: rosters.userId }).from(rosters)
++                        .where(and(eq(rosters.classId, baseResultMatch.classBId!), eq(rosters.sportId, activeSport.id))),
++                ]);
++
++                const teamAUserIds = new Set(teamARoster.map(r => r.userId));
++                const teamBUserIds = new Set(teamBRoster.map(r => r.userId));
++
++                const matchRecord = await db.select().from(matches).where(eq(matches.id, baseResultMatch.id)).limit(1);
++                let matchRegisters: any[] = [];
++                if (matchRecord.length > 0 && matchRecord[0].scheduleId) {
++                    matchRegisters = await db.select({
++                        registerId: registers.id, userId: users.id, name: users.name,
++                        studentNumber: users.studentNumber, classId: users.classId
++                    }).from(registers).innerJoin(users, eq(registers.userId, users.id))
++                        .where(eq(registers.scheduleId, matchRecord[0].scheduleId!));
++                }
+ 
+-            const teamACheckedIn = [];
+-            const teamBCheckedIn = [];
+-            const cheeringCheckedIn = [];
+-
+-            for (const reg of matchRegisters) {
+-                if (teamAUserIds.has(reg.userId)) {
+-                    teamACheckedIn.push(reg);
+-                } else if (teamBUserIds.has(reg.userId)) {
+-                    teamBCheckedIn.push(reg);
+-                } else {
+-                    cheeringCheckedIn.push(reg);
++                const teamACheckedIn: any[] = [];
++                const teamBCheckedIn: any[] = [];
++                const cheeringCheckedIn: any[] = [];
++                for (const reg of matchRegisters) {
++                    if (teamAUserIds.has(reg.userId)) teamACheckedIn.push(reg);
++                    else if (teamBUserIds.has(reg.userId)) teamBCheckedIn.push(reg);
++                    else cheeringCheckedIn.push(reg);
+                 }
++
++                activeResultMatchDetails = {
++                    id: baseResultMatch.id,
++                    classAId: baseResultMatch.classAId, classBId: baseResultMatch.classBId,
++                    classA: baseResultMatch.classA, classB: baseResultMatch.classB,
++                    scoreA: baseResultMatch.scoreA, scoreB: baseResultMatch.scoreB,
++                    status: 'FINISHED',
++                    attendance: {
++                        teamA: teamACheckedIn, teamB: teamBCheckedIn, cheering: cheeringCheckedIn,
++                        teamATotal: activeSport.minPlayers, teamBTotal: activeSport.minPlayers
++                    },
++                    matchNotes: matchRecord[0]?.matchNotes,
++                    recordStructure: activeSport.recordStructure
++                };
+             }
+ 
+-            activeResultMatchDetails = {
+-                id: baseResultMatch.id,
+-                classAId: baseResultMatch.classAId,
+-                classBId: baseResultMatch.classBId,
+-                classA: baseResultMatch.classA,
+-                classB: baseResultMatch.classB,
+-                scoreA: baseResultMatch.scoreA,
+-                scoreB: baseResultMatch.scoreB,
+-                status: 'FINISHED',
+-                attendance: {
+-                    teamA: teamACheckedIn,
+-                    teamB: teamBCheckedIn,
+-                    cheering: cheeringCheckedIn,
+-                    teamATotal: activeSport.minPlayers,
+-                    teamBTotal: activeSport.minPlayers
+-                },
+-                matchNotes: matchRecord[0]?.matchNotes,
+-                recordStructure: activeSport.recordStructure
+-            };
++            baseReturn.finishedMatches = finishedMatches;
++            baseReturn.activeResultMatch = activeResultMatchDetails;
+         }
+ 
+-        return {
+-            sports: sportsWithLocations,
+-            activeSportId: activeSport.id,
+-            gridData: formattedGrid,
+-            activeTab: url.searchParams.get('tab'),
+-
+-            completedClasses: pendingMatches,
+-            activeMatch,
+-            confirmGridData,
+-            allUsers: staffUsers,
+-
+-            finishedMatches,
+-            activeResultMatch: activeResultMatchDetails,
+-            eventState,
+-            registrationDeadline
+-        };
++        return baseReturn;
+     } catch (e) {
+         if (e && typeof e === 'object' && 'status' in e && e.status === 302) {
+             throw e;
+@@ -474,355 +431,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
+         console.error("FATAL: Loader Error in Admin Dashboard! Check DB connection and schema.");
+         console.error(e);
+         return {
+-            sports: [], activeSportId: null, gridData: {},
++            sports: [], activeSportId: null, gridData: {}, activeTab: 'schedule',
+             completedClasses: [], activeMatch: null, confirmGridData: {}, allUsers: [],
+             finishedMatches: [], activeResultMatch: null, eventState: "REGISTRATION" as EventState
+         };
+     }
+ };
+-
+-export const actions: Actions = {
+-    toggleSlotAvailability: async ({ request, locals }) => {
+-        try {
+-            const user = locals.user;
+-            if (!user || (!user.isManager && !user.isAdmin)) {
+-                return fail(403, { message: "沅뚰븳???놁뒿?덈떎." });
+-            }
+-
+-            const formData = await request.formData();
+-            const slotId = formData.get('slotId')?.toString();
+-
+-            if (!slotId) return fail(400, { message: "?щ’ ID媛 ?꾨씫?섏뿀?듬땲??" });
+-
+-            if (slotId.startsWith('NEW_')) {
+-                const parts = slotId.split('_');
+-                const sportId = parts[1];
+-                const isoTime = parts.slice(2).join('_');
+-                const startTime = new Date(isoTime);
+-
+-                await db.insert(schedules).values({
+-                    sportId,
+-                    startTime,
+-                    isAvailable: true
+-                });
+-                return { success: true };
+-            }
+-
+-            const target = await db.select().from(schedules).where(eq(schedules.id, slotId)).limit(1);
+-            if (target.length === 0) return fail(404, { message: "?щ’??李얠쓣 ???놁뒿?덈떎." });
+-
+-            const currentStatus = target[0].isAvailable ?? true;
+-
+-            // If trying to reactivate, check if limit is already reached
+-            if (!currentStatus) {
+-                const sportId = target[0].sportId;
+-                const sportRow = await db.select({ maxParallelMatches: sports.maxParallelMatches }).from(sports).where(eq(sports.id, sportId)).limit(1);
+-                const limit = sportRow[0]?.maxParallelMatches ?? 1;
+-
+-                const scheduledCount = await db.select({ id: matches.id })
+-                    .from(matches)
+-                    .where(and(
+-                        eq(matches.scheduleId, slotId),
+-                        eq(matches.status, 'SCHEDULED')
+-                    ));
+-
+-                if (scheduledCount.length >= limit) {
+-                    return fail(400, { message: `?숈떆 寃쎄린 媛????${limit})瑜?異⑹”?섏뿬 ?쒖꽦?뷀븷 ???놁뒿?덈떎.` });
+-                }
+-            }
+-
+-            await db.update(schedules).set({ isAvailable: !currentStatus }).where(eq(schedules.id, slotId));
+-
+-            return { success: true };
+-        } catch (e) {
+-            console.error(e);
+-            return fail(500, { message: "?쒕쾭 泥섎━ ?ㅻ쪟" });
+-        }
+-    },
+-    updateSchedulePeriod: async ({ request, locals }) => {
+-        try {
+-            const user = locals.user;
+-            if (!user || (!user.isManager && !user.isAdmin)) return fail(403);
+-
+-            const formData = await request.formData();
+-            const sportId = formData.get('sportId')?.toString();
+-            const periodStart = formData.get('periodStart')?.toString();
+-            const periodEnd = formData.get('periodEnd')?.toString();
+-
+-            if (!sportId) return fail(400);
+-
+-            const startObj = periodStart ? new Date(periodStart) : null;
+-            const endObj = periodEnd ? new Date(periodEnd) : null;
+-
+-            await db.update(sports).set({
+-                periodStart: startObj,
+-                periodEnd: endObj
+-            }).where(eq(sports.id, sportId));
+-
+-            return { success: true };
+-        } catch (e) {
+-            console.error(e);
+-            return fail(500);
+-        }
+-    },
+-    processByeMatches: async ({ request, locals }) => {
+-        try {
+-            const user = locals.user;
+-            if (!user || (!user.isManager && !user.isAdmin)) return fail(403);
+-
+-            const formData = await request.formData();
+-            const sportId = formData.get('sportId')?.toString();
+-            if (!sportId) return fail(400, { message: '醫낅ぉ ID ?꾨씫' });
+-
+-            const allPending = await db.select().from(matches).where(
+-                and(eq(matches.sportId, sportId), eq(matches.status, 'PENDING_SCHEDULE'))
+-            );
+-
+-            if (allPending.length === 0) return { success: true, processedCount: 0 };
+-
+-            const matchIds = allPending.map(m => m.id).filter(id => id !== null) as string[];
+-            if (matchIds.length === 0) return { success: true, processedCount: 0 };
+-
+-            const allNodes = await db.select().from(tournament_brackets).where(inArray(tournament_brackets.matchId, matchIds));
+-            const nodesByMatch = new Map<string, typeof allNodes>();
+-            for (const node of allNodes) {
+-                if (node.matchId) {
+-                    if (!nodesByMatch.has(node.matchId)) nodesByMatch.set(node.matchId, []);
+-                    nodesByMatch.get(node.matchId)!.push(node);
+-                }
+-            }
+-
+-            const byeMatches = allPending.filter(m => {
+-                const nodes = nodesByMatch.get(m.id) || [];
+-                // If one side has isEliminatedSlot: true and no classId, it's a legitimate bye.
+-                return nodes.some(n => n.isEliminatedSlot && n.classId === null);
+-            });
+-
+-            let count = 0;
+-            for (const match of byeMatches) {
+-                const nodes = nodesByMatch.get(match.id)!;
+-                const winnerNode = nodes.find(n => n.classId !== null);
+-                if (!winnerNode) continue; // Both sides bye? highly unlikely but skip.
+-
+-                const winnerClassId = winnerNode.classId!;
+-
+-                // Mark the match as finished and verified with the automatic winner
+-                await db.update(matches).set({
+-                    status: 'FINISHED',
+-                    winnerClassId,
+-                    isVerified: true
+-                }).where(eq(matches.id, match.id));
+-
+-                // Update tournament_brackets for this match
+-                const bracketNodes = await db.select().from(tournament_brackets)
+-                    .where(eq(tournament_brackets.matchId, match.id));
+-
+-                for (const node of bracketNodes) {
+-                    let newStatus: 'win' | 'lose' | 'default' = 'lose';
+-
+-                    if (node.classId === winnerClassId) {
+-                        newStatus = 'win';
+-
+-                        // Advance winner to next round
+-                        const nextRound = node.round + 1;
+-                        const nextPosition = Math.floor(node.position / 2);
+-
+-                        const nextNodes = await db.select().from(tournament_brackets).where(and(
+-                            eq(tournament_brackets.sportId, node.sportId),
+-                            eq(tournament_brackets.round, nextRound),
+-                            eq(tournament_brackets.position, nextPosition)
+-                        ));
+-
+-                        if (nextNodes.length > 0) {
+-                            await db.update(tournament_brackets)
+-                                .set({ classId: winnerClassId })
+-                                .where(eq(tournament_brackets.id, nextNodes[0].id));
+-                            
+-                            // CALL SHARED HELPER
+-                            await syncBracketMatch(node.sportId, nextRound, nextPosition);
+-                        }
+-                    }
+-
+-                    await db.update(tournament_brackets)
+-                        .set({ status: newStatus })
+-                        .where(eq(tournament_brackets.id, node.id));
+-                }
+- 
+-                 count++;
+-             }
+- 
+-             // Propagate schedule windows for bye-advanced matches (Optional, syncBracketMatch handles this internally too)
+-             for (const match of byeMatches) {
+-                 try { await propagateByeWindow(match.id); } catch (e) { console.error('propagateByeWindow error:', e); }
+-             }
+- 
+-             return { success: true, processedCount: count };
+-        } catch (e) {
+-            console.error('processByeMatches error:', e);
+-            return fail(500);
+-        }
+-    },
+-    finalizeMatch: async ({ request, locals }) => {
+-        try {
+-            const user = locals.user;
+-            if (!user || (!user.isManager && !user.isAdmin)) return fail(403);
+-
+-            const formData = await request.formData();
+-            const matchId = formData.get('matchId')?.toString();
+-            const scheduleId = formData.get('scheduleId')?.toString();
+-            const refereeId = formData.get('refereeId')?.toString();
+-            const managerId = formData.get('managerId')?.toString();
+-            const location = formData.get('location')?.toString();
+-
+-            if (!matchId || !scheduleId) return fail(400, { message: "留ㅼ튂 ID ?먮뒗 ?ㅼ?以?ID媛 ?놁뒿?덈떎." });
+-
+-            // 1. Get sport info for concurrency limit
+-            const matchRow = await db.select({ sportId: matches.sportId }).from(matches).where(eq(matches.id, matchId)).limit(1);
+-            if (matchRow.length === 0) return fail(404, { message: "留ㅼ튂瑜?李얠쓣 ???놁뒿?덈떎." });
+-            const sportId = matchRow[0].sportId;
+-
+-            const sportRow = await db.select({ maxParallelMatches: sports.maxParallelMatches }).from(sports).where(eq(sports.id, sportId)).limit(1);
+-            const limit = sportRow[0]?.maxParallelMatches ?? 1;
+-
+-            // 2. Set scheduledAt from the chosen schedule slot's startTime
+-            const scheduleRow = await db.select({ startTime: schedules.startTime })
+-                .from(schedules).where(eq(schedules.id, scheduleId)).limit(1);
+-            const scheduledAt = scheduleRow[0]?.startTime ?? null;
+-
+-            await db.update(matches).set({
+-                scheduleId,
+-                status: 'SCHEDULED',
+-                scheduledAt,
+-                location: location || null,
+-                refereeId: refereeId || null,
+-                managerId: managerId || null
+-            }).where(eq(matches.id, matchId));
+-
+-            // Trigger schedule window updates for the next round
+-            await computeOrUpdateNextMatchWindow(matchId);
+-
+-            // 3. Check if limit reached and disable slot
+-            const scheduledCount = await db.select({ id: matches.id })
+-                .from(matches)
+-                .where(and(
+-                    eq(matches.scheduleId, scheduleId),
+-                    eq(matches.status, 'SCHEDULED')
+-                ));
+-
+-            if (scheduledCount.length >= limit) {
+-                await db.update(schedules).set({ isAvailable: false }).where(eq(schedules.id, scheduleId));
+-            }
+-
+-            return { success: true };
+-        } catch (e) {
+-            console.error(e);
+-            return fail(500);
+-        }
+-    },
+-    finalizeMatchResult: async ({ request, locals }) => {
+-        try {
+-            const user = locals.user;
+-            if (!user || (!user.isManager && !user.isAdmin)) return fail(403);
+-
+-            const formData = await request.formData();
+-            const matchId = formData.get('matchId')?.toString();
+-            const rawWinnerClassId = formData.get('winnerClassId')?.toString();
+-
+-            if (!matchId || !rawWinnerClassId) return fail(400, { message: "留ㅼ튂 ID ?먮뒗 ?뱀옄 ?곗씠?곌? ?꾨씫?섏뿀?듬땲??" });
+-
+-            const winnerClassId = rawWinnerClassId === 'none' ? null : rawWinnerClassId;
+-
+-            // Mark match as verified and save winner (or null if both lose)
+-            await db.update(matches).set({
+-                winnerClassId,
+-                isVerified: true
+-            }).where(eq(matches.id, matchId));
+-
+-            const currentNodes = await db.select().from(tournament_brackets).where(eq(tournament_brackets.matchId, matchId));
+-
+-            if (currentNodes.length > 0) {
+-                const anyNode = currentNodes[0];
+-                const sportId = anyNode.sportId;
+-
+-
+-
+-                for (const node of currentNodes) {
+-                    let newStatus: "win" | "lose" | "default" = "lose";
+-
+-                    if (winnerClassId && node.classId === winnerClassId) {
+-                        newStatus = "win";
+-
+-                        // Advance to the next round slot (Winner's progression)
+-                        const nextRound = node.round + 1;
+-                        let nextPosition = Math.floor(node.position / 2);
+-
+-                        // Special mapping for Round 6 winners
+-                        if (node.round === 5) {
+-                            if (node.position < 2) nextPosition = 0;      // GF Winner -> 1st place (Pos 0)
+-                            else nextPosition = 2;                        // BM Winner -> 3rd place (Pos 2)
+-                        }
+-
+-                        const nextNodeResult = await db.select().from(tournament_brackets).where(and(
+-                            eq(tournament_brackets.sportId, sportId),
+-                            eq(tournament_brackets.round, nextRound),
+-                            eq(tournament_brackets.position, nextPosition)
+-                        )).limit(1);
+-
+-                        if (nextNodeResult.length > 0) {
+-                            await db.update(tournament_brackets)
+-                                .set({ classId: winnerClassId, isEliminatedSlot: false, status: 'default' })
+-                                .where(eq(tournament_brackets.id, nextNodeResult[0].id));
+-                            
+-                            // CALL SHARED HELPER
+-                            await syncBracketMatch(sportId, nextRound, nextPosition);
+-                        }
+-                    } else if (winnerClassId && node.classId !== winnerClassId) {
+-                        if (node.round === 4) {
+-                            // Advance Semifinal LOSERS to the Bronze Match (Round 5, Positions 2 and 3)
+-                            const nextRound = 5;
+-                            const nextPosition = Math.floor(node.position / 2) + 2;
+-
+-                            const bronzeNodeResult = await db.select().from(tournament_brackets).where(and(
+-                                eq(tournament_brackets.sportId, sportId),
+-                                eq(tournament_brackets.round, nextRound),
+-                                eq(tournament_brackets.position, nextPosition)
+-                            )).limit(1);
+-
+-                             if (bronzeNodeResult.length > 0) {
+-                                await db.update(tournament_brackets)
+-                                    .set({ classId: node.classId, isEliminatedSlot: false, status: 'default' })
+-                                    .where(eq(tournament_brackets.id, bronzeNodeResult[0].id));
+-
+-                                // CALL SHARED HELPER
+-                                await syncBracketMatch(sportId, nextRound, nextPosition);
+-                            }
+-                        } else if (node.round === 5 && node.position < 2) {
+-                            // Advance GF LOSER to 2nd place (Round 6, Position 1)
+-                            const nextRound = 6;
+-                            const nextPosition = 1;
+-
+-                            const runnerUpNodeResult = await db.select().from(tournament_brackets).where(and(
+-                                eq(tournament_brackets.sportId, sportId),
+-                                eq(tournament_brackets.round, nextRound),
+-                                eq(tournament_brackets.position, nextPosition)
+-                            )).limit(1);
+-
+-                            if (runnerUpNodeResult.length > 0) {
+-                                await db.update(tournament_brackets)
+-                                    .set({ classId: node.classId, isEliminatedSlot: false, status: 'default' })
+-                                    .where(eq(tournament_brackets.id, runnerUpNodeResult[0].id));
+-                                
+-                                // Result column has no matches, but we call sync for consistency (will return early)
+-                                await syncBracketMatch(sportId, nextRound, nextPosition);
+-                            }
+-                        }
+-                    }
+-
+-                    await db.update(tournament_brackets)
+-                        .set({ status: newStatus })
+-                        .where(eq(tournament_brackets.id, node.id));
+-                }
+-
+                 // If both lose
+                 if (!winnerClassId) {
+                     const nextRound = anyNode.round + 1;
+@@ -890,7 +504,7 @@ export const actions: Actions = {
+             const maxParallelMatches = formData.get('maxParallelMatches')?.toString();
+             const requiredGender = formData.get('requiredGender')?.toString();
+ 
+-            if (!sportId) return fail(400, { message: '醫낅ぉ ID媛 ?꾨씫?섏뿀?듬땲??' });
++            if (!sportId) return fail(400, { message: '?ル굝??ID揶쎛 ?袁⑥뵭??뤿???щ빍??' });
+             const sId = sportId as string;
+ 
+             const updatePayload: Record<string, any> = {};
+@@ -963,7 +577,7 @@ export const actions: Actions = {
+             const formData = await request.formData();
+             const newState = formData.get('eventState')?.toString() as 'REGISTRATION' | 'ONGOING' | 'COMPLETED' | undefined;
+             const validStates = ['REGISTRATION', 'ONGOING', 'COMPLETED'];
+-            if (!newState || !validStates.includes(newState)) return fail(400, { message: '?좏슚?섏? ?딆? ?곹깭?낅땲??' });
++            if (!newState || !validStates.includes(newState)) return fail(400, { message: '?醫륁뒞??? ??? ?怨밴묶??낅빍??' });
+ 
+             const existing = await db.select().from(system_config).limit(1);
+             if (existing.length > 0) {
+@@ -986,10 +600,10 @@ export const actions: Actions = {
+             const formData = await request.formData();
+             const deadline = formData.get('registrationDeadline')?.toString();
+ 
+-            if (!deadline) return fail(400, { message: '留덇컧 湲고븳???낅젰?댁＜?몄슂.' });
++            if (!deadline) return fail(400, { message: '筌띾뜃而?疫꿸퀬釉????낆젾??곻폒?紐꾩뒄.' });
+ 
+             const deadlineDate = new Date(deadline);
+-            if (isNaN(deadlineDate.getTime())) return fail(400, { message: '?좏슚?섏? ?딆? ?좎쭨 ?뺤떇?낅땲??' });
++            if (isNaN(deadlineDate.getTime())) return fail(400, { message: '?醫륁뒞??? ??? ?醫롮? ?類ㅻ뻼??낅빍??' });
+ 
+             const existing = await db.select().from(system_config).limit(1);
+             if (existing.length > 0) {
+@@ -1013,7 +627,7 @@ export const actions: Actions = {
+             const sportId = formData.get('sportId')?.toString();
+             const name = formData.get('name')?.toString();
+ 
+-            if (!sportId || !name) return fail(400, { message: '醫낅ぉ ID? ?μ냼 ?대쫫??紐⑤몢 ?낅젰?댁＜?몄슂.' });
++            if (!sportId || !name) return fail(400, { message: '?ル굝??ID?? ?關????已??筌뤴뫀紐???낆젾??곻폒?紐꾩뒄.' });
+ 
+             await db.insert(sport_locations).values({
+                 sportId,
+@@ -1034,7 +648,7 @@ export const actions: Actions = {
+             const formData = await request.formData();
+             const locationId = formData.get('locationId')?.toString();
+ 
+-            if (!locationId) return fail(400, { message: '?μ냼 ID媛 ?꾨씫?섏뿀?듬땲??' });
++            if (!locationId) return fail(400, { message: '?關??ID揶쎛 ?袁⑥뵭??뤿???щ빍??' });
+ 
+             await db.delete(sport_locations).where(eq(sport_locations.id, locationId));
+ 
+@@ -1048,12 +662,12 @@ export const actions: Actions = {
+     impersonate: async ({ request, locals, cookies }) => {
+         try {
+             const user = locals.user;
+-            if (!user?.isAdmin) return fail(403, { message: '愿由ъ옄 沅뚰븳???꾩슂?⑸땲??' });
++            if (!user?.isAdmin) return fail(403, { message: '?온?귐딆쁽 亦낅슦釉???袁⑹뒄??몃빍??' });
+ 
+             const formData = await request.formData();
+             const studentNumber = formData.get('studentNumber')?.toString()?.trim();
+ 
+-            if (!studentNumber) return fail(400, { message: '?숇쾲???낅젰?댁＜?몄슂.' });
++            if (!studentNumber) return fail(400, { message: '??뉗쓰????낆젾??곻폒?紐꾩뒄.' });
+ 
+             // Look up target user
+             const targetUsers = await db.select()
+@@ -1062,7 +676,7 @@ export const actions: Actions = {
+                 .limit(1);
+ 
+             if (targetUsers.length === 0) {
+-                return fail(404, { message: `?숇쾲 ${studentNumber}???대떦?섎뒗 ?좎?瑜?李얠쓣 ???놁뒿?덈떎.` });
++                return fail(404, { message: `??뉗쓰 ${studentNumber}???????롫뮉 ?醫???筌≪뼚??????곷뮸??덈뼄.` });
+             }
+ 
+             const targetUser = targetUsers[0];
+@@ -1099,7 +713,7 @@ export const actions: Actions = {
+         } catch (e) {
+             if (e && typeof e === 'object' && 'status' in e) throw e;
+             console.error('impersonate error:', e);
+-            return fail(500, { message: '?꾪띁?뚮꽕?댁뀡 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.' });
++            return fail(500, { message: '?袁る쓠???퐬??곷?餓???살첒揶쎛 獄쏆뮇源??됰뮸??덈뼄.' });
+         }
+     },
+ 
+@@ -1124,7 +738,7 @@ export const actions: Actions = {
+                 .limit(1);
+ 
+             if (adminUsers.length === 0 || !adminUsers[0].isAdmin) {
+-                // Invalid or non-admin session in backup ??discard it
++                // Invalid or non-admin session in backup ??discard it
+                 cookies.delete('admin_session', { path: '/' });
+                 throw redirect(303, '/');
+             }
+@@ -1144,7 +758,7 @@ export const actions: Actions = {
+         } catch (e) {
+             if (e && typeof e === 'object' && 'status' in e) throw e;
+             console.error('stopImpersonate error:', e);
+-            return fail(500, { message: '愿由ъ옄 蹂듦? 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.' });
++            return fail(500, { message: '?온?귐딆쁽 癰귣벀? 餓???살첒揶쎛 獄쏆뮇源??됰뮸??덈뼄.' });
+         }
+     }
+ };

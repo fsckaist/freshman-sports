@@ -149,17 +149,17 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             throw redirect(302, '/');
         }
 
-        // Fetch event state for system tab
-        const configRows = await db.select().from(system_config).limit(1);
+        const activeTab = url.searchParams.get('tab') ?? 'schedule';
+
+        // --- SHARED: Always needed (lightweight, parallelized) ---
+        const [configRows, allSports, allLocations] = await Promise.all([
+            db.select().from(system_config).limit(1),
+            db.select().from(sports).orderBy(asc(sports.displayOrder)),
+            db.select().from(sport_locations),
+        ]);
+
         const eventState = (configRows[0]?.eventState ?? 'REGISTRATION') as EventState;
         const registrationDeadline = configRows[0]?.registrationDeadline ?? null;
-
-
-        // --- TAB 1: Schedule Configuration Data ---
-        let requestedSportId = url.searchParams.get('sportId');
-
-        const allSports = await db.select().from(sports).orderBy(asc(sports.displayOrder));
-        const allLocations = await db.select().from(sport_locations);
 
         // Group locations by sportId
         const locationsMap = new Map<string, any[]>();
@@ -172,78 +172,74 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             ...s,
             locations: locationsMap.get(s.id) || []
         }));
+
         if (allSports.length === 0) {
             return {
-                sports: [], activeSportId: null, gridData: {}, periodStart: null, periodEnd: null,
-                completedClasses: [], activeClassPair: null, confirmGridData: {}, allUsers: [],
-                finishedMatches: [], activeResultMatch: null, eventState: 'REGISTRATION'
+                sports: [], activeSportId: null, gridData: {},
+                completedClasses: [], activeMatch: null, confirmGridData: {}, allUsers: [],
+                finishedMatches: [], activeResultMatch: null, eventState: 'REGISTRATION',
+                activeTab
             };
         }
 
+        let requestedSportId = url.searchParams.get('sportId');
         let activeSport = sportsWithLocations.find(s => s.id === requestedSportId) || sportsWithLocations[0];
 
-        // Fetch all schedules for grid (Dynamically bounded by DB data)
-        const rawSchedules = await db.select()
-            .from(schedules)
-            .where(eq(schedules.sportId, activeSport.id))
-            .orderBy(asc(schedules.startTime));
-
-        // Get count of scheduled matches for each slot
-        const scheduledMatchesForSport = await db.select({
-            scheduleId: matches.scheduleId,
-        })
-            .from(matches)
-            .where(and(
-                eq(matches.sportId, activeSport.id),
-                eq(matches.status, 'SCHEDULED')
-            ));
-
-        const scheduledCountMap = new Map<string, number>();
-        for (const m of scheduledMatchesForSport) {
-            if (m.scheduleId) {
-                scheduledCountMap.set(m.scheduleId, (scheduledCountMap.get(m.scheduleId) || 0) + 1);
-            }
-        }
-
-        // Create date keys for grouping
-        const dateKeys = Array.from(new Set(rawSchedules.map(rs => {
-            const d = rs.startTime;
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        }))).sort();
-
-        type ScheduleSlot = {
-            id: string;
-            startTime: string;
-            isSlotAvailable: boolean;
-            registrations: any[];
-            totalVotes: number;
-            isVoted: boolean;
-            scheduledMatchesCount: number;
-            maxParallelMatches: number;
+        // Base return value with shared data + empty defaults
+        const baseReturn: Record<string, any> = {
+            sports: sportsWithLocations,
+            activeSportId: activeSport.id,
+            activeTab,
+            eventState,
+            registrationDeadline,
+            gridData: {},
+            completedClasses: [],
+            activeMatch: null,
+            confirmGridData: {},
+            allUsers: [],
+            finishedMatches: [],
+            activeResultMatch: null,
         };
 
-        const formattedGrid: Record<string, ScheduleSlot[]> = {};
+        // --- TAB 1: Schedule Configuration Data (only when schedule tab is active) ---
+        if (activeTab === 'schedule') {
+            const [rawSchedules, scheduledMatchesForSport] = await Promise.all([
+                db.select()
+                    .from(schedules)
+                    .where(eq(schedules.sportId, activeSport.id))
+                    .orderBy(asc(schedules.startTime)),
+                db.select({ scheduleId: matches.scheduleId })
+                    .from(matches)
+                    .where(and(
+                        eq(matches.sportId, activeSport.id),
+                        eq(matches.status, 'SCHEDULED')
+                    )),
+            ]);
 
-        // Calculate start and end bounds based on periodStart and periodEnd
-        const startDate = activeSport.periodStart ? new Date(activeSport.periodStart) : new Date();
-        const endDate = activeSport.periodEnd ? new Date(activeSport.periodEnd) : new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000);
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(23, 59, 59, 999);
+            const scheduledCountMap = new Map<string, number>();
+            for (const m of scheduledMatchesForSport) {
+                if (m.scheduleId) {
+                    scheduledCountMap.set(m.scheduleId, (scheduledCountMap.get(m.scheduleId) || 0) + 1);
+                }
+            }
 
-        // Generate grid bounded ONLY by existing DB records
-        // (dateKeys are already calculated above)
-
-        for (const dateKey of dateKeys) {
-            const daySlots: ScheduleSlot[] = [];
-            // Filter schedules matching this date
-            const matchingSchedules = rawSchedules.filter(rs => {
+            const dateKeys = Array.from(new Set(rawSchedules.map(rs => {
                 const d = rs.startTime;
-                const dk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                return dk === dateKey;
-            }).sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            }))).sort();
 
-            for (const existing of matchingSchedules) {
-                daySlots.push({
+            type ScheduleSlot = {
+                id: string; startTime: string; isSlotAvailable: boolean;
+                registrations: any[]; totalVotes: number; isVoted: boolean;
+                scheduledMatchesCount: number; maxParallelMatches: number;
+            };
+
+            const formattedGrid: Record<string, ScheduleSlot[]> = {};
+            for (const dateKey of dateKeys) {
+                formattedGrid[dateKey] = rawSchedules.filter(rs => {
+                    const d = rs.startTime;
+                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` === dateKey;
+                }).sort((a, b) => a.startTime.getTime() - b.startTime.getTime()).map(existing => ({
                     id: existing.id,
                     startTime: existing.startTime.toISOString(),
                     isSlotAvailable: existing.isAvailable ?? true,
@@ -252,221 +248,182 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     isVoted: false,
                     scheduledMatchesCount: scheduledCountMap.get(existing.id) || 0,
                     maxParallelMatches: activeSport.maxParallelMatches ?? 1
-                });
+                }));
             }
-            formattedGrid[dateKey] = daySlots;
+            baseReturn.gridData = formattedGrid;
         }
 
         // --- TAB 2: Match Confirmation Data ---
-        const pendingMatchesRaw = await db.select({
-            match: matches,
-            sport: sports,
-        })
-            .from(matches)
-            .innerJoin(sports, eq(matches.sportId, sports.id))
-            .where(
-                and(
-                    eq(matches.sportId, activeSport.id),
-                    eq(matches.status, 'PENDING_SCHEDULE'),
-                    isNotNull(matches.classAId),
-                    isNotNull(matches.classBId)
-                )
-            );
+        if (activeTab === 'confirm') {
+            const [pendingMatchesRaw, allClassesRaw, staffUsers, scheduledMatchesForSport] = await Promise.all([
+                db.select({ match: matches, sport: sports })
+                    .from(matches)
+                    .innerJoin(sports, eq(matches.sportId, sports.id))
+                    .where(and(
+                        eq(matches.sportId, activeSport.id),
+                        eq(matches.status, 'PENDING_SCHEDULE'),
+                        isNotNull(matches.classAId),
+                        isNotNull(matches.classBId)
+                    )),
+                db.select().from(classes),
+                db.select({
+                    id: users.id, name: users.name, studentNumber: users.studentNumber,
+                    isManager: users.isManager, isReferee: users.isReferee,
+                }).from(users).where(or(eq(users.isManager, true), eq(users.isReferee, true))),
+                db.select({ scheduleId: matches.scheduleId })
+                    .from(matches)
+                    .where(and(eq(matches.sportId, activeSport.id), eq(matches.status, 'SCHEDULED'))),
+            ]);
 
-        const allClassesRaw = await db.select().from(classes);
-        const classMap = new Map(allClassesRaw.map(c => [c.id, c.classNumber]));
-
-        const pendingMatches = pendingMatchesRaw.map(r => ({
-            id: r.match.id,
-            sportName: r.sport.name,
-            matchName: r.match.name,
-            classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
-            classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
-            classAId: r.match.classAId,
-            classBId: r.match.classBId,
-            scheduleWindowStart: r.match.scheduleWindowStart ? r.match.scheduleWindowStart.toISOString() : null,
-            scheduleWindowEnd: r.match.scheduleWindowEnd ? r.match.scheduleWindowEnd.toISOString() : null,
-            scheduleWindowDeadline: r.match.scheduleWindowDeadline ? r.match.scheduleWindowDeadline.toISOString() : null
-        }));
-
-        let activeMatchId = url.searchParams.get('matchId');
-        let activeMatch = pendingMatches.find(m => m.id === activeMatchId);
-        if (!activeMatch && pendingMatches.length > 0) activeMatch = pendingMatches[0];
-
-        let confirmGridData: Record<string, ScheduleSlot[]> = {};
-
-        if (activeMatch) {
-            const confirmRawData = await db.select({
-                schedule: schedules,
-                register: registers,
-                user: users
-            })
-                .from(schedules)
-                .leftJoin(registers, and(
-                    eq(schedules.id, registers.scheduleId),
-                    eq(registers.isAvailable, true)
-                ))
-                .leftJoin(users, eq(registers.userId, users.id))
-                .where(eq(schedules.sportId, activeSport.id))
-                .orderBy(asc(schedules.startTime));
-
-            const confirmGridMap = new Map<string, Map<string, ScheduleSlot>>();
-            for (const row of confirmRawData) {
-                // Determine if this register is from classA or classB
-                const isRelevantClass = row.register && (row.register.classId === activeMatch.classAId || row.register.classId === activeMatch.classBId);
-
-                const dateObj = row.schedule.startTime;
-                const dateKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-
-                if (!confirmGridMap.has(dateKey)) confirmGridMap.set(dateKey, new Map());
-                const daySlots = confirmGridMap.get(dateKey)!;
-                const schedId = row.schedule.id;
-
-                if (!daySlots.has(schedId)) {
-                    daySlots.set(schedId, {
-                        id: schedId,
-                        startTime: dateObj.toISOString(),
-                        isSlotAvailable: row.schedule.isAvailable ?? true,
-                        registrations: [],
-                        totalVotes: 0,
-                        isVoted: false,
-                        scheduledMatchesCount: scheduledCountMap.get(schedId) || 0,
-                        maxParallelMatches: activeSport.maxParallelMatches ?? 1
-                    });
-                }
-
-                if (isRelevantClass && row.user) {
-                    daySlots.get(schedId)!.registrations.push({
-                        name: row.user.name ?? "익명",
-                        userId: row.user.id,
-                        classId: row.user.classId
-                    });
-                    daySlots.get(schedId)!.totalVotes++;
-                }
+            const classMap = new Map(allClassesRaw.map(c => [c.id, c.classNumber]));
+            const scheduledCountMap = new Map<string, number>();
+            for (const m of scheduledMatchesForSport) {
+                if (m.scheduleId) scheduledCountMap.set(m.scheduleId, (scheduledCountMap.get(m.scheduleId) || 0) + 1);
             }
 
-            for (const [dateKey, mapSlots] of confirmGridMap.entries()) confirmGridData[dateKey] = Array.from(mapSlots.values());
-        }
+            const pendingMatches = pendingMatchesRaw.map(r => ({
+                id: r.match.id, sportName: r.sport.name, matchName: r.match.name,
+                classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
+                classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
+                classAId: r.match.classAId, classBId: r.match.classBId,
+                scheduleWindowStart: r.match.scheduleWindowStart?.toISOString() ?? null,
+                scheduleWindowEnd: r.match.scheduleWindowEnd?.toISOString() ?? null,
+                scheduleWindowDeadline: r.match.scheduleWindowDeadline?.toISOString() ?? null
+            }));
 
-        const staffUsers = await db.select().from(users).where(or(eq(users.isManager, true), eq(users.isReferee, true)));
+            let activeMatchId = url.searchParams.get('matchId');
+            let activeMatch = pendingMatches.find(m => m.id === activeMatchId);
+            if (!activeMatch && pendingMatches.length > 0) activeMatch = pendingMatches[0];
+
+            type ScheduleSlot = {
+                id: string; startTime: string; isSlotAvailable: boolean;
+                registrations: any[]; totalVotes: number; isVoted: boolean;
+                scheduledMatchesCount: number; maxParallelMatches: number;
+            };
+
+            let confirmGridData: Record<string, ScheduleSlot[]> = {};
+            if (activeMatch) {
+                const confirmRawData = await db.select({ schedule: schedules, register: registers, user: users })
+                    .from(schedules)
+                    .leftJoin(registers, and(eq(schedules.id, registers.scheduleId), eq(registers.isAvailable, true)))
+                    .leftJoin(users, eq(registers.userId, users.id))
+                    .where(eq(schedules.sportId, activeSport.id))
+                    .orderBy(asc(schedules.startTime));
+
+                const confirmGridMap = new Map<string, Map<string, ScheduleSlot>>();
+                for (const row of confirmRawData) {
+                    const isRelevantClass = row.register && (row.register.classId === activeMatch.classAId || row.register.classId === activeMatch.classBId);
+                    const dateObj = row.schedule.startTime;
+                    const dateKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+
+                    if (!confirmGridMap.has(dateKey)) confirmGridMap.set(dateKey, new Map());
+                    const daySlots = confirmGridMap.get(dateKey)!;
+                    const schedId = row.schedule.id;
+
+                    if (!daySlots.has(schedId)) {
+                        daySlots.set(schedId, {
+                            id: schedId, startTime: dateObj.toISOString(),
+                            isSlotAvailable: row.schedule.isAvailable ?? true,
+                            registrations: [], totalVotes: 0, isVoted: false,
+                            scheduledMatchesCount: scheduledCountMap.get(schedId) || 0,
+                            maxParallelMatches: activeSport.maxParallelMatches ?? 1
+                        });
+                    }
+
+                    if (isRelevantClass && row.user) {
+                        daySlots.get(schedId)!.registrations.push({
+                            name: row.user.name ?? "익명", userId: row.user.id, classId: row.user.classId
+                        });
+                        daySlots.get(schedId)!.totalVotes++;
+                    }
+                }
+                for (const [dateKey, mapSlots] of confirmGridMap.entries()) confirmGridData[dateKey] = Array.from(mapSlots.values());
+            }
+
+            baseReturn.completedClasses = pendingMatches;
+            baseReturn.activeMatch = activeMatch;
+            baseReturn.confirmGridData = confirmGridData;
+            baseReturn.allUsers = staffUsers;
+        }
 
         // --- TAB 3: Match Result Confirmation Data ---
-        const finishedMatchesRaw = await db.select({
-            match: matches,
-            sport: sports,
-        })
-            .from(matches)
-            .innerJoin(sports, eq(matches.sportId, sports.id))
-            .where(
-                and(
-                    eq(matches.sportId, activeSport.id),
-                    eq(matches.status, 'FINISHED'),
-                    eq(matches.isVerified, false)
-                )
-            );
+        if (activeTab === 'result') {
+            const [finishedMatchesRaw, allClassesRaw] = await Promise.all([
+                db.select({ match: matches, sport: sports })
+                    .from(matches)
+                    .innerJoin(sports, eq(matches.sportId, sports.id))
+                    .where(and(
+                        eq(matches.sportId, activeSport.id),
+                        eq(matches.status, 'FINISHED'),
+                        eq(matches.isVerified, false)
+                    )),
+                db.select().from(classes),
+            ]);
 
-        const finishedMatches = finishedMatchesRaw.map(r => ({
-            id: r.match.id,
-            sportName: r.sport.name,
-            matchName: r.match.name,
-            classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
-            classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
-            classAId: r.match.classAId,
-            classBId: r.match.classBId,
-            scoreA: r.match.scoreA,
-            scoreB: r.match.scoreB
-        }));
+            const classMap = new Map(allClassesRaw.map(c => [c.id, c.classNumber]));
+            const finishedMatches = finishedMatchesRaw.map(r => ({
+                id: r.match.id, sportName: r.sport.name, matchName: r.match.name,
+                classA: r.match.classAId ? classMap.get(r.match.classAId) : null,
+                classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
+                classAId: r.match.classAId, classBId: r.match.classBId,
+                scoreA: r.match.scoreA, scoreB: r.match.scoreB
+            }));
 
-        let activeResultMatchId = url.searchParams.get('resultMatchId');
-        let baseResultMatch = finishedMatches.find(m => m.id === activeResultMatchId);
-        if (!baseResultMatch && finishedMatches.length > 0) baseResultMatch = finishedMatches[0];
+            let activeResultMatchId = url.searchParams.get('resultMatchId');
+            let baseResultMatch = finishedMatches.find(m => m.id === activeResultMatchId);
+            if (!baseResultMatch && finishedMatches.length > 0) baseResultMatch = finishedMatches[0];
 
-        let activeResultMatchDetails = null;
+            let activeResultMatchDetails = null;
+            if (baseResultMatch) {
+                const [teamARoster, teamBRoster] = await Promise.all([
+                    db.select({ userId: rosters.userId }).from(rosters)
+                        .where(and(eq(rosters.classId, baseResultMatch.classAId!), eq(rosters.sportId, activeSport.id))),
+                    db.select({ userId: rosters.userId }).from(rosters)
+                        .where(and(eq(rosters.classId, baseResultMatch.classBId!), eq(rosters.sportId, activeSport.id))),
+                ]);
 
-        if (baseResultMatch) {
-            // Reconstruct attendance to feed to MatchLogPanel correctly
-            const teamARoster = await db
-                .select({ userId: rosters.userId })
-                .from(rosters)
-                .where(and(eq(rosters.classId, baseResultMatch.classAId!), eq(rosters.sportId, activeSport.id)));
+                const teamAUserIds = new Set(teamARoster.map(r => r.userId));
+                const teamBUserIds = new Set(teamBRoster.map(r => r.userId));
 
-            const teamBRoster = await db
-                .select({ userId: rosters.userId })
-                .from(rosters)
-                .where(and(eq(rosters.classId, baseResultMatch.classBId!), eq(rosters.sportId, activeSport.id)));
-
-            const teamAUserIds = new Set(teamARoster.map(r => r.userId));
-            const teamBUserIds = new Set(teamBRoster.map(r => r.userId));
-
-            // Fetch ACTUAL registers for this specific match's schedule
-            const matchRecord = await db.select().from(matches).where(eq(matches.id, baseResultMatch.id)).limit(1);
-            let matchRegisters: any[] = [];
-
-            if (matchRecord.length > 0 && matchRecord[0].scheduleId) {
-                matchRegisters = await db
-                    .select({
-                        registerId: registers.id,
-                        userId: users.id,
-                        name: users.name,
-                        studentNumber: users.studentNumber,
-                        classId: users.classId
-                    })
-                    .from(registers)
-                    .innerJoin(users, eq(registers.userId, users.id))
-                    .where(eq(registers.scheduleId, matchRecord[0].scheduleId!));
-            }
-
-            const teamACheckedIn = [];
-            const teamBCheckedIn = [];
-            const cheeringCheckedIn = [];
-
-            for (const reg of matchRegisters) {
-                if (teamAUserIds.has(reg.userId)) {
-                    teamACheckedIn.push(reg);
-                } else if (teamBUserIds.has(reg.userId)) {
-                    teamBCheckedIn.push(reg);
-                } else {
-                    cheeringCheckedIn.push(reg);
+                const matchRecord = await db.select().from(matches).where(eq(matches.id, baseResultMatch.id)).limit(1);
+                let matchRegisters: any[] = [];
+                if (matchRecord.length > 0 && matchRecord[0].scheduleId) {
+                    matchRegisters = await db.select({
+                        registerId: registers.id, userId: users.id, name: users.name,
+                        studentNumber: users.studentNumber, classId: users.classId
+                    }).from(registers).innerJoin(users, eq(registers.userId, users.id))
+                        .where(eq(registers.scheduleId, matchRecord[0].scheduleId!));
                 }
+
+                const teamACheckedIn: any[] = [];
+                const teamBCheckedIn: any[] = [];
+                const cheeringCheckedIn: any[] = [];
+                for (const reg of matchRegisters) {
+                    if (teamAUserIds.has(reg.userId)) teamACheckedIn.push(reg);
+                    else if (teamBUserIds.has(reg.userId)) teamBCheckedIn.push(reg);
+                    else cheeringCheckedIn.push(reg);
+                }
+
+                activeResultMatchDetails = {
+                    id: baseResultMatch.id,
+                    classAId: baseResultMatch.classAId, classBId: baseResultMatch.classBId,
+                    classA: baseResultMatch.classA, classB: baseResultMatch.classB,
+                    scoreA: baseResultMatch.scoreA, scoreB: baseResultMatch.scoreB,
+                    status: 'FINISHED',
+                    attendance: {
+                        teamA: teamACheckedIn, teamB: teamBCheckedIn, cheering: cheeringCheckedIn,
+                        teamATotal: activeSport.minPlayers, teamBTotal: activeSport.minPlayers
+                    },
+                    matchNotes: matchRecord[0]?.matchNotes,
+                    recordStructure: activeSport.recordStructure
+                };
             }
 
-            activeResultMatchDetails = {
-                id: baseResultMatch.id,
-                classAId: baseResultMatch.classAId,
-                classBId: baseResultMatch.classBId,
-                classA: baseResultMatch.classA,
-                classB: baseResultMatch.classB,
-                scoreA: baseResultMatch.scoreA,
-                scoreB: baseResultMatch.scoreB,
-                status: 'FINISHED',
-                attendance: {
-                    teamA: teamACheckedIn,
-                    teamB: teamBCheckedIn,
-                    cheering: cheeringCheckedIn,
-                    teamATotal: activeSport.minPlayers,
-                    teamBTotal: activeSport.minPlayers
-                },
-                matchNotes: matchRecord[0]?.matchNotes,
-                recordStructure: activeSport.recordStructure
-            };
+            baseReturn.finishedMatches = finishedMatches;
+            baseReturn.activeResultMatch = activeResultMatchDetails;
         }
 
-        return {
-            sports: sportsWithLocations,
-            activeSportId: activeSport.id,
-            gridData: formattedGrid,
-            activeTab: url.searchParams.get('tab'),
-
-            completedClasses: pendingMatches,
-            activeMatch,
-            confirmGridData,
-            allUsers: staffUsers,
-
-            finishedMatches,
-            activeResultMatch: activeResultMatchDetails,
-            eventState,
-            registrationDeadline
-        };
+        return baseReturn;
     } catch (e) {
         if (e && typeof e === 'object' && 'status' in e && e.status === 302) {
             throw e;
@@ -474,12 +431,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         console.error("FATAL: Loader Error in Admin Dashboard! Check DB connection and schema.");
         console.error(e);
         return {
-            sports: [], activeSportId: null, gridData: {},
+            sports: [], activeSportId: null, gridData: {}, activeTab: 'schedule',
             completedClasses: [], activeMatch: null, confirmGridData: {}, allUsers: [],
             finishedMatches: [], activeResultMatch: null, eventState: "REGISTRATION" as EventState
         };
     }
 };
+
 
 export const actions: Actions = {
     toggleSlotAvailability: async ({ request, locals }) => {

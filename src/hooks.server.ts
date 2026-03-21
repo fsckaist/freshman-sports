@@ -14,7 +14,20 @@ export const handle: Handle = async ({ event, resolve }) => {
             // Validate that dbUserId looks like a UUID before querying
             const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
             if (payload?.dbUserId && uuidRegex.test(payload.dbUserId)) {
-                const fetchedUsers = await db.select().from(users).where(eq(users.id, payload.dbUserId)).limit(1);
+                const fetchedUsers = await db.select({
+                    id: users.id,
+                    authId: users.authId,
+                    studentNumber: users.studentNumber,
+                    email: users.email,
+                    name: users.name,
+                    gender: users.gender,
+                    classId: users.classId,
+                    isManager: users.isManager,
+                    isReferee: users.isReferee,
+                    isAdmin: users.isAdmin,
+                    agreedRules: users.agreedRules,
+                    agreedPrivacy: users.agreedPrivacy
+                }).from(users).where(eq(users.id, payload.dbUserId)).limit(1);
                 if (fetchedUsers.length > 0) {
                     event.locals.user = fetchedUsers[0];
                 }

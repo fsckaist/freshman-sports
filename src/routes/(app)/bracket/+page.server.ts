@@ -4,13 +4,12 @@ import { tournament_brackets, sports, classes, system_config } from '$lib/server
 import { eq, asc } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, parent }) => {
     const user = locals.user;
     if (!user) throw redirect(302, '/login');
 
     // State guard: bracket only visible during ONGOING
-    const configs = await db.select().from(system_config).limit(1);
-    const eventState = configs[0]?.eventState ?? 'REGISTRATION';
+    const { eventState } = await parent();
     if (eventState !== 'ONGOING') throw redirect(302, '/');
 
     // 1. Fetch all brackets joined with classes and sports
