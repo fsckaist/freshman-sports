@@ -16,7 +16,7 @@ export function signToken(payload: JWTPayload): string {
 
 export function verifyToken(token: string): JWTPayload | null {
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as JWTPayload;
         return decoded;
     } catch {
         return null;

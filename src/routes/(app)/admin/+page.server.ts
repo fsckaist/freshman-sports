@@ -1117,6 +1117,18 @@ export const actions: Actions = {
                 throw redirect(303, '/login');
             }
 
+            // Verify the backed-up session actually belongs to an admin
+            const adminUsers = await db.select()
+                .from(users)
+                .where(eq(users.id, payload.dbUserId))
+                .limit(1);
+
+            if (adminUsers.length === 0 || !adminUsers[0].isAdmin) {
+                // Invalid or non-admin session in backup — discard it
+                cookies.delete('admin_session', { path: '/' });
+                throw redirect(303, '/');
+            }
+
             // Restore admin session
             cookies.set('session', adminToken, {
                 path: '/',

@@ -10,6 +10,7 @@ export const actions = {
     },
     logout: async (event) => {
         event.cookies.delete('session', { path: '/' });
+        event.cookies.delete('admin_session', { path: '/' });
         throw redirect(303, '/login');
     }
 } satisfies Actions;

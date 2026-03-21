@@ -30,9 +30,13 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     }
 
     // Parse KAIST-specific user data
-    console.log('SSO raw user info:', JSON.stringify(rawUserInfo, null, 2));
+    if (dev) {
+        console.log('SSO raw user info:', JSON.stringify(rawUserInfo, null, 2));
+    }
     const userData = parseUserData(rawUserInfo);
-    console.log('Parsed user data:', JSON.stringify(userData, null, 2));
+    if (dev) {
+        console.log('Parsed user data:', JSON.stringify(userData, null, 2));
+    }
 
     const handleAuthError = (message: string) => {
         const errorUrl = new URL('/login', url.origin);
@@ -56,8 +60,12 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
     const dbUser = existingUsers[0];
 
-    // Update authId if not already set (first SSO login for this user)
-    if (!dbUser.authId || dbUser.authId !== userData.uid) {
+    // Link SSO account on first login, reject if already linked to a different account
+    if (dbUser.authId && dbUser.authId !== userData.uid) {
+        throw handleAuthError('이 학번은 이미 다른 SSO 계정으로 연결되어 있습니다. 기존에 사용한 계정으로 로그인해주세요.');
+    }
+
+    if (!dbUser.authId) {
         await db.update(users)
             .set({
                 authId: userData.uid,
