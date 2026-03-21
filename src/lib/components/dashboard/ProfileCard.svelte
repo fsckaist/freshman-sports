@@ -1,5 +1,5 @@
 <script lang="ts">
-    import QRCode from "qrcode";
+    import * as QRCode from "qrcode";
     import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
     import { slide } from "svelte/transition";
 
