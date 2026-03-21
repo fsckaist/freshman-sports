@@ -324,7 +324,7 @@
                                 >{scannedUser.studentNumber} · {scannedUser.class}반</span
                             >
                         </div>
-                        <p class="text-lg font-medium mb-8">
+                        <p class="text-lg font-medium mb-4">
                             해당 인원을 등록할까요?
                         </p>
                         <div class="flex justify-center w-full px-4 mt-2">
@@ -334,7 +334,9 @@
                                 onclick={resumeScanning}
                                 class="size-14 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full transition-colors flex items-center justify-center disabled:opacity-50"
                             >
-                                <div class="size-6 text-white flex items-center justify-center">
+                                <div
+                                    class="size-6 text-white flex items-center justify-center"
+                                >
                                     {@html CloseIcon}
                                 </div>
                             </button>
