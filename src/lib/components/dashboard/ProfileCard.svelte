@@ -1,5 +1,5 @@
 <script lang="ts">
-    import QRCode from "qrcode";
+    import { toDataURL } from "qrcode";
     import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
     import { slide } from "svelte/transition";
 
@@ -16,7 +16,7 @@
 
     $effect(() => {
         if (userId) {
-            QRCode.toDataURL(userId, {
+            toDataURL(userId, {
                 margin: 0,
                 width: 130,
                 color: { dark: "#1f1f22", light: "#ffffff" },

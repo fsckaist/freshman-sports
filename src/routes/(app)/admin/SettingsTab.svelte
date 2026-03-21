@@ -33,7 +33,7 @@
     let isScheduleUpdating: Record<string, boolean> = $state({});
     let currentState = $derived(eventState);
 
-    let activeSportTab = $state(activeSportId);
+    let activeSportTab = $state("");
 
     // Sync active sport tab if not set (especially on first load)
     $effect(() => {

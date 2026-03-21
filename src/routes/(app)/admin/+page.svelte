@@ -16,7 +16,7 @@
         { id: "settings", label: "시스템 설정" },
     ];
 
-    let activeTab = $state(data.activeTab ?? tabs[0].id);
+    let activeTab = $state("");
 
     // Sync activeTab with data from server when URL changes
     $effect(() => {

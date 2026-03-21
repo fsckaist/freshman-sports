@@ -1,7 +1,7 @@
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { matches, schedules, tournament_brackets, registers } from '$lib/server/db/schema';
-import { eq, and, isNull, lt, gt, or, notExists, inArray } from 'drizzle-orm';
+import { eq, and, or, notExists, inArray } from 'drizzle-orm';
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 

@@ -56,13 +56,7 @@
     let cardsA: Record<string, number> = $state({});
     let cardsB: Record<string, number> = $state({});
     
-    // Initial card setup
-    activeMatch.attendance.teamA.forEach((u: any) => {
-        cardsA[u.name] = 0;
-    });
-    activeMatch.attendance.teamB.forEach((u: any) => {
-        cardsB[u.name] = 0;
-    });
+
 
     interface DetailedNotes {
         teamA: {

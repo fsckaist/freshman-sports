@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { sports, schedules, registers, users, rosters, matches, classes, tournament_brackets, system_config, sport_locations, type EventState } from '$lib/server/db/schema';
-import { eq, and, asc, isNull, isNotNull, or, inArray } from 'drizzle-orm';
+import { eq, and, asc, isNotNull, or, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad, Actions } from './$types';
 import { computeOrUpdateNextMatchWindow, propagateByeWindow, addWeekdays, ensureScheduleSlots } from '$lib/server/scheduleWindowHelper';

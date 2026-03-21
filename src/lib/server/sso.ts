@@ -21,7 +21,7 @@ export interface SSOUserInfo {
     twitter_id: string;
     kaist_id: string;
     kaist_info: string; // JSON string
-    kaist_info_v2?: string; // JSON string (newer API)
+    kaist_v2_info?: string; // JSON string (sometimes returned as kaist_v2_info)
     sparcs_id: string;
 }
 
@@ -29,7 +29,7 @@ interface KaistInfoV1 {
     ku_std_no?: string;
     employeeType?: string;
     mail?: string;
-    ku_knames?: string;
+    ku_kname?: string;
     ku_sex?: string;
 }
 
@@ -129,16 +129,16 @@ export function parseUserData(raw: SSOUserInfo): ParsedUserData {
         try { kaistV1 = typeof raw.kaist_info === 'string' ? JSON.parse(raw.kaist_info) : raw.kaist_info; } catch { /* ignore */ }
     }
 
-    // Parse v2 kaist_info if available
+    // Parse v2 kaist_info if available (could be named kaist_v2_info or kaist_info_v2)
     let kaistV2: KaistInfoV2 = {};
-    if (raw.kaist_info_v2) {
-        try { kaistV2 = typeof raw.kaist_info_v2 === 'string' ? JSON.parse(raw.kaist_info_v2) : raw.kaist_info_v2; } catch { /* ignore */ }
+    if (raw.kaist_v2_info) {
+        try { kaistV2 = typeof raw.kaist_v2_info === 'string' ? JSON.parse(raw.kaist_v2_info) : raw.kaist_v2_info; } catch { /* ignore */ }
     }
 
     const studentNumber = kaistV2.std_no || kaistV1.ku_std_no || 'N/A';
     const kaistType = kaistV2.socps_cd || kaistV1.employeeType || 'N/A';
     const email = kaistV2.email || kaistV1.mail || raw.email || 'N/A';
-    const name = kaistV2.user_nm || kaistV1.ku_knames || 'N/A';
+    const name = kaistV2.user_nm || kaistV1.ku_kname || [raw.first_name, raw.last_name].filter(Boolean).join(' ') || 'N/A';
     const rawSex = kaistV1.ku_sex || raw.gender || '';
     let sex: "MALE" | "FEMALE" | null;
     if (rawSex === "M" || rawSex === "*M" || rawSex === "MALE") sex = "MALE";
@@ -147,7 +147,7 @@ export function parseUserData(raw: SSOUserInfo): ParsedUserData {
 
 
     // Eligibility: KAIST info must be present in SSO response
-    const isEligible = !!raw.kaist_info_v2 || !!raw.kaist_info;
+    const isEligible = !!raw.kaist_v2_info || !!raw.kaist_info;
 
     return {
         uid: raw.uid,
