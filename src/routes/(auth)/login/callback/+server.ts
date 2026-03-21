@@ -34,8 +34,14 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     const userData = parseUserData(rawUserInfo);
     console.log('Parsed user data:', JSON.stringify(userData, null, 2));
 
+    const handleAuthError = (message: string) => {
+        const errorUrl = new URL('/login', url.origin);
+        errorUrl.searchParams.set('error', message);
+        return redirect(303, ssoClient.getLogoutUrl(userData.sid, errorUrl.toString()));
+    };
+
     if (!userData.isEligible) {
-        throw redirect(303, '/login?error=' + encodeURIComponent('KAIST 학적 정보를 확인할 수 없습니다. KAIST IAM으로 다시 로그인해주세요.'));
+        throw handleAuthError('KAIST 학적 정보를 확인할 수 없습니다. KAIST IAM으로 다시 로그인해주세요.');
     }
 
     // Look up user in our database by student number
@@ -45,7 +51,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
         .limit(1);
 
     if (existingUsers.length === 0) {
-        throw redirect(303, '/login?error=' + encodeURIComponent(`해당 학번(${userData.studentNumber})에 해당하는 학우분께서는 새내기 체육대회에 참가할 수 없습니다. 문제가 있다고 판단되시면 새내기학생회에 문의해주세요.`));
+        throw handleAuthError(`해당 학번(${userData.studentNumber})에 해당하는 학우분께서는 새내기 체육대회에 참가할 수 없습니다. 문제가 있다고 판단되시면 새내기학생회에 문의해주세요.`);
     }
 
     const dbUser = existingUsers[0];

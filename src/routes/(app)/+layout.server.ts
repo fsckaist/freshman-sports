@@ -14,6 +14,7 @@ export const load = (async ({ locals }) => {
 
     return {
         user: locals.user,
-        eventState
+        eventState,
+        isImpersonating: locals.isImpersonating ?? false,
     };
 }) satisfies LayoutServerLoad;

@@ -3,6 +3,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			user?: any;
+			isImpersonating?: boolean;
 		}
 		// interface PageData {}
 		// interface PageState {}

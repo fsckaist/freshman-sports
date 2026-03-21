@@ -5,6 +5,8 @@ import { eq, and, asc, isNotNull, or, inArray } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad, Actions } from './$types';
 import { computeOrUpdateNextMatchWindow, propagateByeWindow, addWeekdays, ensureScheduleSlots } from '$lib/server/scheduleWindowHelper';
+import { signToken, verifyToken } from '$lib/server/jwt';
+import { dev } from '$app/environment';
 
 /** 
  * Shared helper to ensure a Match object exists and is synchronized with the bracket nodes 
@@ -1040,6 +1042,97 @@ export const actions: Actions = {
         } catch (e) {
             console.error('deleteSportLocation error:', e);
             return fail(500);
+        }
+    },
+
+    impersonate: async ({ request, locals, cookies }) => {
+        try {
+            const user = locals.user;
+            if (!user?.isAdmin) return fail(403, { message: '관리자 권한이 필요합니다.' });
+
+            const formData = await request.formData();
+            const studentNumber = formData.get('studentNumber')?.toString()?.trim();
+
+            if (!studentNumber) return fail(400, { message: '학번을 입력해주세요.' });
+
+            // Look up target user
+            const targetUsers = await db.select()
+                .from(users)
+                .where(eq(users.studentNumber, studentNumber))
+                .limit(1);
+
+            if (targetUsers.length === 0) {
+                return fail(404, { message: `학번 ${studentNumber}에 해당하는 유저를 찾을 수 없습니다.` });
+            }
+
+            const targetUser = targetUsers[0];
+
+            // Backup current admin session
+            const currentToken = cookies.get('session');
+            if (currentToken) {
+                cookies.set('admin_session', currentToken, {
+                    path: '/',
+                    httpOnly: true,
+                    secure: !dev,
+                    sameSite: 'lax',
+                    maxAge: 60 * 60 * 24 // 1 day
+                });
+            }
+
+            // Sign new JWT for target user
+            const newToken = signToken({
+                uid: targetUser.authId || '',
+                sid: '',
+                studentNumber: targetUser.studentNumber,
+                dbUserId: targetUser.id,
+            });
+
+            cookies.set('session', newToken, {
+                path: '/',
+                httpOnly: true,
+                secure: !dev,
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 7
+            });
+
+            throw redirect(303, '/');
+        } catch (e) {
+            if (e && typeof e === 'object' && 'status' in e) throw e;
+            console.error('impersonate error:', e);
+            return fail(500, { message: '임퍼소네이션 중 오류가 발생했습니다.' });
+        }
+    },
+
+    stopImpersonate: async ({ cookies }) => {
+        try {
+            const adminToken = cookies.get('admin_session');
+            if (!adminToken) {
+                throw redirect(303, '/');
+            }
+
+            // Verify the admin token is still valid
+            const payload = verifyToken(adminToken);
+            if (!payload) {
+                cookies.delete('admin_session', { path: '/' });
+                throw redirect(303, '/login');
+            }
+
+            // Restore admin session
+            cookies.set('session', adminToken, {
+                path: '/',
+                httpOnly: true,
+                secure: !dev,
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 7
+            });
+
+            cookies.delete('admin_session', { path: '/' });
+
+            throw redirect(303, '/admin');
+        } catch (e) {
+            if (e && typeof e === 'object' && 'status' in e) throw e;
+            console.error('stopImpersonate error:', e);
+            return fail(500, { message: '관리자 복귀 중 오류가 발생했습니다.' });
         }
     }
 };

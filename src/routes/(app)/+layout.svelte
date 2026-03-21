@@ -7,7 +7,7 @@
     import { fade, fly } from "svelte/transition";
     import { page } from "$app/stores";
     
-    let { children } = $props();
+    let { children, data } = $props();
 
     // Close menu when route changes
     $effect(() => {
@@ -19,6 +19,20 @@
 
 {#if browser}
     <ToastContainer />
+{/if}
+
+{#if data.isImpersonating}
+    <div class="sticky top-0 z-[100] flex items-center justify-center gap-3 bg-amber-500 text-white px-4 py-2 text-sm font-medium shadow-md">
+        <span>⚠️ {data.user?.name ?? '알 수 없음'} ({data.user?.studentNumber})님으로 접속 중</span>
+        <form method="POST" action="/admin?/stopImpersonate">
+            <button
+                type="submit"
+                class="px-3 py-1 text-xs font-bold bg-white text-amber-700 rounded-md hover:bg-amber-50 transition-colors"
+            >
+                관리자로 복귀
+            </button>
+        </form>
+    </div>
 {/if}
 
 <div

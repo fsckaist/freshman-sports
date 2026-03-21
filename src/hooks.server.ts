@@ -30,6 +30,11 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
 
+    // Detect impersonation mode
+    if (event.cookies.get('admin_session')) {
+        event.locals.isImpersonating = true;
+    }
+
     const { pathname } = event.url;
     const user = event.locals.user;
 
