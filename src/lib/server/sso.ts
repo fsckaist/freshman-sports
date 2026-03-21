@@ -29,12 +29,15 @@ interface KaistInfoV1 {
     ku_std_no?: string;
     employeeType?: string;
     mail?: string;
+    ku_knames?: string;
+    ku_sex?: string;
 }
 
 interface KaistInfoV2 {
     std_no?: string;
     socps_cd?: string;
     email?: string;
+    user_nm?: string;
 }
 
 export interface ParsedUserData {
@@ -45,6 +48,7 @@ export interface ParsedUserData {
     studentNumber: string;
     kaistType: string;
     isEligible: boolean;
+    gender: "MALE" | "FEMALE" | null;
 }
 
 class SSOClient {
@@ -131,16 +135,19 @@ export function parseUserData(raw: SSOUserInfo): ParsedUserData {
         try { kaistV2 = typeof raw.kaist_info_v2 === 'string' ? JSON.parse(raw.kaist_info_v2) : raw.kaist_info_v2; } catch { /* ignore */ }
     }
 
-    const studentNumber = kaistV2.std_no || kaistV1.ku_std_no || '';
-    const kaistType = kaistV2.socps_cd || kaistV1.employeeType || '';
-    const email = kaistV2.email || kaistV1.mail || raw.email || '';
+    const studentNumber = kaistV2.std_no || kaistV1.ku_std_no || 'N/A';
+    const kaistType = kaistV2.socps_cd || kaistV1.employeeType || 'N/A';
+    const email = kaistV2.email || kaistV1.mail || raw.email || 'N/A';
+    const name = kaistV2.user_nm || kaistV1.ku_knames || 'N/A';
+    const rawSex = kaistV1.ku_sex || raw.gender || '';
+    let sex: "MALE" | "FEMALE" | null;
+    if (rawSex === "M" || rawSex === "*M" || rawSex === "MALE") sex = "MALE";
+    else if (rawSex === "F" || rawSex === "*F" || rawSex === "FEMALE") sex = "FEMALE";
+    else sex = null;
 
-    // Determine full name
-    const name = [raw.first_name, raw.last_name].filter(Boolean).join(' ').trim() || 'Unknown';
 
-    // Eligibility: has a student number or recognized KAIST member type
-    const allowedTypes = /^(S|RS|RPF|RPE|RA|RD)$/;
-    const isEligible = !!studentNumber || allowedTypes.test(kaistType);
+    // Eligibility: KAIST info must be present in SSO response
+    const isEligible = !!raw.kaist_info_v2 || !!raw.kaist_info;
 
     return {
         uid: raw.uid,
@@ -150,6 +157,7 @@ export function parseUserData(raw: SSOUserInfo): ParsedUserData {
         studentNumber,
         kaistType,
         isEligible,
+        gender: sex,
     };
 }
 

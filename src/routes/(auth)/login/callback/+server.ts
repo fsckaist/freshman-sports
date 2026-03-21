@@ -34,8 +34,8 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     const userData = parseUserData(rawUserInfo);
     console.log('Parsed user data:', JSON.stringify(userData, null, 2));
 
-    if (!userData.studentNumber) {
-        throw redirect(303, '/login?error=' + encodeURIComponent('KAIST 학번 정보를 확인할 수 없습니다. 다시 로그인해주세요.'));
+    if (!userData.isEligible) {
+        throw redirect(303, '/login?error=' + encodeURIComponent('KAIST 학적 정보를 확인할 수 없습니다. KAIST IAM으로 다시 로그인해주세요.'));
     }
 
     // Look up user in our database by student number
@@ -57,6 +57,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
                 authId: userData.uid,
                 name: userData.name || dbUser.name,
                 email: userData.email || dbUser.email,
+                gender: userData.gender || dbUser.gender,
             })
             .where(eq(users.id, dbUser.id));
     }
