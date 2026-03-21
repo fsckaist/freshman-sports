@@ -1,12 +1,37 @@
 <script lang="ts">
     import { page } from "$app/stores";
+    import rawSunIcon from "@gravity-ui/icons/svgs/sun.svg?raw";
+    import rawMoonIcon from "@gravity-ui/icons/svgs/moon.svg?raw";
+    import { themeManager } from "$lib/theme.svelte";
 
-    $: errorMessage = $page.url.searchParams.get("error");
+    const resizeSvg = (svg: string) =>
+        svg.replace('width="16" height="16"', 'width="24" height="24"');
+
+    const ThemeIcon = $derived(
+        themeManager.theme === "dark"
+            ? resizeSvg(rawSunIcon)
+            : resizeSvg(rawMoonIcon),
+    );
+
+    const errorMessage = $derived($page.url.searchParams.get("error"));
 </script>
 
 <div
     class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
+    <!-- Theme Toggle -->
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-50">
+        <button
+            onclick={() => themeManager.toggle()}
+            class="flex items-center justify-center size-12 rounded-xl bg-white/50 hover:bg-zinc-100 dark:bg-zinc-900/50 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-500 backdrop-blur-sm transition-colors cursor-pointer"
+            title="테마 변경"
+        >
+            <div class="size-6 text-current">
+                {@html ThemeIcon}
+            </div>
+        </button>
+    </div>
+
     <!-- Centered 90rem wrapper so the absolute watermark is properly anchored -->
     <div
         class="relative flex flex-col gap-[0.625rem] min-h-[56.25rem] min-h-screen items-start w-full max-w-[90rem] px-6 py-12 md:px-[12.5rem] md:py-[6.25rem]"
@@ -62,14 +87,28 @@
                     id="sso-login-button"
                     class="inline-flex items-center justify-center gap-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-bold text-[1.125rem] rounded-[6.25rem] px-8 h-[3.125rem] transition-colors cursor-pointer no-underline shadow-md hover:shadow-lg"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="22"
+                        height="22"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                        />
                     </svg>
                     SPARCS SSO 로그인
                 </a>
 
                 {#if errorMessage}
-                    <p class="text-rose-500 font-pretendard text-[0.875rem] font-medium m-0">
+                    <p
+                        class="text-rose-500 font-pretendard text-[0.875rem] font-medium m-0"
+                    >
                         {errorMessage}
                     </p>
                 {/if}
@@ -83,4 +122,3 @@
         </div>
     </div>
 </div>
-

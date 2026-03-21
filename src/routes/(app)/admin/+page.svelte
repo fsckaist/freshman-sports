@@ -35,12 +35,19 @@
         <div
             class="flex gap-[0.625rem] items-center justify-between shrink-0 w-full relative"
         >
-            <h1 class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0">
+            <h1
+                class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0"
+            >
                 관리자 대시보드
             </h1>
 
             <!-- Impersonate Form -->
-            <form method="POST" action="?/impersonate" use:enhance class="flex items-center gap-2">
+            <form
+                method="POST"
+                action="?/impersonate"
+                use:enhance
+                class="flex items-center gap-2"
+            >
                 <input
                     type="text"
                     name="studentNumber"
@@ -51,7 +58,7 @@
                 <button
                     type="submit"
                     disabled={!impersonateStudentNumber.trim()}
-                    class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-400 rounded-lg transition-colors"
+                    class="px-3 py-1.5 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 disabled:bg-zinc-400 rounded-lg transition-colors"
                 >
                     유저 전환
                 </button>
