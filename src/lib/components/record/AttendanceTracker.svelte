@@ -327,14 +327,14 @@
                         <p class="text-lg font-medium mb-8">
                             해당 인원을 등록할까요?
                         </p>
-                        <div class="flex gap-4 w-full px-4">
+                        <div class="flex justify-center w-full px-4 mt-2">
                             <button
                                 type="button"
                                 disabled={isSubmitting}
                                 onclick={resumeScanning}
-                                class="flex-1 py-3.5 bg-zinc-600 hover:bg-zinc-500 rounded-xl font-semibold transition-colors flex items-center justify-center disabled:opacity-50"
+                                class="size-14 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full transition-colors flex items-center justify-center disabled:opacity-50"
                             >
-                                <div class="size-5 mr-1 text-white">
+                                <div class="size-6 text-white">
                                     {@html CloseIcon}
                                 </div>
                             </button>
