@@ -1,6 +1,8 @@
 <script lang="ts">
     import { enhance } from "$app/forms";
     import { page } from "$app/stores";
+    import { Html5Qrcode } from "html5-qrcode";
+    import { onDestroy } from "svelte";
 
     import rawXmarkIcon from "@gravity-ui/icons/svgs/xmark.svg?raw";
     import rawBarcodeIcon from "@gravity-ui/icons/svgs/qr-code.svg?raw";
@@ -20,6 +22,10 @@
     let scanningTarget = $state("");
     let studentNumberInput = $state("");
     let isSubmitting = $state(false);
+    
+    let html5Qrcode: Html5Qrcode | null = null;
+    let scanError = $state("");
+    let formElement: HTMLFormElement | null = $state(null);
     const isMatchFinished = $derived(activeMatch.status === "FINISHED");
 
     let activeTab = $state("teamA");
@@ -55,13 +61,62 @@
     function openScan(target: string) {
         scanningTarget = target;
         studentNumberInput = "";
+        scanError = "";
         scanModalOpen = true;
+        
+        // Start scanner slightly after modal opens to ensure DOM is ready
+        setTimeout(startScanner, 100);
     }
 
     function closeScan() {
+        stopScanner();
         scanModalOpen = false;
         studentNumberInput = "";
     }
+    
+    async function startScanner() {
+        if (!html5Qrcode) {
+            html5Qrcode = new Html5Qrcode("qr-reader");
+        }
+        try {
+            await html5Qrcode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                },
+                (decodedText) => {
+                    if (!isSubmitting && studentNumberInput !== decodedText) {
+                        studentNumberInput = decodedText;
+                        if (formElement) {
+                            formElement.requestSubmit();
+                        }
+                    }
+                },
+                (errorMessage) => {
+                    // Ignore continuous scan read errors
+                }
+            );
+        } catch (err) {
+            console.error("Error starting QR scanner:", err);
+            scanError = "카메라를 시작할 수 없습니다. 권한을 확인해주세요.";
+        }
+    }
+    
+    async function stopScanner() {
+        if (html5Qrcode && html5Qrcode.isScanning) {
+            try {
+                await html5Qrcode.stop();
+            } catch (err) {
+                console.error("Error stopping scanner:", err);
+            }
+        }
+    }
+    
+    onDestroy(() => {
+        stopScanner();
+    });
+
     import { toast } from "$lib/toast.svelte";
 </script>
 
@@ -202,22 +257,27 @@
 
             <!-- QR Code Scanner Area -->
             <div
-                class="w-full aspect-square bg-zinc-200/50 dark:bg-zinc-800/50 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex flex-col items-center justify-center relative overflow-hidden shrink-0"
+                class="w-full aspect-square bg-black rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex flex-col items-center justify-center relative overflow-hidden shrink-0"
             >
                 <div
                     id="qr-reader"
-                    class="w-full h-full absolute inset-0 hidden"
+                    class="w-full h-full absolute inset-0 z-0 flex items-center justify-center"
                 ></div>
-                {@html ScanIcon}
-                <p
-                    class="mt-4 text-zinc-500 font-['Pretendard_Variable'] font-medium"
-                >
-                    카메라 화면이 여기에 표시됩니다.
-                </p>
+                
+                {#if scanError}
+                    <div class="z-10 bg-white/90 dark:bg-zinc-900/90 p-4 rounded-xl text-center flex flex-col items-center gap-2">
+                        <div class="text-zinc-500 w-8 h-8 flex items-center justify-center">{@html ScanIcon}</div>
+                        <p class="text-red-500 font-medium text-sm">{scanError}</p>
+                    </div>
+                {:else if !scanModalOpen}
+                    <!-- Placeholder when not scanning -->
+                    <div class="z-10 text-zinc-500 w-8 h-8 flex items-center justify-center">{@html ScanIcon}</div>
+                {/if}
             </div>
 
             <!-- Manual Input Form -->
             <form
+                bind:this={formElement}
                 method="POST"
                 action="?/registerPlayer"
                 use:enhance={() => {
@@ -318,3 +378,20 @@
         </div>
     </div>
 {/if}
+
+<style>
+    /* Styling to make sure html5-qrcode video scales perfectly */
+    :global(#qr-reader video) {
+        object-fit: cover !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Hide the annoying license/info footer from html5-qrcode */
+    :global(#qr-reader__dashboard_section_swaplink) {
+        display: none !important;
+    }
+    :global(#qr-reader a) {
+        display: none !important;
+    }
+</style>
