@@ -11,14 +11,22 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (token) {
         try {
             const payload = verifyToken(token);
-            if (payload?.dbUserId) {
+            // Validate that dbUserId looks like a UUID before querying
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (payload?.dbUserId && uuidRegex.test(payload.dbUserId)) {
                 const fetchedUsers = await db.select().from(users).where(eq(users.id, payload.dbUserId)).limit(1);
                 if (fetchedUsers.length > 0) {
                     event.locals.user = fetchedUsers[0];
                 }
+            } else if (token) {
+                // Invalid or legacy cookie — clear it
+                console.warn('Invalid session token (not a valid JWT or bad dbUserId), clearing cookie.');
+                event.cookies.delete('session', { path: '/' });
             }
         } catch (e) {
             console.error('Error verifying JWT session:', e);
+            // Clear corrupt cookie to prevent repeated errors
+            event.cookies.delete('session', { path: '/' });
         }
     }
 

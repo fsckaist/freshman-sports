@@ -5,42 +5,23 @@ import { eq, or, and, asc, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ cookies, locals }) => {
-    // 1. Authentication Check
-    // Get the session token from cookies
-    const sessionToken = cookies.get('session');
+export const load: PageServerLoad = async ({ locals }) => {
+    // 1. Authentication Check (handled by hooks.server.ts via JWT)
+    const user = locals.user;
 
-
-    if (!sessionToken) {
+    if (!user) {
         throw redirect(302, '/login');
     }
 
     try {
-        // Here we use the session token (which we stored as user.id in login) 
-        // to directly query the database.
-        const userId = sessionToken;
-
-        // 2. Database Queries
-
-        // Fetch User Profile
-        const userProfiles = await db.select({
-            id: users.id,
-            username: users.name,
-            studentNumber: users.studentNumber,
-            classId: users.classId,
-            phoneNumber: users.phoneNumber
-        })
-            .from(users)
-            .where(eq(users.id, userId))
-            .limit(1);
-
-        const userProfile = userProfiles[0];
-
-        if (!userProfile) {
-            // Invalid session ID or user deleted
-            cookies.delete('session', { path: '/' });
-            throw redirect(302, '/login');
-        }
+        // User profile comes from hooks (JWT-verified)
+        const userProfile = {
+            id: user.id,
+            username: user.name,
+            studentNumber: user.studentNumber,
+            classId: user.classId,
+            phoneNumber: user.phoneNumber
+        };
 
         // QUERY: Fetch user's registered sports
         const userSports = await db.select({
