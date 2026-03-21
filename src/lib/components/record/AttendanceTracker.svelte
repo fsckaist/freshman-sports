@@ -334,7 +334,7 @@
                                 onclick={resumeScanning}
                                 class="size-14 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full transition-colors flex items-center justify-center disabled:opacity-50"
                             >
-                                <div class="size-6 text-white">
+                                <div class="size-6 text-white flex items-center justify-center">
                                     {@html CloseIcon}
                                 </div>
                             </button>
