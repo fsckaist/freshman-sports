@@ -13,6 +13,11 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
     const { eventState, registrationDeadline } = await parent();
     if (eventState !== 'REGISTRATION') throw redirect(302, '/');
 
+    // Access guard: only participants (students with a class or proctors) can apply
+    if (!user.classId && !user.isProctor) {
+        throw redirect(302, '/');
+    }
+
     if (!user.classId) {
         // If a user doesn't belong to a class, they can't see the sports rosters or apply
         return {
@@ -118,7 +123,7 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 export const actions: Actions = {
     apply: async ({ request, locals }) => {
         const user = locals.user;
-        if (!user || !user.classId) {
+        if (!user || (!user.classId && !user.isProctor)) {
             return fail(401, { message: "권한이 없어요." });
         }
 
@@ -202,7 +207,7 @@ export const actions: Actions = {
 
     cancel: async ({ request, locals }) => {
         const user = locals.user;
-        if (!user || !user.classId) {
+        if (!user || (!user.classId && !user.isProctor)) {
             return fail(401, { message: "권한이 없어요." });
         }
 

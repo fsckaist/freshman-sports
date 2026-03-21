@@ -171,7 +171,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             const teamBOfflinePlanned = [];
             const cheeringA = [];
             const cheeringB = [];
-            const otherCheering = []; 
+            const otherCheering = [];
 
             for (const reg of matchRegisters) {
                 if (reg.checkedInAt) {
@@ -263,7 +263,11 @@ export const actions: Actions = {
             return fail(404, { message: 'User not found' });
         }
 
-        if (scanType !== "Cheering") {
+        if (scanType === "Cheering") {
+            if (user.classId !== match.classAId && user.classId !== match.classBId) {
+                return fail(400, { message: '해당 경기를 진행하는 반 소속이 아닙니다.' });
+            }
+        } else {
             // Player Registration Logic
             const targetClassId = scanType === "Team A" ? match.classAId : match.classBId;
 
@@ -318,7 +322,7 @@ export const actions: Actions = {
 
         if (existing) {
             await db.update(registers)
-                .set({ 
+                .set({
                     checkedInAt: new Date(),
                     isCheering: scanType === "Cheering"
                 })
@@ -333,9 +337,9 @@ export const actions: Actions = {
             });
         }
 
-        return { 
-            success: true, 
-            message: scanType === "Cheering" ? "응원 인원으로 등록되었습니다." : "선수로 등록되었습니다." 
+        return {
+            success: true,
+            message: scanType === "Cheering" ? "응원 인원으로 등록되었습니다." : "선수로 등록되었습니다."
         };
     },
 

@@ -22,10 +22,11 @@
     let scanningTarget = $state("");
     let studentNumberInput = $state("");
     let isSubmitting = $state(false);
-    
     let html5Qrcode: Html5Qrcode | null = null;
     let scanError = $state("");
     let formElement: HTMLFormElement | null = $state(null);
+    let scannedUser = $state<{ name: string; studentNumber: string; id: string } | null>(null);
+    let isScanPaused = $state(false);
     const isMatchFinished = $derived(activeMatch.status === "FINISHED");
 
     let activeTab = $state("teamA");
@@ -62,6 +63,8 @@
         scanningTarget = target;
         studentNumberInput = "";
         scanError = "";
+        isScanPaused = false;
+        scannedUser = null;
         scanModalOpen = true;
         
         // Start scanner slightly after modal opens to ensure DOM is ready
@@ -85,12 +88,32 @@
                     fps: 10,
                     qrbox: { width: 250, height: 250 },
                 },
-                (decodedText) => {
-                    if (!isSubmitting && studentNumberInput !== decodedText) {
-                        studentNumberInput = decodedText;
-                        if (formElement) {
-                            formElement.requestSubmit();
+                async (decodedText) => {
+                    if (isSubmitting || isScanPaused || scannedUser) return;
+                    
+                    isScanPaused = true;
+                    if (html5Qrcode && html5Qrcode.isScanning) {
+                        html5Qrcode.pause();
+                    }
+
+                    try {
+                        const res = await fetch(`/api/user/${decodedText}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            scannedUser = {
+                                name: data.name,
+                                studentNumber: data.studentNumber,
+                                id: data.id
+                            };
+                            studentNumberInput = data.studentNumber;
+                        } else {
+                            toast.error(res.status === 404 ? "등록되지 않은 인원이거나 유효하지 않은 QR입니다." : "유저 정보를 불러올 수 없습니다.");
+                            resumeScanning();
                         }
+                    } catch (e) {
+                        console.error("Fetch error:", e);
+                        toast.error("네트워크 오류가 발생했습니다.");
+                        resumeScanning();
                     }
                 },
                 (errorMessage) => {
@@ -106,10 +129,23 @@
     async function stopScanner() {
         if (html5Qrcode && html5Qrcode.isScanning) {
             try {
+                // If paused, we must resume before stopping
+                if (html5Qrcode.getState() === 3) {
+                    html5Qrcode.resume();
+                }
                 await html5Qrcode.stop();
             } catch (err) {
                 console.error("Error stopping scanner:", err);
             }
+        }
+    }
+    
+    function resumeScanning() {
+        scannedUser = null;
+        studentNumberInput = "";
+        isScanPaused = false;
+        if (html5Qrcode && html5Qrcode.getState() === 3) {
+            html5Qrcode.resume();
         }
     }
     
@@ -264,7 +300,42 @@
                     class="w-full h-full absolute inset-0 z-0 flex items-center justify-center"
                 ></div>
                 
-                {#if scanError}
+                {#if scannedUser}
+                    <!-- 2-Step Confirmation Overlay Layer -->
+                    <div class="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white">
+                        <div class="flex flex-col items-center mb-6">
+                            <span class="text-[2rem] font-bold font-pretendard mb-1">{scannedUser.name}</span>
+                            <span class="text-xl text-zinc-300 font-medium">{scannedUser.studentNumber}</span>
+                        </div>
+                        <p class="text-lg font-medium mb-8">해당 인원을 등록할까요?</p>
+                        <div class="flex gap-4 w-full px-4">
+                            <button
+                                type="button"
+                                disabled={isSubmitting}
+                                onclick={resumeScanning}
+                                class="flex-1 py-3.5 bg-zinc-600 hover:bg-zinc-500 rounded-xl font-semibold transition-colors flex items-center justify-center disabled:opacity-50"
+                            >
+                                <div class="size-5 mr-1 text-white">{@html CloseIcon}</div>
+                                <span>취소</span>
+                            </button>
+                            <button
+                                type="button"
+                                disabled={isSubmitting}
+                                onclick={() => { if (formElement) { formElement.requestSubmit(); } }}
+                                class="flex-1 py-3.5 bg-amber-500 hover:bg-amber-400 rounded-xl font-semibold transition-colors text-white disabled:opacity-50 flex items-center justify-center"
+                            >
+                                {#if isSubmitting}
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                {:else}
+                                    등록하기
+                                {/if}
+                            </button>
+                        </div>
+                    </div>
+                {:else if scanError}
                     <div class="z-10 bg-white/90 dark:bg-zinc-900/90 p-4 rounded-xl text-center flex flex-col items-center gap-2">
                         <div class="text-zinc-500 w-8 h-8 flex items-center justify-center">{@html ScanIcon}</div>
                         <p class="text-red-500 font-medium text-sm">{scanError}</p>
@@ -285,13 +356,14 @@
                     return async ({ result, update }) => {
                         isSubmitting = false;
                         if (result.type === "success") {
-                            studentNumberInput = ""; // clear for next scan
                             const message = result.data?.message;
                             toast.success(
                                 typeof message === "string"
                                     ? message
                                     : "등록되었습니다.",
                             );
+                            if (isScanPaused) resumeScanning();
+                            studentNumberInput = ""; // clear for next scan
                         } else if (result.type === "failure") {
                             const message = result.data?.message;
                             toast.error(
@@ -299,6 +371,7 @@
                                     ? message
                                     : "Failed to register",
                             );
+                            if (isScanPaused) resumeScanning();
                         }
                         update({ reset: false }); // keep form modal open for rapid scans
                     };

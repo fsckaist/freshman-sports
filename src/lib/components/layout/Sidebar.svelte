@@ -38,6 +38,7 @@
             path: "/apply",
             icon: resizeSvg(rawApplyIcon),
             states: ["REGISTRATION"],
+            requiresParticipant: true,
         },
         {
             id: "schedule",
@@ -45,6 +46,7 @@
             path: "/schedule",
             icon: resizeSvg(rawScheduleIcon),
             states: ["ONGOING"],
+            requiresParticipant: true,
         },
         {
             id: "bracket",
@@ -88,7 +90,13 @@
     const user = $derived($page.data.user);
 
     const visibleGeneral = $derived(
-        allNavItems.filter((item) => item.states.includes(eventState)),
+        allNavItems.filter((item) => {
+            if (!item.states.includes(eventState)) return false;
+            if (item.requiresParticipant) {
+                return user?.classId != null || user?.isProctor === true;
+            }
+            return true;
+        }),
     );
     const visibleAdmin = $derived(
         adminNavItems.filter((item) => {

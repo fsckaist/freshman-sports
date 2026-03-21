@@ -25,6 +25,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                     isManager: users.isManager,
                     isReferee: users.isReferee,
                     isAdmin: users.isAdmin,
+                    isProctor: users.isProctor,
                     agreedRules: users.agreedRules,
                     agreedPrivacy: users.agreedPrivacy
                 }).from(users).where(eq(users.id, payload.dbUserId)).limit(1);
@@ -75,6 +76,11 @@ export const handle: Handle = async ({ event, resolve }) => {
                 if (pathname !== '/') {
                     throw redirect(303, '/');
                 }
+            }
+
+            const isOnlyReferee = user.isReferee && !user.isAdmin && !user.isManager && !user.isProctor && !user.classId;
+            if (isOnlyReferee && pathname !== '/referee-notice' && pathname !== '/logout') {
+                throw redirect(303, '/referee-notice');
             }
         }
     }

@@ -14,6 +14,11 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
         const { eventState } = await parent();
         if (eventState !== 'ONGOING') throw redirect(302, '/');
 
+        // Access guard: only participants
+        if (!user.classId && !user.isProctor) {
+            throw redirect(302, '/');
+        }
+
         // 1. URL Parameter Handling
         let requestedSportId = url.searchParams.get('sportId');
 
@@ -284,7 +289,7 @@ export const actions: Actions = {
             if (!user) {
                 return fail(401, { message: "로그인이 필요합니다." });
             }
-            if (!user.classId) {
+            if (!user.classId && !user.isProctor) {
                 return fail(403, { message: "소속된 반(Class) 정보가 없어 투표할 수 없습니다." });
             }
 

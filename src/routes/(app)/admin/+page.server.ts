@@ -438,12 +438,11 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     }
 };
 
-
 export const actions: Actions = {
     toggleSlotAvailability: async ({ request, locals }) => {
         try {
             const user = locals.user;
-            if (!user || (!user.isManager && !user.isAdmin)) {
+            if (!user || !user.isAdmin) {
                 return fail(403, { message: "권한이 없습니다." });
             }
 
