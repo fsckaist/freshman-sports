@@ -29,6 +29,7 @@
         name: string;
         studentNumber: string;
         id: string;
+        class?: number | string;
     } | null>(null);
     let isScanPaused = $state(false);
     const isMatchFinished = $derived(activeMatch.status === "FINISHED");
@@ -108,6 +109,7 @@
                                 name: data.name,
                                 studentNumber: data.studentNumber,
                                 id: data.id,
+                                class: data.class ?? "0",
                             };
                             studentNumberInput = data.studentNumber;
                         } else {
@@ -319,10 +321,10 @@
                                 >{scannedUser.name}</span
                             >
                             <span class="text-xl text-zinc-300 font-medium"
-                                >{scannedUser.studentNumber}</span
+                                >{scannedUser.studentNumber} · {scannedUser.class}반</span
                             >
                         </div>
-                        <p class="text-lg font-medium mb-8">
+                        <p class="text-lg font-medium">
                             해당 인원을 등록할까요?
                         </p>
                     </div>

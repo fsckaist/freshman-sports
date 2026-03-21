@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import { users } from '$lib/server/db/schema';
+import { users, classes } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 
@@ -27,9 +27,11 @@ export const GET: RequestHandler = async ({ params, locals }) => {
             id: users.id,
             name: users.name,
             studentNumber: users.studentNumber,
-            classId: users.classId
+            classId: users.classId,
+            class: classes.classNumber
         })
         .from(users)
+        .leftJoin(classes, eq(users.classId, classes.id))
         .where(eq(users.id, id))
         .limit(1);
 
