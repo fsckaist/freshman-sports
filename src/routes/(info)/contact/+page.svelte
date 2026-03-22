@@ -31,21 +31,7 @@
                         class="flex flex-col gap-2 m-0 p-0 pl-[1.6875rem] list-disc"
                     >
                         <li class="leading-relaxed break-keep">
-                            sports@fsckaist.com : 체육 대회 전반적인 문의
-                        </li>
-                        <li class="leading-relaxed break-keep">
-                            futsal@fsckaist.com : 풋살 경기 관련 문의
-                        </li>
-                        <li class="leading-relaxed break-keep">
-                            basketball@fsckaist.com : 농구 경기 관련 문의
-                        </li>
-                        <li class="leading-relaxed break-keep">
-                            badminton_male@fsckaist.com : 남자 복식 배드민턴
-                            관련 문의
-                        </li>
-                        <li class="leading-relaxed break-keep">
-                            badminton_female@fsckaist.com : 여자 복식 배드민턴
-                            관련 문의
+                            sports@kaistfsc.org
                         </li>
                     </ul>
                 </div>
@@ -59,7 +45,7 @@
                         class="flex flex-col gap-2 m-0 p-0 pl-[1.6875rem] list-disc"
                     >
                         <li class="leading-relaxed break-keep">
-                            fsckaist@gmail.com
+                            staff@kaistfsc.org
                         </li>
                         <li class="leading-relaxed break-keep">
                             @kaist_freshman 인스타그램 DM
