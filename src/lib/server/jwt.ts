@@ -2,8 +2,8 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '$env/static/private';
 
 export interface JWTPayload {
-    uid: string;        // SSO uid
-    sid: string;        // SSO session id
+    uid?: string;        // SSO uid
+    sid?: string;        // SSO session id
     studentNumber: string;
     dbUserId: string;   // Our DB user.id (UUID)
 }

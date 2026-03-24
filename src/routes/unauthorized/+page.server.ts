@@ -1,0 +1,7 @@
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ locals }) => {
+    return {
+        name: locals.user?.name || '사용자'
+    };
+};

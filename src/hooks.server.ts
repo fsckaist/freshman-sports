@@ -82,6 +82,11 @@ export const handle: Handle = async ({ event, resolve }) => {
             if (isOnlyReferee && pathname !== '/referee-notice' && pathname !== '/logout') {
                 throw redirect(303, '/referee-notice');
             }
+
+            const isUnauthorized = !user.isReferee && !user.isAdmin && !user.isManager && !user.isProctor && !user.classId;
+            if (isUnauthorized && pathname !== '/unauthorized' && pathname !== '/logout') {
+                throw redirect(303, '/unauthorized');
+            }
         }
     }
 

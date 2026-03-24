@@ -13,8 +13,9 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
     const { eventState, registrationDeadline } = await parent();
     if (eventState !== 'REGISTRATION') throw redirect(302, '/');
 
-    // Access guard: only participants (students with a class or proctors) can apply
-    if (!user.classId && !user.isProctor) {
+    // Access guard: only participants (students or proctors) can access
+    const isStudent = !user.isProctor && user.classId != null;
+    if (!isStudent && !user.isProctor) {
         throw redirect(302, '/');
     }
 
@@ -123,9 +124,10 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 export const actions: Actions = {
     apply: async ({ request, locals }) => {
         const user = locals.user;
-        if (!user || (!user.classId && !user.isProctor)) {
-            return fail(401, { message: "권한이 없어요." });
-        }
+        if (!user) return fail(401, { message: "권한이 없어요." });
+        const isStudent = !user.isProctor && user.classId != null;
+        if (!isStudent && !user.isProctor) return fail(401, { message: "권한이 없어요." });
+        if (!user.classId && !user.isProctor) return fail(403, { message: "소속된 반 정보가 없어요." });
 
         const formData = await request.formData();
         const sportId = formData.get('sportId')?.toString();
@@ -207,9 +209,10 @@ export const actions: Actions = {
 
     cancel: async ({ request, locals }) => {
         const user = locals.user;
-        if (!user || (!user.classId && !user.isProctor)) {
-            return fail(401, { message: "권한이 없어요." });
-        }
+        if (!user) return fail(401, { message: "권한이 없어요." });
+        const isStudent = !user.isProctor && user.classId != null;
+        if (!isStudent && !user.isProctor) return fail(401, { message: "권한이 없어요." });
+        if (!user.classId && !user.isProctor) return fail(403, { message: "소속된 반 정보가 없어요." });
 
         const formData = await request.formData();
         const sportId = formData.get('sportId')?.toString();

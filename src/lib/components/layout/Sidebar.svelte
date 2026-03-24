@@ -93,7 +93,9 @@
         allNavItems.filter((item) => {
             if (!item.states.includes(eventState)) return false;
             if (item.requiresParticipant) {
-                return user?.classId != null || user?.isProctor === true;
+                if (!user) return false;
+                const isStudent = !user.isProctor && user.classId != null;
+                return isStudent || user.isProctor === true;
             }
             return true;
         }),

@@ -13,7 +13,8 @@
             : resizeSvg(rawMoonIcon),
     );
 
-    const errorMessage = $derived($page.url.searchParams.get("error"));
+    let { data, form } = $props();
+    const errorMessage = $derived(form?.error || $page.url.searchParams.get("error"));
 </script>
 
 <div
@@ -82,28 +83,46 @@
             class="content-stretch flex flex-[1_0_0] flex-col items-start justify-between min-h-px min-w-px p-[0.625rem] relative w-full overflow-visible"
         >
             <div class="flex flex-col gap-3 items-start">
-                <a
-                    href="/login/sso"
-                    id="sso-login-button"
-                    class="inline-flex items-center justify-center gap-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-bold text-[1.125rem] rounded-[6.25rem] px-8 h-[3.125rem] transition-colors cursor-pointer no-underline shadow-md hover:shadow-lg"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="22"
-                        height="22"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2.5"
+                {#if data.useSparcsSso}
+                    <a
+                        href="/login/sso"
+                        id="sso-login-button"
+                        class="flex items-center justify-center gap-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-bold text-[1.125rem] rounded-[6.25rem] px-8 h-[3.125rem] transition-colors cursor-pointer no-underline shadow-md hover:shadow-lg w-full"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="22"
+                            height="22"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                            />
+                        </svg>
+                        SPARCS SSO 로그인
+                    </a>
+                {:else}
+                    <form method="POST" action="?/login" class="flex flex-col gap-3 w-full max-w-[20rem]">
+                        <input
+                            type="text"
+                            name="studentNumber"
+                            placeholder="학번 입력 (예: 20241234)"
+                            class="flex-1 px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all font-pretendard h-[3.125rem]"
+                            required
                         />
-                    </svg>
-                    SPARCS SSO 로그인
-                </a>
+                        <button
+                            type="submit"
+                            class="flex items-center justify-center gap-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-bold text-[1.125rem] rounded-[6.25rem] px-8 h-[3.125rem] transition-colors cursor-pointer shadow-md hover:shadow-lg w-full"
+                        >
+                            학번으로 로그인
+                        </button>
+                    </form>
+                {/if}
 
                 {#if errorMessage}
                     <p

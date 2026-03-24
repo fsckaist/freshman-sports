@@ -499,7 +499,7 @@ export const actions: Actions = {
     updateSchedulePeriod: async ({ request, locals }) => {
         try {
             const user = locals.user;
-            if (!user || (!user.isManager && !user.isAdmin)) return fail(403);
+            if (!user || !user.isAdmin) return fail(403, { message: "권한이 없습니다." });
 
             const formData = await request.formData();
             const sportId = formData.get('sportId')?.toString();
@@ -525,7 +525,7 @@ export const actions: Actions = {
     processByeMatches: async ({ request, locals }) => {
         try {
             const user = locals.user;
-            if (!user || (!user.isManager && !user.isAdmin)) return fail(403);
+            if (!user || !user.isAdmin) return fail(403, { message: "권한이 없습니다." });
 
             const formData = await request.formData();
             const sportId = formData.get('sportId')?.toString();
@@ -622,7 +622,7 @@ export const actions: Actions = {
     finalizeMatch: async ({ request, locals }) => {
         try {
             const user = locals.user;
-            if (!user || (!user.isManager && !user.isAdmin)) return fail(403);
+            if (!user || !user.isAdmin) return fail(403, { message: "권한이 없습니다." });
 
             const formData = await request.formData();
             const matchId = formData.get('matchId')?.toString();
@@ -679,7 +679,7 @@ export const actions: Actions = {
     finalizeMatchResult: async ({ request, locals }) => {
         try {
             const user = locals.user;
-            if (!user || (!user.isManager && !user.isAdmin)) return fail(403);
+            if (!user || !user.isAdmin) return fail(403, { message: "권한이 없습니다." });
 
             const formData = await request.formData();
             const matchId = formData.get('matchId')?.toString();

@@ -15,7 +15,8 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
         if (eventState !== 'ONGOING') throw redirect(302, '/');
 
         // Access guard: only participants
-        if (!user.classId && !user.isProctor) {
+        const isStudent = !user.isProctor && user.classId != null;
+        if (!isStudent && !user.isProctor) {
             throw redirect(302, '/');
         }
 
