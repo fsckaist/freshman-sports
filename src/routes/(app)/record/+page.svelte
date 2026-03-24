@@ -6,6 +6,7 @@
     import type { PageData } from "./$types";
     import { slide } from "svelte/transition";
     import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
+    import { i18n } from "$lib/i18n.svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -49,7 +50,7 @@
             <h1
                 class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
             >
-                경기 일정
+                {i18n.t({ ko: '경기 일정', en: 'Match Schedule' })}
             </h1>
             <div
                 class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isScheduleCollapsed
@@ -80,7 +81,7 @@
                                 ? 'bg-amber-500 text-white border-amber-500 shadow-md'
                                 : 'bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700'}"
                         >
-                            {sport.name}
+                            {i18n.decode(sport.name)}
                         </button>
                     {/each}
                 </div>
@@ -117,7 +118,7 @@
                     <h2
                         class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
                     >
-                        인원 관리
+                        {i18n.t({ ko: '인원 관리', en: 'Attendance Management' })}
                     </h2>
                     <div
                         class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isAttendanceCollapsed
@@ -155,7 +156,7 @@
                     <h2
                         class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0 whitespace-nowrap"
                     >
-                        경기 기록지
+                        {i18n.t({ ko: '경기 기록지', en: 'Match Record' })}
                     </h2>
                     <div
                         class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isLogCollapsed
@@ -201,13 +202,12 @@
                 <h3
                     class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] mb-[0.625rem]"
                 >
-                    경기를 선택해주세요
+                    {i18n.t({ ko: '경기를 선택해주세요', en: 'Please select a match' })}
                 </h3>
                 <p
                     class="font-pretendard font-medium text-zinc-400 dark:text-zinc-500 text-[1.125rem] max-w-[20rem]"
                 >
-                    좌측 리스트에서 경기 기록 혹은 관리가 필요한 매치를
-                    선택해주세요.
+                    {i18n.t({ ko: '좌측 리스트에서 경기 기록 혹은 관리가 필요한 매치를 선택해주세요.', en: 'Select a match from the left list to record or manage attendance.' })}
                 </p>
             </div>
         {/if}

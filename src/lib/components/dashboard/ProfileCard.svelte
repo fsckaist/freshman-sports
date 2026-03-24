@@ -2,14 +2,21 @@
     import * as QRCode from "qrcode";
     import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
     import { slide } from "svelte/transition";
+    import { i18n } from "$lib/i18n.svelte";
 
     let {
-        name = "홍길동",
+        name = i18n.t({ ko: "홍길동", en: "John Doe" }),
         studentNumber = "20251234",
         phone = "010-1234-5678",
-        sports = "풋살, 농구, 배드민턴",
+        sports = [] as string[],
         userId = "123e4567-e89b-12d3-a456-426614174000",
-    } = $props();
+    } = $props<{
+        name?: string;
+        studentNumber?: string;
+        phone?: string;
+        sports?: string[];
+        userId?: string;
+    }>();
 
     let qrCodeUrl = $state("");
     let isCollapsed = $state(false);
@@ -37,7 +44,7 @@
         <h2
             class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] leading-[normal] shrink-0 m-0"
         >
-            내 정보
+            {i18n.t({ ko: "내 정보", en: "My Info" })}
         </h2>
         <div
             class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isCollapsed ? '' : 'rotate-180'}"
@@ -62,10 +69,10 @@
                     <div
                         class="bg-neutral-50 dark:bg-zinc-800/50 border-r border-zinc-200 dark:border-zinc-800 flex flex-col font-pretendard font-normal gap-[0.9375rem] items-end justify-center leading-[normal] overflow-clip pl-8 md:pl-[3.125rem] pr-[1.25rem] py-[1.25rem] shrink-0 text-zinc-600 dark:text-zinc-400 text-base md:text-[1.125rem]"
                     >
-                        <p class="shrink-0 m-0">이름</p>
-                        <p class="shrink-0 m-0">학번</p>
-                        <p class="shrink-0 m-0">전화번호</p>
-                        <p class="shrink-0 m-0">내 종목</p>
+                        <p class="shrink-0 m-0">{i18n.t({ ko: "이름", en: "Name" })}</p>
+                        <p class="shrink-0 m-0">{i18n.t({ ko: "학번", en: "ID" })}</p>
+                        <p class="shrink-0 m-0">{i18n.t({ ko: "전화번호", en: "Phone" })}</p>
+                        <p class="shrink-0 m-0">{i18n.t({ ko: "내 종목", en: "My Sports" })}</p>
                     </div>
 
                     <div
@@ -74,7 +81,11 @@
                         <p class="shrink-0 m-0">{name}</p>
                         <p class="shrink-0 m-0">{studentNumber}</p>
                         <p class="shrink-0 m-0">{phone}</p>
-                        <p class="shrink-0 m-0">{sports}</p>
+                        <p class="shrink-0 m-0">
+                            {sports && sports.length > 0
+                                ? sports.map((s: string) => i18n.decode(s)).join(", ")
+                                : i18n.t({ ko: "참여 종목 없음", en: "No participations" })}
+                        </p>
                     </div>
                 </div>
 

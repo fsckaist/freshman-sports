@@ -1,3 +1,7 @@
+<script lang="ts">
+    import { i18n } from "$lib/i18n.svelte";
+</script>
+
 <div
     class="content-stretch flex flex-[1_0_0] flex-col gap-[1.5625rem] h-full items-start min-h-px min-w-px relative"
 >
@@ -8,17 +12,16 @@
             <h1
                 class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[2rem] m-0"
             >
-                규정 읽기
+                {i18n.t({ ko: "규정 읽기", en: "Rules" })}
             </h1>
             <div
                 class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
             >
                 <p class="m-0">
-                    공정한 경기 운영을 위해 아래 규정을 반드시 확인해주세요.
+                    {i18n.t({ ko: '공정한 경기 운영을 위해 아래 규정을 반드시 확인해주세요.', en: 'Please check the rules below for fair play.' })}
                 </p>
                 <p class="m-0">
-                    규정 미숙지 시 실격 등 불이익을 받을 수 있으니 각별히 유의해
-                    주세요.
+                    {i18n.t({ ko: '규정 미숙지 시 실격 등 불이익을 받을 수 있으니 각별히 유의해 주세요.', en: 'Failure to comply with rules may result in disqualification.' })}
                 </p>
             </div>
         </div>
@@ -39,7 +42,7 @@
                     <h2
                         class="font-pretendard font-bold relative shrink-0 text-[2rem] m-0 mb-[0.625rem]"
                     >
-                        2026 새내기 체육 대회 운영 규정
+                        {i18n.t({ ko: '2026 새내기 체육 대회 운영 규정', en: '2026 Freshman Sports Rules' })}
                     </h2>
 
                     <div

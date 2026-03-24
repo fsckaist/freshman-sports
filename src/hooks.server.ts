@@ -49,6 +49,20 @@ export const handle: Handle = async ({ event, resolve }) => {
         event.locals.isImpersonating = true;
     }
 
+    // Extract locale from cookie for SSR support
+    const cookieLocale = event.cookies.get('locale');
+    if (cookieLocale === 'ko' || cookieLocale === 'en') {
+        event.locals.locale = cookieLocale;
+    } else {
+        // Fallback to browser language for new users without a cookie
+        const acceptLang = event.request.headers.get('accept-language');
+        if (acceptLang?.toLocaleLowerCase().includes('en')) {
+            event.locals.locale = 'en';
+        } else {
+            event.locals.locale = 'ko';
+        }
+    }
+
     const { pathname } = event.url;
     const user = event.locals.user;
 

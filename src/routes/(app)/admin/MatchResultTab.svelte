@@ -1,6 +1,7 @@
 <script lang="ts">
     import MatchLogPanel from "$lib/components/record/MatchLogPanel.svelte";
     import { enhance } from "$app/forms";
+    import { i18n } from "$lib/i18n.svelte";
 
     let {
         sports = [],
@@ -40,7 +41,7 @@
                 <p
                     class="font-pretendard font-semibold text-[1rem] m-0 transition-colors duration-200"
                 >
-                    {sport.name}
+                    {i18n.decode(sport.name)}
                 </p>
             </a>
         {/each}
@@ -54,12 +55,12 @@
             <h2
                 class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[1.25rem] m-0"
             >
-                경기 결과 확정
+                {i18n.t({ ko: '경기 결과 확정', en: 'Confirm Match Result' })}
             </h2>
             <p
                 class="font-pretendard font-normal text-zinc-500 text-[0.875rem] m-0 mt-1"
             >
-                종료된 경기들의 승패를 관리자가 최종적으로 확정합니다.
+                {i18n.t({ ko: '종료된 경기들의 승패를 관리자가 최종적으로 확정합니다.', en: 'Administrator finally confirms the win/loss of finished matches.' })}
             </p>
         </div>
 
@@ -86,11 +87,11 @@
                     disabled={isByeProcessing}
                     class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap"
                 >
-                    {isByeProcessing ? "처리 중..." : "부전승 자동 처리"}
+                    {isByeProcessing ? i18n.t({ ko: "처리 중...", en: "Processing..." }) : i18n.t({ ko: "부전승 자동 처리", en: "Auto-process Bye Matches" })}
                 </button>
                 {#if byeProcessed !== null}
                     <span class="text-xs text-zinc-400 dark:text-zinc-500"
-                        >{byeProcessed}건 처리됨</span
+                        >{byeProcessed}{i18n.t({ ko: "건 처리됨", en: " cases processed" })}</span
                     >
                 {/if}
             </div>
@@ -117,10 +118,10 @@
                             ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100'
                             : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200'}"
                     >
-                        <span>{matchPair.sportName}</span>
+                        <span>{i18n.decode(matchPair.sportName)}</span>
                         {#if matchPair.matchName}
                             <span class="opacity-50">•</span>
-                            <span>{matchPair.matchName}</span>
+                            <span>{i18n.decode(matchPair.matchName)}</span>
                         {/if}
                     </div>
                     <div
@@ -128,14 +129,14 @@
                     >
                         <span
                             >{matchPair.classA
-                                ? `${matchPair.classA}반`
-                                : "미정"}</span
+                                ? `${matchPair.classA}${i18n.t({ ko: '반', en: '' })}`
+                                : i18n.t({ ko: "미정", en: "TBD" })}</span
                         >
                         <span class="text-[0.6rem] text-zinc-400">VS</span>
                         <span
                             >{matchPair.classB
-                                ? `${matchPair.classB}반`
-                                : "미정"}</span
+                                ? `${matchPair.classB}${i18n.t({ ko: '반', en: '' })}`
+                                : i18n.t({ ko: "미정", en: "TBD" })}</span
                         >
                     </div>
                 </a>
@@ -144,7 +145,7 @@
                 <div
                     class="text-zinc-400 dark:text-zinc-500 text-sm py-4 text-center"
                 >
-                    결과 확정이 필요한 경기가 없습니다.
+                    {i18n.t({ ko: '결과 확정이 필요한 경기가 없습니다.', en: 'No matches requiring result confirmation.' })}
                 </div>
             {/if}
         </div>
@@ -166,13 +167,12 @@
                     <h3
                         class="font-pretendard font-bold text-lg text-center text-zinc-800 dark:text-zinc-100 m-0"
                     >
-                        승리 팀 확정하기
+                        {i18n.t({ ko: '승리 팀 확정하기', en: 'Confirm Winner' })}
                     </h3>
                     <p
                         class="text-sm text-zinc-500 dark:text-zinc-400 text-center m-0"
                     >
-                        위 기록을 바탕으로 어느 팀을 승리 팀으로
-                        기록하시겠습니까? (이 결정은 되돌릴 수 없습니다)
+                        {i18n.t({ ko: '위 기록을 바탕으로 어느 팀을 승리 팀으로 기록하시겠습니까? (이 결정은 되돌릴 수 없습니다)', en: 'Based on the above records, which team would you like to record as the winner? (This decision cannot be undone)' })}
                     </p>
                     <div
                         class="flex gap-4 items-center justify-center w-full mt-2"
@@ -205,7 +205,7 @@
                                 disabled={isSubmitting}
                                 class="w-full py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-700 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl font-bold text-lg text-zinc-800 dark:text-zinc-100 transition-all"
                             >
-                                {activeResultMatch.classA}반 승리
+                                {activeResultMatch.classA}{i18n.t({ ko: "반 승리", en: " Win" })}
                             </button>
                         </form>
 
@@ -237,7 +237,7 @@
                                 disabled={isSubmitting}
                                 class="w-full py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-700 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl font-bold text-lg text-zinc-800 dark:text-zinc-100 transition-all"
                             >
-                                {activeResultMatch.classB}반 승리
+                                {activeResultMatch.classB}{i18n.t({ ko: "반 승리", en: " Win" })}
                             </button>
                         </form>
                     </div>
@@ -270,7 +270,7 @@
                             disabled={isSubmitting}
                             class="w-full py-[0.875rem] border-2 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-xl font-bold text-lg text-zinc-500 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-all disabled:opacity-50"
                         >
-                            결과 없음 (양 팀 탈락)
+                            {i18n.t({ ko: '결과 없음 (양 팀 탈락)', en: 'No Result (Both Eliminated)' })}
                         </button>
                     </form>
                 </div>
@@ -281,7 +281,7 @@
                     <p
                         class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0 text-center"
                     >
-                        좌측 메뉴에서 매치를 선택하세요.
+                        {i18n.t({ ko: '좌측 메뉴에서 매치를 선택하세요.', en: 'Select a match from the left menu.' })}
                     </p>
                 </div>
             {/if}

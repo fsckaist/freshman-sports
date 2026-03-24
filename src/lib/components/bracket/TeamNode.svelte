@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { i18n } from "$lib/i18n.svelte";
     export let state: "win" | "lose" | "default";
     export let notAvailable: boolean = false;
     export let className: string = "0";
@@ -102,7 +103,7 @@
             class="content-stretch flex font-pretendard font-semibold items-center leading-tight relative shrink-0 text-[1rem] gap-[0.0625rem] {textClass}"
         >
             <p class="relative shrink-0 m-0">{className}</p>
-            <p class="relative shrink-0 m-0">반</p>
+            <p class="relative shrink-0 m-0">{i18n.t({ ko: '반', en: '' })}</p>
         </div>
     {/if}
 </div>

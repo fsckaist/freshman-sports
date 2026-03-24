@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from "$app/stores";
+    import { i18n } from "$lib/i18n.svelte";
     export let activeMatchId: string | null = null;
 
     interface Player {
@@ -45,16 +46,15 @@
     const LocationIcon = resizeSvgTo12(rawMapPinIcon);
 
     function formatDate(date: Date) {
-        return new Intl.DateTimeFormat("ko-KR", {
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-        })
-            .format(new Date(date))
-            .replace("일 ", "일 ")
-            .replace("에 ", " "); // e.g., 3월 9일 18:00
-        // Wait, standard format might be MM월 DD일 HH시 MM분
+        const d = new Date(date);
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        const hh = String(d.getHours()).padStart(2, "0");
+        const min = String(d.getMinutes()).padStart(2, "0");
+        return i18n.t({
+            ko: `${mm}월 ${dd}일 ${hh}시 ${min}분`,
+            en: `${mm}/${dd} ${hh}:${min}`,
+        });
     }
 
     function formatFigmaDate(date: Date) {
@@ -63,7 +63,10 @@
         const dd = String(d.getDate()).padStart(2, "0");
         const hh = String(d.getHours()).padStart(2, "0");
         const min = String(d.getMinutes()).padStart(2, "0");
-        return `${mm}월 ${dd}일 ${hh}시 ${min}분`;
+        return i18n.t({
+            ko: `${mm}월 ${dd}일 ${hh}시 ${min}분`,
+            en: `${mm}/${dd} ${hh}:${min}`,
+        });
     }
 
     function getCardStyles(status: string | null, isSelected: boolean) {
@@ -92,13 +95,13 @@
     function getBadgeText(status: string | null) {
         switch (status) {
             case "ONGOING":
-                return "진행";
+                return i18n.t({ ko: "진행", en: "Ongoing" });
             case "SCHEDULED":
-                return "예정";
+                return i18n.t({ ko: "예정", en: "Scheduled" });
             case "FINISHED":
-                return "종료";
+                return i18n.t({ ko: "종료", en: "Ended" });
             default:
-                return status || "미정";
+                return status || i18n.t({ ko: "미정", en: "TBD" });
         }
     }
 </script>
@@ -124,14 +127,11 @@
                     <p
                         class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] whitespace-nowrap"
                     >
-                        {match.sportName}{match.name &&
-                        match.name.includes("조")
-                            ? ` ${match.name.split(" ")[0]}조`
-                            : ""}
-                        {#if match.name && !match.name.includes("조")}
-                            <span class="text-lg text-zinc-500 dark:text-zinc-400 ml-2"
-                                >{match.name}</span
-                            >
+                        {i18n.decode(match.sportName)}
+                        {#if match.name}
+                            <span class="text-lg text-zinc-500 dark:text-zinc-400 ml-2">
+                                {i18n.decode(match.name)}
+                            </span>
                         {/if}
                     </p>
                     <div
@@ -166,13 +166,19 @@
                     <p
                         class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
                     >
-                        담당자 : {match.managerName || "미정"}
+                        {i18n.t({
+                            ko: "담당자 : ",
+                            en: "Manager: ",
+                        })}{match.managerName ||
+                            i18n.t({ ko: "미정", en: "TBD" })}
                     </p>
                 </div>
             </div>
 
             <!-- Divider Line -->
-            <div class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0"></div>
+            <div
+                class="h-px w-full bg-zinc-200 dark:bg-zinc-800 shrink-0"
+            ></div>
 
             <!-- Content -->
             <div
@@ -187,7 +193,9 @@
                         <p
                             class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
                         >
-                            {match.classA ? `${match.classA}반` : "미정"}
+                            {match.classA
+                                ? `${match.classA}${i18n.t({ ko: "반", en: "" })}`
+                                : i18n.t({ ko: "미정", en: "TBD" })}
                         </p>
                         <div
                             class="bg-zinc-400 content-stretch flex flex-col items-center justify-center px-[0.1875rem] py-px relative rounded-[0.1875rem] shrink-0"
@@ -201,7 +209,9 @@
                         <p
                             class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
                         >
-                            {match.classB ? `${match.classB}반` : "미정"}
+                            {match.classB
+                                ? `${match.classB}${i18n.t({ ko: "반", en: "" })}`
+                                : i18n.t({ ko: "미정", en: "TBD" })}
                         </p>
                     </div>
                     <div
@@ -215,7 +225,8 @@
                         <p
                             class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.75rem] whitespace-nowrap"
                         >
-                            {match.location || "북측 풋살장 A (임시)"}
+                            {i18n.decode(match.location) ||
+                                i18n.t({ ko: "미정", en: "TBD" })}
                         </p>
                     </div>
                 </div>
@@ -226,26 +237,38 @@
                     <p
                         class="relative shrink-0 whitespace-nowrap truncate w-full max-w-[30rem]"
                     >
-                        {match.classA ? `${match.classA}반` : "미정"} 선수 (예정)
+                        {match.classA
+                            ? `${match.classA}${i18n.t({ ko: "반", en: "" })}`
+                            : i18n.t({ ko: "미정", en: "TBD" })}
+                        {i18n.t({
+                            ko: "선수 (예정)",
+                            en: "Players (Expected)",
+                        })}
                         : {match.attendance?.plannedTeamA
                             ?.map((t) => t.name)
                             .concat(
                                 match.attendance?.teamA?.map((t) => t.name) ||
                                     [],
                             )
-                            .join(", ") || "미정"}
+                            .join(", ") || i18n.t({ ko: "미정", en: "TBD" })}
                     </p>
                     <p
                         class="relative shrink-0 whitespace-nowrap truncate w-full max-w-[30rem]"
                     >
-                        {match.classB ? `${match.classB}반` : "미정"} 선수 (예정)
+                        {match.classB
+                            ? `${match.classB}${i18n.t({ ko: "반", en: "" })}`
+                            : i18n.t({ ko: "미정", en: "TBD" })}
+                        {i18n.t({
+                            ko: "선수 (예정)",
+                            en: "Players (Expected)",
+                        })}
                         : {match.attendance?.plannedTeamB
                             ?.map((t) => t.name)
                             .concat(
                                 match.attendance?.teamB?.map((t) => t.name) ||
                                     [],
                             )
-                            .join(", ") || "미정"}
+                            .join(", ") || i18n.t({ ko: "미정", en: "TBD" })}
                     </p>
                 </div>
 
@@ -255,7 +278,11 @@
                     <p
                         class="font-['Pretendard_Variable'] font-normal leading-[normal] relative shrink-0 text-zinc-500 text-[0.625rem] whitespace-nowrap"
                     >
-                        심판 : {match.refereeName || "미정"}
+                        {i18n.t({
+                            ko: "심판 : ",
+                            en: "Referee: ",
+                        })}{match.refereeName ||
+                            i18n.t({ ko: "미정", en: "TBD" })}
                     </p>
                 </div>
             </div>
@@ -266,7 +293,10 @@
         <div
             class="text-center p-8 w-full rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 border-dashed text-zinc-500 dark:text-zinc-400 text-sm"
         >
-            등록된 경기가 없습니다.
+            {i18n.t({
+                ko: "등록된 경기가 없습니다.",
+                en: "No matches registered.",
+            })}
         </div>
     {/if}
 </div>

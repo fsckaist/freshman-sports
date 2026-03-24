@@ -1,36 +1,37 @@
 <script lang="ts">
     import { page } from "$app/stores";
+    import { i18n } from "$lib/i18n.svelte";
 
     const errorMessages: Record<
         number,
-        { title: string; description: string }
+        { title: string; description: {ko: string, en: string} }
     > = {
         404: {
             title: "404",
-            description: "페이지를 찾을 수 없습니다.",
+            description: { ko: "페이지를 찾을 수 없습니다.", en: "Page not found." },
         },
         403: {
             title: "403",
-            description: "이 페이지에 접근할 수 있는 권한이 없습니다.",
+            description: { ko: "이 페이지에 접근할 수 있는 권한이 없습니다.", en: "You do not have permission to access this page." },
         },
         500: {
             title: "500",
-            description: "서버 내부에서 오류가 발생했습니다.",
+            description: { ko: "서버 내부에서 오류가 발생했습니다.", en: "Internal Server Error." },
         },
         502: {
             title: "502",
-            description: "게이트웨이 오류가 발생했습니다.",
+            description: { ko: "게이트웨이 오류가 발생했습니다.", en: "Bad Gateway." },
         },
         503: {
             title: "503",
-            description: "서비스를 일시적으로 사용할 수 없습니다.",
+            description: { ko: "서비스를 일시적으로 사용할 수 없습니다.", en: "Service Unavailable." },
         },
     };
 
     $: status = $page.status;
     $: error = errorMessages[status] || {
         title: status.toString(),
-        description: $page.error?.message || "알 수 없는 오류가 발생했습니다.",
+        description: { ko: $page.error?.message || "알 수 없는 오류가 발생했습니다.", en: $page.error?.message || "An unknown error occurred." },
     };
 </script>
 
@@ -61,7 +62,7 @@
             >
                 <img
                     src="/logo.png"
-                    alt="샛별 로고"
+                    alt={i18n.t({ ko: '샛별 로고', en: 'Saetbyeol Logo' })}
                     class="absolute max-w-none object-contain h-[6rem] w-[6rem] md:h-[10.625rem] md:w-[10.625rem] left-[-0.5rem] top-[-0.5rem] md:left-[-1.5625rem] md:top-[-1.5625rem]"
                 />
             </div>
@@ -77,7 +78,7 @@
                 <p
                     class="font-pretendard font-medium text-xl md:text-[1.25rem] mt-4 opacity-70"
                 >
-                    {error.description}
+                    {i18n.t(error.description)}
                 </p>
             </div>
         </div>
@@ -91,7 +92,7 @@
                     href="/"
                     class="group flex items-center gap-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3.5 rounded-2xl font-pretendard font-bold text-[1.125rem] hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-lg shadow-zinc-200 dark:shadow-none"
                 >
-                    <span>메인 페이지로 돌아가기</span>
+                    <span>{i18n.t({ ko: '메인 페이지로 돌아가기', en: 'Return to Main Page' })}</span>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"
@@ -114,7 +115,7 @@
             <p
                 class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100"
             >
-                제23대 새내기학생회 <span class="text-amber-500">샛별</span>
+                {i18n.t({ ko: '제23대 새내기학생회', en: '23rd Freshman Council' })} <span class="text-amber-500">{i18n.t({ ko: '샛별', en: 'Saetbyeol' })}</span>
             </p>
         </div>
     </div>

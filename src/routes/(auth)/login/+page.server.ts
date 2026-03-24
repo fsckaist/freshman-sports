@@ -23,7 +23,7 @@ export const actions = {
         const studentNumber = data.get('studentNumber')?.toString();
 
         if (!studentNumber || studentNumber.trim().length === 0) {
-            return fail(400, { error: '학번을 입력해주세요.' });
+            return fail(400, { error: JSON.stringify({ ko: '학번을 입력해주세요.', en: 'Please enter your student ID.' }) });
         }
 
         const num = studentNumber.trim();
@@ -32,7 +32,10 @@ export const actions = {
         let dbUser = existingUsers[0];
 
         if (!dbUser) {
-            return fail(400, { error: `${num}는 등록되지 않은 학번이에요.` });
+            return fail(400, { error: JSON.stringify({ 
+                ko: `${num}는 등록되지 않은 학번이에요.`, 
+                en: `${num} is not a registered student ID.` 
+            }) });
         }
 
         const token = signToken({

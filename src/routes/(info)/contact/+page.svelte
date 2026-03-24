@@ -1,3 +1,7 @@
+<script lang="ts">
+    import { i18n } from "$lib/i18n.svelte";
+</script>
+
 <div
     class="content-stretch flex flex-[1_0_0] flex-col gap-[1.5625rem] h-full items-start min-h-px min-w-px relative"
 >
@@ -8,7 +12,7 @@
             <h1
                 class="font-pretendard font-bold leading-tight relative shrink-0 text-[#1f1f22] dark:text-zinc-100 text-[2rem] m-0"
             >
-                문의하기
+                {i18n.t({ ko: '문의하기', en: 'Contact Us' })}
             </h1>
         </div>
     </div>
@@ -24,8 +28,7 @@
             >
                 <div class="flex flex-col gap-[0.9375rem] items-start w-full">
                     <p class="leading-relaxed m-0 break-keep">
-                        체육 대회와 관련하여 문의할 점이 있을 경우 아래 메일로
-                        연락 부탁드립니다.
+                        {i18n.t({ ko: '체육 대회와 관련하여 문의할 점이 있을 경우 아래 메일로 연락 부탁드립니다.', en: 'If you have any questions regarding the sports event, please contact us at the email below.' })}
                     </p>
                     <ul
                         class="flex flex-col gap-2 m-0 p-0 pl-[1.6875rem] list-disc"
@@ -38,8 +41,7 @@
 
                 <div class="flex flex-col gap-[0.9375rem] items-start w-full">
                     <p class="leading-relaxed m-0 break-keep">
-                        그 외 새내기학생회에게 직접적으로 문의하고 싶은 분은
-                        아래 연락처로 연락 부탁드립니다.
+                        {i18n.t({ ko: '그 외 새내기학생회에게 직접적으로 문의하고 싶은 분은 아래 연락처로 연락 부탁드립니다.', en: 'For direct inquiries to the Freshman Council, please use the contact info below.' })}
                     </p>
                     <ul
                         class="flex flex-col gap-2 m-0 p-0 pl-[1.6875rem] list-disc"
@@ -48,7 +50,7 @@
                             staff@kaistfsc.org
                         </li>
                         <li class="leading-relaxed break-keep">
-                            @kaist_freshman 인스타그램 DM
+                            {i18n.t({ ko: '@kaist_freshman 인스타그램 DM', en: '@kaist_freshman Instagram DM' })}
                         </li>
                     </ul>
                 </div>
@@ -57,8 +59,7 @@
                     <p
                         class="font-normal leading-relaxed text-[#c10007] dark:text-red-400 m-0 break-keep"
                     >
-                        긴급한 사항의 경우 프락터를 통하여 새내기학생회
-                        기획국장에게 직접 연락 부탁드립니다.
+                        {i18n.t({ ko: '긴급한 사항의 경우 프락터를 통하여 새내기학생회 기획국장에게 직접 연락 부탁드립니다.', en: 'For urgent matters, please contact the Director of Planning of the Freshman Council directly through your Proctor.' })}
                     </p>
                 </div>
             </div>

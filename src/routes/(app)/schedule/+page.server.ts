@@ -131,8 +131,14 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
             const dlHour = String(deadlineDate.getHours()).padStart(2, '0');
             const dlMin = String(deadlineDate.getMinutes()).padStart(2, '0');
 
-            deadlineLabel = `${dlMonth}월 ${dlDay}일`;
-            deadlineAt = `${deadlineLabel} ${dlHour}:${dlMin}`;
+            deadlineLabel = JSON.stringify({
+                ko: `${dlMonth}월 ${dlDay}일`,
+                en: `${dlMonth}/${dlDay}`
+            });
+            deadlineAt = JSON.stringify({
+                ko: `${dlMonth}월 ${dlDay}일 ${dlHour}:${dlMin}`,
+                en: `${dlMonth}/${dlDay} ${dlHour}:${dlMin}`
+            });
 
             const difMs = deadlineDate.getTime() - now.getTime();
             hoursRemaining = Math.max(0, Math.floor(difMs / (1000 * 60 * 60)));

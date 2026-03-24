@@ -17,6 +17,5 @@ export const load = (async ({ locals }) => {
         user: locals.user,
         eventState,
         registrationDeadline,
-        isImpersonating: locals.isImpersonating ?? false,
     };
 }) satisfies LayoutServerLoad;

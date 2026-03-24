@@ -235,7 +235,7 @@ export const actions: Actions = {
     registerPlayer: async ({ request, locals }) => {
         const userAction = locals.user;
         if (!userAction || (!userAction.isManager && !userAction.isAdmin)) {
-            return fail(403, { message: '권한이 없습니다.' });
+            return fail(403, { message: JSON.stringify({ ko: '권한이 없습니다.', en: 'Permission denied.' }) });
         }
 
         const data = await request.formData();
@@ -265,7 +265,7 @@ export const actions: Actions = {
 
         if (scanType === "Cheering") {
             if (user.classId !== match.classAId && user.classId !== match.classBId) {
-                return fail(400, { message: '해당 경기를 진행하는 반 소속이 아닙니다.' });
+                return fail(400, { message: JSON.stringify({ ko: '해당 경기를 진행하는 반 소속이 아닙니다.', en: 'You are not in a class participating in this match.' }) });
             }
         } else {
             // Player Registration Logic
@@ -273,7 +273,7 @@ export const actions: Actions = {
 
             // 1. Must belong to the specific team they are scanning for
             if (user.classId !== targetClassId) {
-                return fail(400, { message: '해당 팀 소속이 아닙니다.' });
+                return fail(400, { message: JSON.stringify({ ko: '해당 팀 소속이 아닙니다.', en: 'You do not belong to this team.' }) });
             }
 
             // 2. Must be on the sports roster
@@ -287,7 +287,7 @@ export const actions: Actions = {
             });
 
             if (!rosterEntry) {
-                return fail(400, { message: '해당 종목 출전 엔트리(선수 명단)에 등록되어 있지 않습니다.' });
+                return fail(400, { message: JSON.stringify({ ko: '해당 종목 출전 선수 명단에 등록되어 있지 않습니다.', en: 'You are not registered in the entry list for this sport.' }) });
             }
         }
 
@@ -305,14 +305,14 @@ export const actions: Actions = {
             const scanningAsCheering = scanType === "Cheering";
 
             if (alreadyCheering && scanningAsCheering) {
-                return fail(400, { message: '이미 응원 인원으로 등록된 사용자입니다.' });
+                return fail(400, { message: JSON.stringify({ ko: '이미 응원 인원으로 등록된 사용자입니다.', en: 'User is already registered as a cheering member.' }) });
             }
 
             if (!alreadyCheering) {
                 if (scanningAsCheering) {
-                    return fail(400, { message: '이미 선수로 등록된 사용자는 응원 인원으로 변경할 수 없습니다.' });
+                    return fail(400, { message: JSON.stringify({ ko: '이미 선수로 등록된 사용자는 응원 인원으로 변경할 수 없습니다.', en: 'Users already registered as players cannot be changed to cheering members.' }) });
                 } else {
-                    return fail(400, { message: '이미 선수로 등록된 사용자입니다.' });
+                    return fail(400, { message: JSON.stringify({ ko: '이미 선수로 등록된 사용자입니다.', en: 'User is already registered as a player.' }) });
                 }
             }
 
@@ -339,14 +339,16 @@ export const actions: Actions = {
 
         return {
             success: true,
-            message: scanType === "Cheering" ? "응원 인원으로 등록되었습니다." : "선수로 등록되었습니다."
+            message: scanType === "Cheering"
+                ? JSON.stringify({ ko: "응원 인원으로 등록되었습니다.", en: "Registered as a cheering member." })
+                : JSON.stringify({ ko: "선수로 등록되었습니다.", en: "Registered as a player." })
         };
     },
 
     startMatch: async ({ request, locals }) => {
         const userAction = locals.user;
         if (!userAction || (!userAction.isManager && !userAction.isAdmin)) {
-            return fail(403, { message: '권한이 없습니다.' });
+            return fail(403, { message: JSON.stringify({ ko: '권한이 없습니다.', en: 'Permission denied.' }) });
         }
 
         const data = await request.formData();
@@ -364,7 +366,7 @@ export const actions: Actions = {
     finalizeMatch: async ({ request, locals }) => {
         const userAction = locals.user;
         if (!userAction || (!userAction.isManager && !userAction.isAdmin)) {
-            return fail(403, { message: '권한이 없습니다.' });
+            return fail(403, { message: JSON.stringify({ ko: '권한이 없습니다.', en: 'Permission denied.' }) });
         }
 
         const data = await request.formData();
@@ -391,7 +393,7 @@ export const actions: Actions = {
     forfeitMatch: async ({ request, locals }) => {
         const userAction = locals.user;
         if (!userAction || (!userAction.isManager && !userAction.isAdmin)) {
-            return fail(403, { message: '권한이 없습니다.' });
+            return fail(403, { message: JSON.stringify({ ko: '권한이 없습니다.', en: 'Permission denied.' }) });
         }
 
         const data = await request.formData();
@@ -402,7 +404,7 @@ export const actions: Actions = {
         await db.update(matches)
             .set({
                 status: 'FINISHED',
-                matchNotes: JSON.stringify({ note: '기권패 / 몰수패 처리' })
+                matchNotes: JSON.stringify({ note: JSON.stringify({ ko: '기권패 / 몰수패 처리', en: 'Forfeit / Disqualification' }) })
             })
             .where(eq(matches.id, matchId));
 

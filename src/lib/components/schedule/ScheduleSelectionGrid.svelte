@@ -1,6 +1,7 @@
 <script lang="ts">
     import TimeSlotCard from "./TimeSlotCard.svelte";
     import { enhance } from "$app/forms";
+    import { i18n } from "$lib/i18n.svelte";
 
     interface Participant {
         name: string;
@@ -79,7 +80,15 @@
         const d = new Date(dateStr);
         const month = d.getMonth() + 1;
         const day = d.getDate();
-        const days = ["일", "월", "화", "수", "목", "금", "토"];
+        const days = [
+            i18n.t({ ko: "일", en: "Sun" }),
+            i18n.t({ ko: "월", en: "Mon" }),
+            i18n.t({ ko: "화", en: "Tue" }),
+            i18n.t({ ko: "수", en: "Wed" }),
+            i18n.t({ ko: "목", en: "Thu" }),
+            i18n.t({ ko: "금", en: "Fri" }),
+            i18n.t({ ko: "토", en: "Sat" }),
+        ];
         const dayName = days[d.getDay()];
         return `${month}/${day} (${dayName})`;
     }
@@ -110,7 +119,7 @@
             class="flex items-center justify-center text-zinc-400 dark:text-zinc-500 font-pretendard text-[0.875rem] font-semibold text-center"
             style="grid-column-start: 1;"
         >
-            날짜 / 시간
+            {i18n.t({ ko: '날짜 / 시간', en: 'Date / Time' })}
         </div>
         {#each timeHeaders as time}
             <div
@@ -176,7 +185,7 @@
         <p
             class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0"
         >
-            해당 종목의 일정이 아직 등록되지 않았어요.
+            {i18n.t({ ko: '해당 종목의 일정이 아직 등록되지 않았어요.', en: 'No schedule has been registered for this sport yet.' })}
         </p>
     </div>
 {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
     import personSvg from "@gravity-ui/icons/svgs/person.svg?raw";
     import skullSvg from "@gravity-ui/icons/svgs/skull.svg?raw";
+    import { i18n } from "$lib/i18n.svelte";
 
     let {
         isAvailable = true,
@@ -51,7 +52,7 @@
     let namesTooltip = $derived(
         participantNames.length > 0
             ? participantNames.join(", ")
-            : "참여자 없음",
+            : i18n.t({ ko: "참여자 없음", en: "No participants" }),
     );
 
     function cx(classes: (string | boolean | undefined | null)[]) {
@@ -101,7 +102,7 @@
                         : 'text-zinc-400 dark:text-zinc-500',
                 ])}"
             >
-                {isEmpty ? "비활성화" : "활성화"}
+                {isEmpty ? i18n.t({ ko: "비활성화", en: "Disabled" }) : i18n.t({ ko: "활성화", en: "Active" })}
             </span>
             <span
                 class="font-pretendard font-medium text-[0.625rem] text-zinc-400 dark:text-zinc-500"
@@ -227,7 +228,7 @@
                                 : 'text-zinc-400 dark:text-zinc-500',
                         ])}"
                     >
-                        {isParticipating ? "참여" : "미참여"}
+                        {isParticipating ? i18n.t({ ko: "참여", en: "In" }) : i18n.t({ ko: "미참여", en: "Out" })}
                     </p>
                 </div>
             {/if}

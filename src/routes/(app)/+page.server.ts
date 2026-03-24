@@ -5,6 +5,16 @@ import { eq, or, and, asc, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad } from './$types';
 
+function serverDecode(jsonStr: string | null, lang: 'ko' | 'en') {
+    if (!jsonStr) return "";
+    try {
+        const obj = JSON.parse(jsonStr);
+        return obj[lang] || obj['ko'] || "";
+    } catch {
+        return jsonStr;
+    }
+}
+
 export const load: PageServerLoad = async ({ locals }) => {
     // 1. Authentication Check (handled by hooks.server.ts via JWT)
     const user = locals.user;
@@ -191,7 +201,10 @@ export const load: PageServerLoad = async ({ locals }) => {
             return {
                 id: match.id,
                 statusOriginal: match.status,
-                title: `${match.sportName} ${match.name || ''}`.trim(),
+                title: JSON.stringify({
+                    ko: `${serverDecode(match.sportName, 'ko')} ${serverDecode(match.name, 'ko')}`.trim(),
+                    en: `${serverDecode(match.sportName, 'en')} ${serverDecode(match.name, 'en')}`.trim()
+                }),
                 time: formattedTime,
                 status: statusKo,
                 teamA: `${match.teamA}반`,
@@ -232,7 +245,7 @@ export const load: PageServerLoad = async ({ locals }) => {
                 username: userProfile.username,
                 studentNumber: userProfile.studentNumber,
                 phoneNumber: userProfile.phoneNumber,
-                sports: userSportsString
+                sports: userSports.map(s => s.name)
             },
             classInfo: {
                 classNumber,

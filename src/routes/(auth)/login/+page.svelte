@@ -2,7 +2,9 @@
     import { page } from "$app/stores";
     import rawSunIcon from "@gravity-ui/icons/svgs/sun.svg?raw";
     import rawMoonIcon from "@gravity-ui/icons/svgs/moon.svg?raw";
+    import rawGlobeIcon from "@gravity-ui/icons/svgs/globe.svg?raw";
     import { themeManager } from "$lib/theme.svelte";
+    import { i18n } from "$lib/i18n.svelte";
 
     const resizeSvg = (svg: string) =>
         svg.replace('width="16" height="16"', 'width="24" height="24"');
@@ -20,12 +22,21 @@
 <div
     class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
-    <!-- Theme Toggle -->
-    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-50">
+    <!-- Toggles (Top Right) -->
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex items-center gap-2">
+        <button
+            onclick={() => i18n.toggle()}
+            class="flex items-center justify-center size-12 rounded-xl bg-white/50 hover:bg-zinc-100 dark:bg-zinc-900/50 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-500 backdrop-blur-sm transition-colors cursor-pointer"
+            title={i18n.t({ ko: "언어 변경", en: "Change Language" })}
+        >
+            <div class="size-6 text-current">
+                {@html resizeSvg(rawGlobeIcon)}
+            </div>
+        </button>
         <button
             onclick={() => themeManager.toggle()}
             class="flex items-center justify-center size-12 rounded-xl bg-white/50 hover:bg-zinc-100 dark:bg-zinc-900/50 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-500 backdrop-blur-sm transition-colors cursor-pointer"
-            title="테마 변경"
+            title={i18n.t({ ko: "테마 변경", en: "Toggle Theme" })}
         >
             <div class="size-6 text-current">
                 {@html ThemeIcon}
@@ -57,7 +68,7 @@
             >
                 <img
                     src="/logo.png"
-                    alt="샛별 로고"
+                    alt={i18n.t({ ko: '샛별 로고', en: 'Saetbyeol Logo' })}
                     class="absolute max-w-none object-contain h-[6rem] w-[6rem] md:h-[10.625rem] md:w-[10.625rem] left-[-0.5rem] top-[-0.5rem] md:left-[-1.5625rem] md:top-[-1.5625rem]"
                 />
             </div>
@@ -68,12 +79,12 @@
                 <p
                     class="font-pretendard font-semibold relative shrink-0 text-lg md:text-[1.5rem]"
                 >
-                    2026 봄학기
+                    {i18n.t({ ko: '2026 봄학기', en: 'Spring 2026' })}
                 </p>
                 <h1
                     class="font-pretendard font-bold relative shrink-0 text-[2.5rem] md:text-[4rem] tracking-tight leading-[1.1]"
                 >
-                    새내기 체육 대회
+                    {i18n.t({ ko: '새내기 체육 대회', en: 'Freshman Sports' })}
                 </h1>
             </div>
         </div>
@@ -104,14 +115,14 @@
                                 d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
                             />
                         </svg>
-                        SPARCS SSO 로그인
+                        {i18n.t({ ko: 'SPARCS SSO 로그인', en: 'SPARCS SSO Login' })}
                     </a>
                 {:else}
                     <form method="POST" action="?/login" class="flex flex-col gap-3 w-full max-w-[20rem]">
                         <input
                             type="text"
                             name="studentNumber"
-                            placeholder="학번 입력 (예: 20241234)"
+                            placeholder={i18n.t({ ko: '학번 입력 (예: 20241234)', en: 'Student Number (e.g. 20241234)' })}
                             class="flex-1 px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all font-pretendard h-[3.125rem]"
                             required
                         />
@@ -119,7 +130,7 @@
                             type="submit"
                             class="flex items-center justify-center gap-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-bold text-[1.125rem] rounded-[6.25rem] px-8 h-[3.125rem] transition-colors cursor-pointer shadow-md hover:shadow-lg w-full"
                         >
-                            학번으로 로그인
+                            {i18n.t({ ko: '학번으로 로그인', en: 'Login by Student ID' })}
                         </button>
                     </form>
                 {/if}
@@ -128,7 +139,7 @@
                     <p
                         class="text-rose-500 font-pretendard text-[0.875rem] font-medium m-0"
                     >
-                        {errorMessage}
+                        {i18n.decode(errorMessage)}
                     </p>
                 {/if}
             </div>
@@ -136,7 +147,7 @@
             <p
                 class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100"
             >
-                제23대 새내기학생회 <span class="text-amber-500">샛별</span>
+                {i18n.t({ ko: '제23대 새내기학생회', en: '23rd Freshman Council' })} <span class="text-amber-500">{i18n.t({ ko: '샛별', en: 'Saetbyeol' })}</span>
             </p>
         </div>
     </div>

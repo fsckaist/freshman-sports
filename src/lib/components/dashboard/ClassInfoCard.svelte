@@ -1,10 +1,11 @@
 <script lang="ts">
     import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
     import { slide } from "svelte/transition";
+    import { i18n } from "$lib/i18n.svelte";
 
     let {
         classNumber = "99",
-        proctors = "없음",
+        proctors = i18n.t({ ko: "없음", en: "None" }),
         rosters = [],
     } = $props<{
         classNumber?: string;
@@ -28,7 +29,7 @@
         <h2
             class="font-pretendard font-bold text-zinc-600 dark:text-zinc-400 text-[1.5rem] leading-[normal] shrink-0 m-0"
         >
-            내 새터반 정보
+            {i18n.t({ ko: "내 새터반 정보", en: "Class Info" })}
         </h2>
         <div
             class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isCollapsed ? '' : 'rotate-180'}"
@@ -53,15 +54,15 @@
                 <div
                     class="bg-neutral-50 dark:bg-zinc-800/50 border-r border-zinc-200 dark:border-zinc-800 flex flex-col gap-[0.9375rem] items-end justify-center overflow-clip pl-8 md:pl-[3.125rem] pr-[1.25rem] py-[1.25rem] shrink-0 text-zinc-600 dark:text-zinc-400"
                 >
-                    <p class="shrink-0 m-0">새터반</p>
-                    <p class="shrink-0 m-0">프락터</p>
+                    <p class="shrink-0 m-0">{i18n.t({ ko: "새터반", en: "Class" })}</p>
+                    <p class="shrink-0 m-0">{i18n.t({ ko: "프락터", en: "Proctor" })}</p>
                 </div>
 
                 <!-- Right Info -->
                 <div
                     class="flex flex-[1_0_0] flex-col gap-[0.9375rem] items-start justify-center min-w-px overflow-clip p-[1.25rem] text-zinc-800 dark:text-zinc-200 font-medium"
                 >
-                    <p class="shrink-0 m-0">{classNumber}반</p>
+                    <p class="shrink-0 m-0">{classNumber}{i18n.t({ ko: '반', en: '' })}</p>
                     <p class="shrink-0 m-0">{proctors}</p>
                 </div>
             </div>
@@ -72,9 +73,9 @@
             >
                 <div class="flex items-center justify-center px-[0.3125rem] shrink-0">
                     <h3
-                        class="font-pretendard font-normal leading-[normal] shrink-0 text-zinc-600 dark:text-zinc-400 text-base md:text-[1.125rem] m-0"
+                        class="font-pretendard font-normal leading-[normal] shrink-0 text-zinc-600 dark:text-zinc-400 text-base md:text-[1.125rem] m-0 text-center"
                     >
-                        출전 선수
+                        {i18n.t({ ko: "출전 선수", en: "Players" })}
                     </h3>
                 </div>
 
@@ -94,12 +95,12 @@
                                 <h4
                                     class="font-pretendard font-medium leading-[normal] shrink-0 text-zinc-800 dark:text-zinc-100 text-base md:text-[1.125rem] m-0 text-center"
                                 >
-                                    {roster.sport}
+                                    {i18n.decode(roster.sport)}
                                 </h4>
                                 <div
                                     class="w-full h-[1px] shrink-0 relative bg-zinc-100 dark:bg-zinc-700 rounded-full"
                                 ></div>
-                                {#if roster.players && roster.players !== "출전 선수가 없어요."}
+                                {#if roster.players && roster.players !== i18n.t({ ko: "출전 선수가 없어요.", en: "No players registered." })}
                                     <p
                                         class="font-pretendard font-normal leading-[1.5rem] shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] text-center whitespace-pre-wrap m-0 w-full"
                                     >
@@ -109,7 +110,7 @@
                                     <p
                                         class="font-pretendard font-normal leading-[1.5rem] shrink-0 text-zinc-400 dark:text-zinc-500 text-[0.875rem] text-center m-0 w-full"
                                     >
-                                        출전 선수가 없어요.
+                                        {i18n.t({ ko: "출전 선수가 없어요.", en: "No players registered." })}
                                     </p>
                                 {/if}
                             </div>
@@ -118,7 +119,7 @@
                         <div
                             class="sm:col-span-2 flex items-center justify-center w-full py-8 text-zinc-500 font-pretendard font-normal"
                         >
-                            등록된 선수가 없어요.
+                            {i18n.t({ ko: "등록된 선수가 없어요.", en: "No players registered." })}
                         </div>
                     {/if}
                 </div>

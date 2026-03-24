@@ -17,7 +17,8 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
     // Validate CSRF state
     if (!code || !state || !storedState || state !== storedState) {
-        throw redirect(303, '/login?error=' + encodeURIComponent('잘못된 인증 요청입니다. 다시 로그인해 주세요.'));
+        const msg = JSON.stringify({ ko: '잘못된 인증 요청입니다. 다시 로그인해 주세요.', en: 'Invalid authentication request. Please log in again.' });
+        throw redirect(303, '/login?error=' + encodeURIComponent(msg));
     }
 
     // Exchange code for user info
@@ -26,7 +27,8 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
         rawUserInfo = await ssoClient.getUserInfo(code);
     } catch (e) {
         console.error('SSO getUserInfo error:', e);
-        throw redirect(303, '/login?error=' + encodeURIComponent('SSO 서버와 통신 중 오류가 발생했습니다.'));
+        const msg = JSON.stringify({ ko: 'SSO 서버와 통신 중 오류가 발생했습니다.', en: 'An error occurred while communicating with the SSO server.' });
+        throw redirect(303, '/login?error=' + encodeURIComponent(msg));
     }
 
     // Parse KAIST-specific user data
@@ -45,7 +47,8 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     };
 
     if (!userData.isEligible) {
-        throw handleAuthError('KAIST 학적 정보를 확인할 수 없습니다. KAIST IAM으로 다시 로그인해주세요.');
+        const msg = JSON.stringify({ ko: 'KAIST 학적 정보를 확인할 수 없습니다. KAIST IAM으로 다시 로그인해주세요.', en: 'Could not verify KAIST student information. Please log in again with KAIST IAM.' });
+        throw handleAuthError(msg);
     }
 
     // Look up user in our database by student number
@@ -55,14 +58,19 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
         .limit(1);
 
     if (existingUsers.length === 0) {
-        throw handleAuthError(`해당 학번(${userData.studentNumber})에 해당하는 학우분께서는 새내기 체육대회에 참가할 수 없습니다. 문제가 있다고 판단되시면 새내기학생회에 문의해주세요.`);
+        const msg = JSON.stringify({ 
+            ko: `해당 학번(${userData.studentNumber})에 해당하는 학우분께서는 새내기 체육대회에 참가할 수 없습니다. 문제가 있다고 판단되시면 새내기학생회에 문의해주세요.`, 
+            en: `The student with ID (${userData.studentNumber}) is not eligible to participate in the Freshman Sports event. Please contact the Freshman Student Council if you believe this is an error.` 
+        });
+        throw handleAuthError(msg);
     }
 
     const dbUser = existingUsers[0];
 
     // Link SSO account on first login, reject if already linked to a different account
     if (dbUser.authId && dbUser.authId !== userData.uid) {
-        throw handleAuthError('이 학번은 이미 다른 SSO 계정으로 연결되어 있습니다. 기존에 사용한 계정으로 로그인해주세요.');
+        const msg = JSON.stringify({ ko: '이 학번은 이미 다른 SSO 계정으로 연결되어 있습니다. 기존에 사용한 계정으로 로그인해주세요.', en: 'This student ID is already linked to a different SSO account. Please log in with the previously used account.' });
+        throw handleAuthError(msg);
     }
 
     if (!dbUser.authId) {

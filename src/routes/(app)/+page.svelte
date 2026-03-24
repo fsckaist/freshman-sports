@@ -5,6 +5,7 @@
     import noticeIconSvg from "@gravity-ui/icons/svgs/circle-exclamation.svg?raw";
     import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
     import { slide } from "svelte/transition";
+    import { i18n } from "$lib/i18n.svelte";
 
     let { data } = $props();
     let isScheduleCollapsed = $state(false);
@@ -31,11 +32,10 @@
                         <span class="font-bold">
                             {Array.from(
                                 new Set(
-                                    data.pendingMatches.map((m) => m.sportName),
+                                    data.pendingMatches.map((m) => i18n.decode(m.sportName)),
                                 ),
                             ).join(", ")}
-                        </span> 일정을 정할 수 있어요. 일정 정하기에서 가능한 시간을
-                        선택해주세요.
+                        </span> {i18n.t({ ko: '일정을 정할 수 있어요. 일정 정하기에서 가능한 시간을 선택해주세요.', en: 'matches are ready. Please select your available times in the Schedule tab.' })}
                     </h3>
                 </div>
             </div>
@@ -51,15 +51,15 @@
             class="flex lg:flex-1 flex-col gap-6 md:gap-[1.875rem] lg:h-full items-start relative lg:hide-scrollbar w-full"
         >
             <ProfileCard
-                name={data?.dashboardUser?.username || "DummyName"}
+                name={data?.dashboardUser?.username || i18n.t({ ko: "알 수 없음", en: "Unknown" })}
                 studentNumber={data?.dashboardUser?.studentNumber || "20260000"}
                 userId={data?.dashboardUser?.userId}
                 phone={data?.dashboardUser?.phoneNumber || "010-0000-0000"}
-                sports={data?.dashboardUser?.sports || "참여 종목 없음"}
+                sports={data?.dashboardUser?.sports || i18n.t({ ko: "참여 종목 없음", en: "No participations" })}
             />
             <ClassInfoCard
                 classNumber={data?.classInfo?.classNumber?.toString() || ""}
-                proctors={data?.classInfo?.proctors || "없음"}
+                proctors={data?.classInfo?.proctors || i18n.t({ ko: "없음", en: "None" })}
                 rosters={data?.classInfo?.rosters || []}
             />
         </div>
@@ -78,7 +78,7 @@
                 <h2
                     class="font-pretendard font-bold leading-[normal] shrink-0 text-zinc-600 dark:text-zinc-400 text-[1.5rem] m-0"
                 >
-                    경기 일정
+                    {i18n.t({ ko: '경기 일정', en: 'Match Schedule' })}
                 </h2>
                 <div
                     class="flex items-center justify-center size-8 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-all {isScheduleCollapsed ? '' : 'rotate-180'}"
@@ -106,7 +106,7 @@
                         {/each}
                     {:else}
                         <div class="flex items-center justify-center w-full py-12 text-zinc-500 font-pretendard">
-                            확정된 경기 일정이 없습니다.
+                            {i18n.t({ ko: '확정된 경기 일정이 없습니다.', en: 'No scheduled matches.' })}
                         </div>
                     {/if}
                 </div>

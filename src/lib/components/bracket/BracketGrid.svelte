@@ -1,6 +1,7 @@
 <script lang="ts">
     import TeamNode from "./TeamNode.svelte";
     import MatchConnector from "./MatchConnector.svelte";
+    import { i18n } from "$lib/i18n.svelte";
 
     // Reusable Component Architecture:
     // This bracket dynamically fetches and renders matches based on `activeTab`
@@ -51,7 +52,18 @@
     <div
         class="border-zinc-300 dark:border-zinc-800 border-b border-solid flex items-stretch overflow-clip sticky top-0 w-full bg-zinc-100 dark:bg-zinc-950 z-10 m-0 p-0"
     >
-        {#each [{ id: "futsal", label: "풋살" }, { id: "basketball", label: "농구" }, { id: "badminton-m", label: "남자 배드민턴" }, { id: "badminton-w", label: "여자 배드민턴" }] as tab, index}
+        {#each [
+            { id: "futsal", label: i18n.t({ ko: "풋살", en: "Futsal" }) },
+            { id: "basketball", label: i18n.t({ ko: "농구", en: "Basketball" }) },
+            {
+                id: "badminton-m",
+                label: i18n.t({ ko: "남자 배드민턴", en: "Men's Badminton" }),
+            },
+            {
+                id: "badminton-w",
+                label: i18n.t({ ko: "여자 배드민턴", en: "Women's Badminton" }),
+            },
+        ] as tab, index}
             <button
                 on:click={() => (activeTab = tab.id)}
                 class="flex flex-[1_0_0] flex-col min-h-[3.125rem] items-center justify-center px-4 py-[0.5rem] relative outline-none cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors m-0
@@ -82,7 +94,7 @@
                 class="w-full h-full flex flex-col items-center justify-center p-[5rem]"
             >
                 <p class="text-zinc-500 dark:text-zinc-400 font-pretendard">
-                    선택된 종목의 대진표 데이터가 없어요.
+                    {i18n.t({ ko: '선택된 종목의 대진표 데이터가 없어요.', en: 'No bracket data for the selected sport.' })}
                 </p>
             </div>
         {:else}

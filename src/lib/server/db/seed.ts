@@ -58,7 +58,7 @@ async function main() {
         console.log("⚽ Inserting Sports with Periods...");
         const insertedSports = await db.insert(schema.sports).values([
             {
-                name: "풋살",
+                name: JSON.stringify({ ko: "풋살", en: "Futsal" }),
                 slug: "futsal",
                 minPlayers: 5,
                 maxPlayers: 10,
@@ -73,13 +73,13 @@ async function main() {
                 round1SelectionEnd: march20,
                 round1Deadline: march20,
                 recordStructure: [
-                    { key: "half1", label: "전반", stats: [{ key: "score", label: "득점" }, { key: "foul", label: "파울" }] },
-                    { key: "half2", label: "후반", stats: [{ key: "score", label: "득점" }, { key: "foul", label: "파울" }] },
-                    { key: "penalty", label: "승부차기", stats: [{ key: "score", label: "득점" }] }
+                    { key: "half1", label: JSON.stringify({ ko: "전반", en: "1st Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
+                    { key: "half2", label: JSON.stringify({ ko: "후반", en: "2nd Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
+                    { key: "penalty", label: JSON.stringify({ ko: "승부차기", en: "Penalty Shootout" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] }
                 ]
             },
             {
-                name: "농구",
+                name: JSON.stringify({ ko: "농구", en: "Basketball" }),
                 slug: "basketball",
                 minPlayers: 3,
                 maxPlayers: 8,
@@ -94,12 +94,12 @@ async function main() {
                 round1SelectionEnd: march20,
                 round1Deadline: march20,
                 recordStructure: [
-                    { key: "half1", label: "전반", stats: [{ key: "score", label: "득점" }, { key: "foul", label: "파울" }] },
-                    { key: "half2", label: "후반", stats: [{ key: "score", label: "득점" }, { key: "foul", label: "파울" }] }
+                    { key: "half1", label: JSON.stringify({ ko: "전반", en: "1st Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
+                    { key: "half2", label: JSON.stringify({ ko: "후반", en: "2nd Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] }
                 ]
             },
             {
-                name: "남자 배드민턴 복식",
+                name: JSON.stringify({ ko: "남자 배드민턴 복식", en: "Men's Badminton Doubles" }),
                 slug: "badminton-m",
                 minPlayers: 2,
                 maxPlayers: 4,
@@ -115,13 +115,13 @@ async function main() {
                 round1Deadline: march20,
                 requiredGender: 'MALE_ONLY',
                 recordStructure: [
-                    { key: "set1", label: "1세트", stats: [{ key: "score", label: "득점" }] },
-                    { key: "set2", label: "2세트", stats: [{ key: "score", label: "득점" }] },
-                    { key: "set3", label: "3세트", stats: [{ key: "score", label: "득점" }] }
+                    { key: "set1", label: JSON.stringify({ ko: "1세트", en: "Set 1" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] },
+                    { key: "set2", label: JSON.stringify({ ko: "2세트", en: "Set 2" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] },
+                    { key: "set3", label: JSON.stringify({ ko: "3세트", en: "Set 3" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] }
                 ]
             },
             {
-                name: "여자 배드민턴 복식",
+                name: JSON.stringify({ ko: "여자 배드민턴 복식", en: "Women's Badminton Doubles" }),
                 slug: "badminton-w",
                 minPlayers: 2,
                 maxPlayers: 4,
@@ -137,9 +137,9 @@ async function main() {
                 round1Deadline: march20,
                 requiredGender: 'FEMALE_ONLY',
                 recordStructure: [
-                    { key: "set1", label: "1세트", stats: [{ key: "score", label: "득점" }] },
-                    { key: "set2", label: "2세트", stats: [{ key: "score", label: "득점" }] },
-                    { key: "set3", label: "3세트", stats: [{ key: "score", label: "득점" }] }
+                    { key: "set1", label: JSON.stringify({ ko: "1세트", en: "Set 1" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] },
+                    { key: "set2", label: JSON.stringify({ ko: "2세트", en: "Set 2" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] },
+                    { key: "set3", label: JSON.stringify({ ko: "3세트", en: "Set 3" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] }
                 ]
             }
         ]).returning();
@@ -149,15 +149,15 @@ async function main() {
         const locationData: typeof schema.sport_locations.$inferInsert[] = [];
         for (const sport of insertedSports) {
             if (sport.slug === 'futsal') {
-                locationData.push({ sportId: sport.id, name: '풋살장 A' });
-                locationData.push({ sportId: sport.id, name: '풋살장 B' });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '풋살장 A', en: 'Futsal Court A' }) });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '풋살장 B', en: 'Futsal Court B' }) });
             } else if (sport.slug === 'basketball') {
-                locationData.push({ sportId: sport.id, name: '실내체육관 농구장' });
-                locationData.push({ sportId: sport.id, name: '야외 농구장' });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '실내체육관 농구장', en: 'Indoor Gym Court' }) });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '야외 농구장', en: 'Outdoor Court' }) });
             } else {
-                locationData.push({ sportId: sport.id, name: '체육관 코트 1' });
-                locationData.push({ sportId: sport.id, name: '체육관 코트 2' });
-                locationData.push({ sportId: sport.id, name: '체육관 코트 3' });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '체육관 코트 1', en: 'Gym Court 1' }) });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '체육관 코트 2', en: 'Gym Court 2' }) });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '체육관 코트 3', en: 'Gym Court 3' }) });
             }
         }
         await db.insert(schema.sport_locations).values(locationData);
@@ -296,7 +296,7 @@ async function seedBrackets(
                 classAId: aIdx < 31 ? insertedClasses[aIdx].id : null,
                 classBId: bIdx < 31 ? insertedClasses[bIdx].id : null,
                 status: 'PENDING_SCHEDULE',
-                name: `R32-M${i + 1}`,
+                name: JSON.stringify({ ko: `32강 - 경기 ${i + 1}`, en: `R32-M${i + 1}` }),
                 scoreA: 0,
                 scoreB: 0
             });

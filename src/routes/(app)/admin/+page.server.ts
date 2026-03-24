@@ -64,11 +64,22 @@ async function syncBracketMatch(sportId: string, targetRound: number, targetPosi
                 sportId,
                 status: 'FINISHED',
                 isVerified: true,
-                name: `${prefix}-M${pIdx + 1}`,
+                name: JSON.stringify({
+                    ko: targetRound === 5 && pIdx === 1 ? '3위 결정전' :
+                        targetRound === 5 ? '결승전' :
+                        targetRound === 4 ? '준결승' :
+                        targetRound === 3 ? '8강' :
+                        targetRound === 2 ? '16강' :
+                        '32강',
+                    en: `${prefix}-M${pIdx + 1}`
+                }),
                 classAId: classA,
                 classBId: classB,
                 winnerClassId: winnerId,
-                matchNotes: bothEliminated ? '양측 우승자 없음으로 인한 동시 탈락' : '상대측 우승자 없음으로 인한 부전승/자동승리'
+                matchNotes: JSON.stringify({
+                    ko: bothEliminated ? '양측 우승자 없음으로 인한 동시 탈락' : '상대측 우승자 없음으로 인한 부전승/자동승리',
+                    en: bothEliminated ? 'Simultaneous elimination due to no winner on either side' : 'Bye win due to no opponent'
+                })
             }).returning({ id: matches.id });
             mId = newMatch.id;
 
@@ -120,7 +131,15 @@ async function syncBracketMatch(sportId: string, targetRound: number, targetPosi
             const [newMatch] = await db.insert(matches).values({
                 sportId,
                 status: 'PENDING_SCHEDULE',
-                name: `${prefix}-M${pIdx + 1}`,
+                name: JSON.stringify({
+                    ko: targetRound === 5 && pIdx === 1 ? '3위 결정전' :
+                        targetRound === 5 ? '결승전' :
+                        targetRound === 4 ? '준결승' :
+                        targetRound === 3 ? '8강' :
+                        targetRound === 2 ? '16강' :
+                        '32강',
+                    en: `${prefix}-M${pIdx + 1}`
+                }),
                 classAId: classA,
                 classBId: classB,
             }).returning({ id: matches.id });
@@ -443,13 +462,13 @@ export const actions: Actions = {
         try {
             const user = locals.user;
             if (!user || !user.isAdmin) {
-                return fail(403, { message: "권한이 없습니다." });
+                return fail(403, { message: JSON.stringify({ ko: "권한이 없습니다.", en: "Permission denied." }) });
             }
 
             const formData = await request.formData();
             const slotId = formData.get('slotId')?.toString();
 
-            if (!slotId) return fail(400, { message: "슬롯 ID가 누락되었습니다." });
+            if (!slotId) return fail(400, { message: JSON.stringify({ ko: "슬롯 ID가 누락되었습니다.", en: "Slot ID is missing." }) });
 
             if (slotId.startsWith('NEW_')) {
                 const parts = slotId.split('_');
@@ -466,7 +485,7 @@ export const actions: Actions = {
             }
 
             const target = await db.select().from(schedules).where(eq(schedules.id, slotId)).limit(1);
-            if (target.length === 0) return fail(404, { message: "슬롯을 찾을 수 없습니다." });
+            if (target.length === 0) return fail(404, { message: JSON.stringify({ ko: "슬롯을 찾을 수 없습니다.", en: "Slot not found." }) });
 
             const currentStatus = target[0].isAvailable ?? true;
 
@@ -484,7 +503,7 @@ export const actions: Actions = {
                     ));
 
                 if (scheduledCount.length >= limit) {
-                    return fail(400, { message: `동시 경기 가능 수(${limit})를 충족하여 활성화할 수 없습니다.` });
+                    return fail(400, { message: JSON.stringify({ ko: `동시 경기 가능 수(${limit})를 충족하여 활성화할 수 없습니다.`, en: `Cannot activate because the maximum parallel matches (${limit}) is reached.` }) });
                 }
             }
 
@@ -493,13 +512,13 @@ export const actions: Actions = {
             return { success: true };
         } catch (e) {
             console.error(e);
-            return fail(500, { message: "서버 처리 오류" });
+            return fail(500, { message: JSON.stringify({ ko: "서버 처리 오류", en: "Server error" }) });
         }
     },
     updateSchedulePeriod: async ({ request, locals }) => {
         try {
             const user = locals.user;
-            if (!user || !user.isAdmin) return fail(403, { message: "권한이 없습니다." });
+            if (!user || !user.isAdmin) return fail(403, { message: JSON.stringify({ ko: "권한이 없습니다.", en: "Permission denied." }) });
 
             const formData = await request.formData();
             const sportId = formData.get('sportId')?.toString();
@@ -529,7 +548,7 @@ export const actions: Actions = {
 
             const formData = await request.formData();
             const sportId = formData.get('sportId')?.toString();
-            if (!sportId) return fail(400, { message: '종목 ID 누락' });
+            if (!sportId) return fail(400, { message: JSON.stringify({ ko: '종목 ID 누락', en: 'Sport ID missing' }) });
 
             const allPending = await db.select().from(matches).where(
                 and(eq(matches.sportId, sportId), eq(matches.status, 'PENDING_SCHEDULE'))
@@ -622,7 +641,7 @@ export const actions: Actions = {
     finalizeMatch: async ({ request, locals }) => {
         try {
             const user = locals.user;
-            if (!user || !user.isAdmin) return fail(403, { message: "권한이 없습니다." });
+            if (!user || !user.isAdmin) return fail(403, { message: JSON.stringify({ ko: "권한이 없습니다.", en: "Permission denied." }) });
 
             const formData = await request.formData();
             const matchId = formData.get('matchId')?.toString();
@@ -631,11 +650,11 @@ export const actions: Actions = {
             const managerId = formData.get('managerId')?.toString();
             const location = formData.get('location')?.toString();
 
-            if (!matchId || !scheduleId) return fail(400, { message: "매치 ID 또는 스케줄 ID가 없습니다." });
+            if (!matchId || !scheduleId) return fail(400, { message: JSON.stringify({ ko: "매치 ID 또는 스케줄 ID가 없습니다.", en: "Match ID or Schedule ID is missing." }) });
 
             // 1. Get sport info for concurrency limit
             const matchRow = await db.select({ sportId: matches.sportId }).from(matches).where(eq(matches.id, matchId)).limit(1);
-            if (matchRow.length === 0) return fail(404, { message: "매치를 찾을 수 없습니다." });
+            if (matchRow.length === 0) return fail(404, { message: JSON.stringify({ ko: "매치를 찾을 수 없습니다.", en: "Match not found." }) });
             const sportId = matchRow[0].sportId;
 
             const sportRow = await db.select({ maxParallelMatches: sports.maxParallelMatches }).from(sports).where(eq(sports.id, sportId)).limit(1);
@@ -679,13 +698,13 @@ export const actions: Actions = {
     finalizeMatchResult: async ({ request, locals }) => {
         try {
             const user = locals.user;
-            if (!user || !user.isAdmin) return fail(403, { message: "권한이 없습니다." });
+            if (!user || !user.isAdmin) return fail(403, { message: JSON.stringify({ ko: "권한이 없습니다.", en: "Permission denied." }) });
 
             const formData = await request.formData();
             const matchId = formData.get('matchId')?.toString();
             const rawWinnerClassId = formData.get('winnerClassId')?.toString();
 
-            if (!matchId || !rawWinnerClassId) return fail(400, { message: "매치 ID 또는 승자 데이터가 누락되었습니다." });
+            if (!matchId || !rawWinnerClassId) return fail(400, { message: JSON.stringify({ ko: "매치 ID 또는 승자 데이터가 누락되었습니다.", en: "Match ID or winner data is missing." }) });
 
             const winnerClassId = rawWinnerClassId === 'none' ? null : rawWinnerClassId;
 
@@ -847,7 +866,7 @@ export const actions: Actions = {
             const maxParallelMatches = formData.get('maxParallelMatches')?.toString();
             const requiredGender = formData.get('requiredGender')?.toString();
 
-            if (!sportId) return fail(400, { message: '종목 ID가 누락되었습니다.' });
+            if (!sportId) return fail(400, { message: JSON.stringify({ ko: '종목 ID가 누락되었습니다.', en: 'Sport ID is missing.' }) });
             const sId = sportId as string;
 
             const updatePayload: Record<string, any> = {};
@@ -920,7 +939,7 @@ export const actions: Actions = {
             const formData = await request.formData();
             const newState = formData.get('eventState')?.toString() as 'REGISTRATION' | 'ONGOING' | 'COMPLETED' | undefined;
             const validStates = ['REGISTRATION', 'ONGOING', 'COMPLETED'];
-            if (!newState || !validStates.includes(newState)) return fail(400, { message: '유효하지 않은 상태입니다.' });
+            if (!newState || !validStates.includes(newState)) return fail(400, { message: JSON.stringify({ ko: '유효하지 않은 상태입니다.', en: 'Invalid state.' }) });
 
             const existing = await db.select().from(system_config).limit(1);
             if (existing.length > 0) {
@@ -943,10 +962,10 @@ export const actions: Actions = {
             const formData = await request.formData();
             const deadline = formData.get('registrationDeadline')?.toString();
 
-            if (!deadline) return fail(400, { message: '마감 기한을 입력해주세요.' });
+            if (!deadline) return fail(400, { message: JSON.stringify({ ko: '마감 기한을 입력해주세요.', en: 'Please enter the deadline.' }) });
 
             const deadlineDate = new Date(deadline);
-            if (isNaN(deadlineDate.getTime())) return fail(400, { message: '유효하지 않은 날짜 형식입니다.' });
+            if (isNaN(deadlineDate.getTime())) return fail(400, { message: JSON.stringify({ ko: '유효하지 않은 날짜 형식입니다.', en: 'Invalid date format.' }) });
 
             const existing = await db.select().from(system_config).limit(1);
             if (existing.length > 0) {
@@ -970,11 +989,11 @@ export const actions: Actions = {
             const sportId = formData.get('sportId')?.toString();
             const name = formData.get('name')?.toString();
 
-            if (!sportId || !name) return fail(400, { message: '종목 ID와 장소 이름을 모두 입력해주세요.' });
+            if (!sportId || !name) return fail(400, { message: JSON.stringify({ ko: '종목 ID와 장소 이름을 모두 입력해주세요.', en: 'Please enter both Sport ID and location name.' }) });
 
             await db.insert(sport_locations).values({
                 sportId,
-                name
+                name: JSON.stringify({ ko: name, en: name })
             });
 
             return { success: true };
@@ -991,7 +1010,7 @@ export const actions: Actions = {
             const formData = await request.formData();
             const locationId = formData.get('locationId')?.toString();
 
-            if (!locationId) return fail(400, { message: '장소 ID가 누락되었습니다.' });
+            if (!locationId) return fail(400, { message: JSON.stringify({ ko: '장소 ID가 누락되었습니다.', en: 'Location ID is missing.' }) });
 
             await db.delete(sport_locations).where(eq(sport_locations.id, locationId));
 
@@ -1005,12 +1024,12 @@ export const actions: Actions = {
     impersonate: async ({ request, locals, cookies }) => {
         try {
             const user = locals.user;
-            if (!user?.isAdmin) return fail(403, { message: '관리자 권한이 필요합니다.' });
+            if (!user?.isAdmin) return fail(403, { message: JSON.stringify({ ko: '관리자 권한이 필요합니다.', en: 'Admin permission required.' }) });
 
             const formData = await request.formData();
             const studentNumber = formData.get('studentNumber')?.toString()?.trim();
 
-            if (!studentNumber) return fail(400, { message: '학번을 입력해주세요.' });
+            if (!studentNumber) return fail(400, { message: JSON.stringify({ ko: '학번을 입력해주세요.', en: 'Please enter student ID.' }) });
 
             // Look up target user
             const targetUsers = await db.select()
@@ -1019,7 +1038,7 @@ export const actions: Actions = {
                 .limit(1);
 
             if (targetUsers.length === 0) {
-                return fail(404, { message: `학번 ${studentNumber}에 해당하는 유저를 찾을 수 없습니다.` });
+                return fail(404, { message: JSON.stringify({ ko: `학번 ${studentNumber}에 해당하는 유저를 찾을 수 없습니다.`, en: `Could not find user with student ID ${studentNumber}.` }) });
             }
 
             const targetUser = targetUsers[0];
@@ -1056,7 +1075,7 @@ export const actions: Actions = {
         } catch (e) {
             if (e && typeof e === 'object' && 'status' in e) throw e;
             console.error('impersonate error:', e);
-            return fail(500, { message: '임퍼소네이션 중 오류가 발생했습니다.' });
+            return fail(500, { message: JSON.stringify({ ko: '임퍼소네이션 중 오류가 발생했습니다.', en: 'Error occurred during impersonation.' }) });
         }
     },
 
@@ -1101,7 +1120,7 @@ export const actions: Actions = {
         } catch (e) {
             if (e && typeof e === 'object' && 'status' in e) throw e;
             console.error('stopImpersonate error:', e);
-            return fail(500, { message: '관리자 복귀 중 오류가 발생했습니다.' });
+            return fail(500, { message: JSON.stringify({ ko: '관리자 복귀 중 오류가 발생했습니다.', en: 'Error occurred during return to admin.' }) });
         }
     }
 };

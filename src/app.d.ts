@@ -4,6 +4,7 @@ declare global {
 		interface Locals {
 			user?: any;
 			isImpersonating?: boolean;
+			locale?: 'ko' | 'en';
 		}
 		// interface PageData {}
 		// interface PageState {}

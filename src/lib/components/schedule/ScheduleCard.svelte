@@ -1,12 +1,17 @@
 <script lang="ts">
+    import { i18n } from "$lib/i18n.svelte";
+
     let {
-        title = "풋살 A조",
-        time = "MM월 DD일 HH시 MM분",
+        title = i18n.t({ ko: "데모 경기", en: "Demo Match" }),
+        time = i18n.t({ ko: "월 일 시 분", en: "MM/DD HH:MM" }),
         status = "진행", // 진행 (Ongoing), 예정 (Scheduled), 승리 (Win), 패배 (Loss)
-        teamA = "1반",
-        teamB = "99반",
-        location = "북측 풋살장 A",
-        players = "홍길동, 김철수, 김민수, 박지훈, 최현우",
+        teamA = i18n.t({ ko: "A반", en: "Class A" }),
+        teamB = i18n.t({ ko: "B반", en: "Class B" }),
+        location = i18n.t({ ko: "미정", en: "TBD" }),
+        players = i18n.t({
+            ko: "선수단 전체",
+            en: "All Players",
+        }),
     } = $props();
 
     // Mapping Status Tokens
@@ -60,7 +65,7 @@
             <h3
                 class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] m-0"
             >
-                {title}
+                {i18n.decode(title)}
             </h3>
             <div
                 class="flex gap-[0.3125rem] items-center justify-center shrink-0"
@@ -85,7 +90,13 @@
             <p
                 class="font-pretendard font-semibold leading-tight shrink-0 text-[0.875rem] m-0 {currentConfig.badgeTextClass}"
             >
-                {status}
+                {status === "진행"
+                    ? i18n.t({ ko: "진행", en: "Ongoing" })
+                    : status === "예정"
+                      ? i18n.t({ ko: "예정", en: "Scheduled" })
+                      : status === "종료"
+                        ? i18n.t({ ko: "종료", en: "Ended" })
+                        : status}
             </p>
         </div>
     </div>
@@ -136,7 +147,7 @@
                 <p
                     class="font-pretendard font-normal leading-tight shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.75rem] m-0 pt-[1px]"
                 >
-                    {location}
+                    {i18n.decode(location)}
                 </p>
             </div>
         </div>
@@ -145,7 +156,7 @@
         <p
             class="font-pretendard font-normal leading-tight shrink-0 text-zinc-600 dark:text-zinc-500 text-[0.625rem] m-0 pt-[2px]"
         >
-            선수 : {players}
+            {i18n.t({ ko: "선수 : ", en: "Players: " })}{players}
         </p>
     </div>
 </div>

@@ -1,3 +1,7 @@
+<script lang="ts">
+    import { i18n } from "$lib/i18n.svelte";
+</script>
+
 <div
     class="content-stretch flex flex-[1_0_0] flex-col gap-[1.5625rem] h-full items-start min-h-px min-w-px relative"
 >
@@ -8,7 +12,7 @@
             <h1
                 class="font-pretendard font-bold leading-tight relative shrink-0 text-[#1f1f22] dark:text-zinc-100 text-[2rem] m-0"
             >
-                개인정보 처리방침
+                {i18n.t({ ko: '개인정보 처리방침', en: 'Privacy Policy' })}
             </h1>
         </div>
     </div>
@@ -26,7 +30,7 @@
                     class="flex flex-col gap-[0.9375rem] items-start w-full"
                 >
                     <h2 class="font-bold text-[1.375rem] text-[#1f1f22] dark:text-zinc-100 m-0">
-                        1. Purpose (수집 목적)
+                        {i18n.t({ ko: '1. 수집 목적', en: '1. Purpose' })}
                     </h2>
                     <p class="leading-relaxed m-0 break-keep">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -43,7 +47,7 @@
                     class="flex flex-col gap-[0.9375rem] items-start w-full"
                 >
                     <h2 class="font-bold text-[1.375rem] text-[#1f1f22] dark:text-zinc-100 m-0">
-                        2. Data Collected (개인정보 수집 항목)
+                        {i18n.t({ ko: '2. 개인정보 수집 항목', en: '2. Data Collected' })}
                     </h2>
                     <p class="leading-relaxed m-0 break-keep">
                         Maecenas maximus, elit non consectetur feugiat, nunc leo
@@ -70,7 +74,7 @@
                     class="flex flex-col gap-[0.9375rem] items-start w-full"
                 >
                     <h2 class="font-bold text-[1.375rem] text-[#1f1f22] dark:text-zinc-100 m-0">
-                        3. Data Usage (개인정보 이용 목적)
+                        {i18n.t({ ko: '3. 개인정보 이용 목적', en: '3. Data Usage' })}
                     </h2>
                     <p class="leading-relaxed m-0 break-keep">
                         Aliquam sit amet odio a urna sollicitudin sollicitudin
@@ -87,7 +91,7 @@
                     class="flex flex-col gap-[0.9375rem] items-start w-full"
                 >
                     <h2 class="font-bold text-[1.375rem] text-[#1f1f22] dark:text-zinc-100 m-0">
-                        4. Retention Period (보유 기간)
+                        {i18n.t({ ko: '4. 보유 기간', en: '4. Retention Period' })}
                     </h2>
                     <p class="leading-relaxed m-0 break-keep">
                         Curabitur tristique lobortis odio, non faucibus lectus.

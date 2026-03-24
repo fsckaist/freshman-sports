@@ -3,6 +3,7 @@
     import { page } from "$app/stores";
     import { Html5Qrcode } from "html5-qrcode";
     import { onDestroy } from "svelte";
+    import { i18n } from "$lib/i18n.svelte";
 
     import rawXmarkIcon from "@gravity-ui/icons/svgs/xmark.svg?raw";
     import rawBarcodeIcon from "@gravity-ui/icons/svgs/qr-code.svg?raw";
@@ -39,21 +40,21 @@
     const tabs = $derived([
         {
             id: "teamA",
-            label: `${activeMatch.classA}반 선수`,
+            label: `${activeMatch.classA}${i18n.t({ ko: '반 선수', en: ' Players' })}`,
             current: activeMatch.attendance.teamA.length,
             total: activeMatch.attendance.teamATotal,
             color: "amber",
         },
         {
             id: "teamB",
-            label: `${activeMatch.classB}반 선수`,
+            label: `${activeMatch.classB}${i18n.t({ ko: '반 선수', en: ' Players' })}`,
             current: activeMatch.attendance.teamB.length,
             total: activeMatch.attendance.teamBTotal,
             color: "amber",
         },
         {
             id: "cheering",
-            label: "응원 인원",
+            label: i18n.t({ ko: "응원 인원", en: "Cheering Squad" }),
             current:
                 activeMatch.attendance.cheeringA.length +
                 activeMatch.attendance.cheeringB.length,
@@ -115,14 +116,14 @@
                         } else {
                             toast.error(
                                 res.status === 404
-                                    ? "등록되지 않은 인원이거나 유효하지 않은 QR입니다."
-                                    : "유저 정보를 불러올 수 없습니다.",
+                                    ? i18n.t({ ko: "등록되지 않은 인원이거나 유효하지 않은 QR입니다.", en: "Unregistered user or invalid QR." })
+                                    : i18n.t({ ko: "유저 정보를 불러올 수 없습니다.", en: "Failed to load user info." }),
                             );
                             resumeScanning();
                         }
                     } catch (e) {
                         console.error("Fetch error:", e);
-                        toast.error("네트워크 오류가 발생했습니다.");
+                        toast.error(i18n.t({ ko: "네트워크 오류가 발생했습니다.", en: "Network error occurred." }));
                         resumeScanning();
                     }
                 },
@@ -132,7 +133,7 @@
             );
         } catch (err) {
             console.error("Error starting QR scanner:", err);
-            scanError = "카메라를 시작할 수 없습니다. 권한을 확인해주세요.";
+            scanError = i18n.t({ ko: "카메라를 시작할 수 없습니다. 권한을 확인해주세요.", en: "Cannot start camera. Please check permissions." });
         }
     }
 
@@ -204,7 +205,7 @@
     >
         <div class="flex flex-col items-center justify-center flex-1">
             <h3 class="text-[1rem] font-bold text-zinc-800 dark:text-zinc-100">
-                {currentTab?.label} 등록
+                {currentTab?.label}{i18n.t({ ko: ' 등록', en: ' Registration' })}
             </h3>
 
             <div class="mt-2 text-zinc-600 text-[0.875rem] flex justify-center">
@@ -213,7 +214,7 @@
                         <div class="flex flex-col">
                             <span
                                 class="text-[0.8rem] text-zinc-600 dark:text-zinc-400 font-medium"
-                                >{activeMatch.classA}반</span
+                                >{activeMatch.classA}{i18n.t({ ko: '반', en: '' })}</span
                             >
                             <span
                                 class="text-[1.25rem] font-bold text-zinc-800 dark:text-zinc-100"
@@ -226,7 +227,7 @@
                         <div class="flex flex-col">
                             <span
                                 class="text-[0.8rem] text-zinc-600 dark:text-zinc-400 font-medium"
-                                >{activeMatch.classB}반</span
+                                >{activeMatch.classB}{i18n.t({ ko: '반', en: '' })}</span
                             >
                             <span
                                 class="text-[1.25rem] font-bold text-zinc-800 dark:text-zinc-100"
@@ -272,7 +273,7 @@
             disabled:opacity-40 disabled:grayscale disabled:scale-100"
         >
             {@html ScanIcon}
-            {activeTab === "cheering" ? "응원 인원 스캔" : "선수 스캔"}
+            {activeTab === "cheering" ? i18n.t({ ko: "응원 인원 스캔", en: "Scan Cheering Squad" }) : i18n.t({ ko: "선수 스캔", en: "Scan Player" })}
         </button>
     </div>
 </div>
@@ -292,12 +293,12 @@
                 <p
                     class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem]"
                 >
-                    {scanningTarget === "Cheering" ? "응원 스캔" : "선수 스캔"}
+                    {scanningTarget === "Cheering" ? i18n.t({ ko: "응원 스캔", en: "Scan Cheering" }) : i18n.t({ ko: "선수 스캔", en: "Scan Player" })}
                 </p>
                 <p
                     class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[1rem]"
                 >
-                    QR 코드를 스캔하거나 학번을 입력해주세요.
+                    {i18n.t({ ko: 'QR 코드를 스캔하거나 학번을 입력해주세요.', en: 'Scan QR code or enter Student ID.' })}
                 </p>
             </div>
 
@@ -321,11 +322,11 @@
                                 >{scannedUser.name}</span
                             >
                             <span class="text-xl text-zinc-300 font-medium"
-                                >{scannedUser.studentNumber} · {scannedUser.class}반</span
+                                >{scannedUser.studentNumber} · {scannedUser.class}{i18n.t({ ko: '반', en: '' })}</span
                             >
                         </div>
                         <p class="text-lg font-medium mb-4">
-                            해당 인원을 등록할까요?
+                            {i18n.t({ ko: '해당 인원을 등록할까요?', en: 'Register this user?' })}
                         </p>
                         <div class="flex justify-center w-full px-4 mt-2">
                             <button
@@ -379,7 +380,7 @@
                             toast.success(
                                 typeof message === "string"
                                     ? message
-                                    : "등록되었습니다.",
+                                    : i18n.t({ ko: "등록되었습니다.", en: "Registered successfully." }),
                             );
                             if (isScanPaused) resumeScanning();
                             studentNumberInput = ""; // clear for next scan
@@ -404,7 +405,7 @@
                         for="studentNumber"
                         class="font-['Pretendard_Variable'] font-semibold text-zinc-700 dark:text-zinc-300 text-[0.875rem]"
                     >
-                        학번 수동 입력
+                        {i18n.t({ ko: '학번 수동 입력', en: 'Manual Student ID Input' })}
                     </label>
                     <input
                         type="text"
@@ -412,7 +413,7 @@
                         name="studentNumber"
                         bind:value={studentNumberInput}
                         required
-                        placeholder="예: 20240001"
+                        placeholder={i18n.t({ ko: '예: 20240001', en: 'e.g. 20240001' })}
                         class="w-full h-[3.125rem] bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-[0.9375rem] px-4 font-['Pretendard_Variable'] text-[1rem] text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
                     />
                 </div>
@@ -428,7 +429,7 @@
                         <p
                             class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                         >
-                            돌아가기
+                            {i18n.t({ ko: '돌아가기', en: 'Go Back' })}
                         </p>
                     </button>
                     <button
@@ -461,7 +462,7 @@
                             <p
                                 class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
                             >
-                                등록하기
+                                {i18n.t({ ko: '등록하기', en: 'Register' })}
                             </p>
                         {/if}
                     </button>

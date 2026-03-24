@@ -1,5 +1,6 @@
 <script lang="ts">
     import ScheduleSelectionGrid from "$lib/components/schedule/ScheduleSelectionGrid.svelte";
+    import { i18n } from "$lib/i18n.svelte";
 
     let {
         sports = [],
@@ -33,7 +34,7 @@
                 <p
                     class="font-pretendard font-semibold text-[1rem] m-0 transition-colors duration-200"
                 >
-                    {sport.name}
+                    {i18n.decode(sport.name)}
                 </p>
             </a>
         {/each}
@@ -47,12 +48,12 @@
             <h2
                 class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[1.25rem] m-0"
             >
-                종목별 일정 세팅
+                {i18n.t({ ko: '종목별 일정 세팅', en: 'Sport Schedule Setting' })}
             </h2>
             <p
                 class="font-pretendard font-normal text-zinc-500 text-[0.875rem] m-0 mt-1"
             >
-                타임 블록을 클릭하여 활성화 여부를 조절할 수 있습니다.
+                {i18n.t({ ko: '타임 블록을 클릭하여 활성화 여부를 조절할 수 있습니다.', en: 'Click time blocks to toggle availability.' })}
             </p>
         </div>
     </div>
@@ -69,7 +70,7 @@
                     <p
                         class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0 text-center"
                     >
-                        현재 저장된 일정이 없습니다.
+                        {i18n.t({ ko: '현재 저장된 일정이 없습니다.', en: 'No schedules saved yet.' })}
                     </p>
                 </div>
             {:else}

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { i18n } from "$lib/i18n.svelte";
     function handleClose() {
         if (window.history.length > 1) {
             window.history.back();
@@ -36,12 +37,12 @@
                 <p
                     class="font-pretendard font-semibold relative shrink-0 text-lg md:text-[1.5rem] m-0"
                 >
-                    2026 봄학기 새내기 체육 대회
+                    {i18n.t({ ko: '2026 봄학기 새내기 체육 대회', en: 'Spring 2026 Freshman Sports' })}
                 </p>
                 <h1
                     class="font-pretendard font-bold relative shrink-0 text-4xl md:text-[4rem] leading-[1.1] m-0"
                 >
-                    규정
+                    {i18n.t({ ko: '규정', en: 'Rules' })}
                 </h1>
             </div>
             <button
@@ -51,7 +52,7 @@
             >
                 <span
                     class="font-pretendard font-semibold leading-[normal] relative shrink-0 text-lg md:text-[1.25rem] text-white whitespace-pre-wrap"
-                    >확인</span
+                    >{i18n.t({ ko: '확인', en: 'Confirm' })}</span
                 >
             </button>
         </div>
@@ -156,7 +157,7 @@
             <p
                 class="font-pretendard font-medium text-zinc-800 dark:text-zinc-100 m-0 p-0 text-[1.125rem]"
             >
-                제23대 새내기학생회 <span class="text-amber-500">샛별</span>
+                {i18n.t({ ko: '제23대 새내기학생회', en: '23rd Freshman Council' })} <span class="text-amber-500">{i18n.t({ ko: '샛별', en: 'Saetbyeol' })}</span>
             </p>
         </div>
     </div>

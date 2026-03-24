@@ -1,6 +1,7 @@
 <script lang="ts">
     import { isMenuOpen } from "$lib/stores/nav";
     import barsIcon from "@gravity-ui/icons/svgs/bars.svg?raw";
+    import { i18n } from "$lib/i18n.svelte";
     
     const logoUrl = "/logo.png";
 </script>
@@ -21,7 +22,7 @@
             <img src={logoUrl} alt="logo" class="size-full object-contain" />
         </div>
         <h1 class="font-pretendard font-bold text-neutral-800 dark:text-zinc-100 text-lg leading-tight">
-            새내기 체육 대회
+            {i18n.t({ ko: "새내기 체육 대회", en: "Freshman Sports" })}
         </h1>
     </div>
 </header>

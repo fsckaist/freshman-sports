@@ -1,6 +1,7 @@
 <script lang="ts">
     import triangleExclamationSvg from "@gravity-ui/icons/svgs/triangle-exclamation.svg?raw";
     import { enhance } from "$app/forms";
+    import { i18n } from "$lib/i18n.svelte";
 
     interface RosterMember {
         name: string;
@@ -9,7 +10,7 @@
 
     let {
         id = "",
-        title = "종목명",
+        title = i18n.t({ ko: "종목명", en: "Sport Name" }),
         currentSpots = 0,
         maxSpots = 10,
         descriptionLines = [],
@@ -55,7 +56,7 @@
                 <h2
                     class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.6rem] m-0"
                 >
-                    {title}
+                    {i18n.decode(title)}
                 </h2>
             </div>
             <p
@@ -68,7 +69,7 @@
             class="flex flex-col font-pretendard font-normal gap-[0.3125rem] items-start relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[0.875rem] w-full"
         >
             {#each descriptionLines as line}
-                <p class="relative shrink-0 m-0">{line}</p>
+                <p class="relative shrink-0 m-0">{i18n.decode(line)}</p>
             {/each}
         </div>
     </div>
@@ -104,7 +105,10 @@
                 <p
                     class="font-pretendard font-normal leading-tight relative shrink-0 text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0"
                 >
-                    아직 지원자가 없어요.
+                    {i18n.t({
+                        ko: "아직 지원자가 없어요.",
+                        en: "No applicants yet.",
+                    })}
                 </p>
             </div>
         {/if}
@@ -125,7 +129,7 @@
                 <p
                     class="font-pretendard font-normal leading-tight relative shrink-0 text-red-600 dark:text-red-400 text-[0.75rem] m-0"
                 >
-                    {alertMessage}
+                    {i18n.decode(alertMessage)}
                 </p>
             </div>
         {/if}
@@ -143,11 +147,14 @@
                     {buttonState === 'apply'
                         ? 'bg-amber-500 hover:bg-amber-600 active:bg-amber-800'
                         : 'bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800'}"
+                    onclick={onButtonClick}
                 >
                     <p
                         class="font-pretendard font-semibold leading-tight relative shrink-0 text-[1rem] m-0 text-white"
                     >
-                        {buttonState === "apply" ? "지원하기" : "취소하기"}
+                        {buttonState === "apply"
+                            ? i18n.t({ ko: "지원하기", en: "Apply" })
+                            : i18n.t({ ko: "취소하기", en: "Cancel" })}
                     </p>
                 </button>
             </form>
@@ -159,7 +166,9 @@
                 <p
                     class="font-pretendard font-semibold leading-tight relative shrink-0 text-[1rem] m-0 text-zinc-500 dark:text-zinc-400"
                 >
-                    {buttonState === "closed" ? "마감" : "지원 불가"}
+                    {buttonState === "closed"
+                        ? i18n.t({ ko: "마감", en: "Closed" })
+                        : i18n.t({ ko: "지원 불가", en: "Not Eligible" })}
                 </p>
             </button>
         {/if}
