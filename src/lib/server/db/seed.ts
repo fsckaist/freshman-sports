@@ -162,78 +162,57 @@ async function main() {
         }
         await db.insert(schema.sport_locations).values(locationData);
 
-        // --- 5. Users ---
-        console.log("👤 Inserting Users (Role-based Student Numbers)...");
-        const usersToInsert: typeof schema.users.$inferInsert[] = [];
-
-        // 1. Admin (2022...)
-        usersToInsert.push({
-            name: "총관리자",
-            studentNumber: "20250474",
-            email: "twooyu@kaist.ac.kr",
-            isAdmin: true,
-            isManager: true,
-            agreedPrivacy: false,
-            agreedRules: false,
-            gender: 'MALE'
-        });
-
-        // 2. Managers (2023...) - 10 users
-        for (let i = 1; i <= 10; i++) {
-            usersToInsert.push({
-                name: `매니저_${i}`,
-                studentNumber: `2023${i.toString().padStart(4, '0')}`,
-                email: `manager_${i}@kaist.ac.kr`,
-                isManager: true,
+        // --- 5. Users from CSV ---
+        console.log("👤 Inserting Users from ../data/user.csv...");
+        const fs = await import('fs');
+        const path = await import('path');
+        const csvPath = path.resolve(process.cwd(), '../data/user.csv');
+        const csvContent = fs.readFileSync(csvPath, 'utf8');
+        const lines = csvContent.split('\n').filter(line => line.trim() !== '');
+        
+        // Remove header
+        const header = lines.shift();
+        
+        const usersMap = new Map<string, typeof schema.users.$inferInsert>();
+        
+        for (const line of lines) {
+            const [class_number, student_number, name, phone_number, is_proctor, is_referee, is_manager, is_admin] = line.split(',').map(s => s.trim());
+            
+            const classNum = parseInt(class_number);
+            const targetClass = insertedClasses.find(c => c.classNumber === classNum);
+            
+            const userData: typeof schema.users.$inferInsert = {
+                name,
+                studentNumber: student_number,
+                phoneNumber: phone_number,
+                classId: targetClass?.id || null,
+                isProctor: is_proctor.toUpperCase() === 'TRUE',
+                isReferee: is_referee.toUpperCase() === 'TRUE',
+                isManager: is_manager.toUpperCase() === 'TRUE',
+                isAdmin: is_admin.toUpperCase() === 'TRUE',
                 agreedPrivacy: false,
                 agreedRules: false,
-                gender: i % 2 === 0 ? 'FEMALE' : 'MALE'
-            });
-        }
+                gender: 'MALE' // Default
+            };
 
-        // 3. Referees (2024...) - 50 users
-        for (let i = 1; i <= 50; i++) {
-            usersToInsert.push({
-                name: `심판_${i}`,
-                studentNumber: `2024${i.toString().padStart(4, '0')}`,
-                email: `referee_${i}@kaist.ac.kr`,
-                isReferee: true,
-                agreedPrivacy: false,
-                agreedRules: false,
-                gender: i % 2 === 0 ? 'FEMALE' : 'MALE'
-            });
-        }
-
-        // 4. Per-Class Users: Proctors (2025...) and Students (2026...)
-        for (const c of insertedClasses) {
-            // 2 Proctors per class
-            for (let i = 1; i <= 2; i++) {
-                usersToInsert.push({
-                    name: `프락터_${c.classNumber}반_${i}`,
-                    studentNumber: `2025${c.classNumber.toString().padStart(2, '0')}${i.toString().padStart(2, '0')}`,
-                    email: `proctor_${c.classNumber}_${i}@kaist.ac.kr`,
-                    classId: c.id,
-                    isProctor: true,
-                    agreedPrivacy: false,
-                    agreedRules: false,
-                    gender: i === 1 ? 'MALE' : 'FEMALE'
-                });
-            }
-
-            // 10 Students per class
-            for (let i = 1; i <= 10; i++) {
-                usersToInsert.push({
-                    name: `학생_${c.classNumber}반_${i}`,
-                    studentNumber: `2026${c.classNumber.toString().padStart(2, '0')}${i.toString().padStart(2, '0')}`,
-                    email: `student_${c.classNumber}_${i}@kaist.ac.kr`,
-                    classId: c.id,
-                    agreedPrivacy: false,
-                    agreedRules: false,
-                    gender: i <= 5 ? 'MALE' : 'FEMALE' // 5 Male, 5 Female
-                });
+            if (usersMap.has(student_number)) {
+                const existing = usersMap.get(student_number)!;
+                // Merge roles
+                existing.isProctor = existing.isProctor || userData.isProctor;
+                existing.isReferee = existing.isReferee || userData.isReferee;
+                existing.isManager = existing.isManager || userData.isManager;
+                existing.isAdmin = existing.isAdmin || userData.isAdmin;
+                // If existing has no class but user does, update it
+                if (!existing.classId && userData.classId) {
+                    existing.classId = userData.classId;
+                }
+            } else {
+                usersMap.set(student_number, userData);
             }
         }
-
+        
+        const usersToInsert = Array.from(usersMap.values());
+        
         const batchSize = 100;
         let insertedUsers: typeof schema.users.$inferSelect[] = [];
         for (let i = 0; i < usersToInsert.length; i += batchSize) {
