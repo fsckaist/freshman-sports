@@ -31,7 +31,7 @@
             >
                 <img
                     src="/logo.png"
-                    alt={i18n.t({ ko: '샛별 로고', en: 'Saetbyeol Logo' })}
+                    alt={i18n.t({ ko: "샛별 로고", en: "Saetbyeol Logo" })}
                     class="absolute max-w-none object-contain h-[6rem] w-[6rem] md:h-[10.625rem] md:w-[10.625rem] left-[-0.5rem] top-[-0.5rem] md:left-[-1.5625rem] md:top-[-1.5625rem]"
                 />
             </div>
@@ -42,12 +42,12 @@
                 <p
                     class="font-pretendard font-semibold relative shrink-0 text-lg md:text-[1.5rem]"
                 >
-                    {i18n.t({ ko: '2026 봄학기', en: 'Spring 2026' })}
+                    {i18n.t({ ko: "2026 봄학기", en: "Spring 2026" })}
                 </p>
                 <h1
-                    class="font-pretendard font-bold relative shrink-0 text-5xl md:text-[4rem] tracking-tight leading-[1.1]"
+                    class="font-pretendard font-bold relative shrink-0 text-[2.5rem] md:text-[4rem] tracking-tight leading-[1.1]"
                 >
-                    {i18n.t({ ko: '새내기 체육 대회', en: 'Freshman Sports' })}
+                    {i18n.t({ ko: "새내기 체육 대회", en: "Freshman Sports" })}
                 </h1>
             </div>
         </div>
@@ -59,15 +59,23 @@
             <div
                 class="content-stretch flex flex-col font-pretendard font-normal gap-[0.625rem] items-start leading-[normal] overflow-clip relative shrink-0 text-lg md:text-[1.25rem]"
             >
-                <p class="relative shrink-0 text-zinc-800 dark:text-zinc-300 m-0">
-                    {i18n.t({ ko: '효율적인 체육 대회를 위하여 여러분의 일부 개인 정보와 학적 정보가 필요해요.', en: 'We require some of your personal and academic information for an efficient sports event.' })}
+                <p
+                    class="relative shrink-0 text-zinc-800 dark:text-zinc-300 m-0"
+                >
+                    {i18n.t({
+                        ko: "효율적인 체육 대회를 위하여 여러분의 일부 개인 정보와 학적 정보가 필요해요.",
+                        en: "We require some of your personal and academic information for an efficient sports event.",
+                    })}
                 </p>
                 <a
                     href="/info/privacy"
                     target="_blank"
                     class="decoration-solid relative shrink-0 text-amber-500 underline hover:text-amber-600 transition-colors cursor-pointer m-0"
                 >
-                    {i18n.t({ ko: '개인정보 처리방침 전문 확인하기', en: 'Read full Privacy Policy' })}
+                    {i18n.t({
+                        ko: "개인정보 처리방침 전문 확인하기",
+                        en: "Read full Privacy Policy",
+                    })}
                 </a>
             </div>
 
@@ -80,7 +88,10 @@
                 <p
                     class="font-pretendard font-normal leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-lg md:text-[1.25rem] m-0"
                 >
-                    {i18n.t({ ko: '개인정보 제공에 대해 동의하시나요?', en: 'Do you agree to the provision of personal information?' })}
+                    {i18n.t({
+                        ko: "개인정보 제공에 대해 동의하시나요?",
+                        en: "Do you agree to the provision of personal information?",
+                    })}
                 </p>
                 <button
                     type="submit"
@@ -89,7 +100,7 @@
                 >
                     <span
                         class="font-pretendard font-semibold leading-[normal] relative shrink-0 text-lg md:text-[1.25rem] text-white"
-                        >{i18n.t({ ko: '동의', en: 'Agree' })}</span
+                        >{i18n.t({ ko: "동의", en: "Agree" })}</span
                     >
                 </button>
             </form>
@@ -97,7 +108,13 @@
             <p
                 class="font-pretendard font-medium leading-[normal] relative shrink-0 text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100 border-t border-transparent dark:border-zinc-800/50 w-full pt-[1.25rem]"
             >
-                {i18n.t({ ko: '제23대 새내기학생회', en: '23rd Freshman Council' })} <span class="text-amber-500">{i18n.t({ ko: '샛별', en: 'Saetbyeol' })}</span>
+                {i18n.t({
+                    ko: "제23대 새내기학생회",
+                    en: "23rd Freshman Council",
+                })}
+                <span class="text-amber-500"
+                    >{i18n.t({ ko: "샛별", en: "Saetbyeol" })}</span
+                >
             </p>
         </div>
     </div>
