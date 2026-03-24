@@ -106,12 +106,12 @@
                     <div
                         class="flex gap-2 items-center font-bold text-lg text-zinc-800 dark:text-zinc-100"
                     >
-                        <span>{matchPair.classA}{i18n.t({ ko: '반', en: '' })}</span>
+                        <span>{i18n.t({ ko: "", en: "Class " })}{matchPair.classA}{i18n.t({ ko: "반", en: "" })}</span>
                         <span
                             class="text-[0.6rem] text-zinc-400 dark:text-zinc-500"
                             >VS</span
                         >
-                        <span>{matchPair.classB}{i18n.t({ ko: '반', en: '' })}</span>
+                        <span>{i18n.t({ ko: "", en: "Class " })}{matchPair.classB}{i18n.t({ ko: "반", en: "" })}</span>
                     </div>
                     {#if matchPair.scheduleWindowDeadline}
                         <div

@@ -129,13 +129,13 @@
                     >
                         <span
                             >{matchPair.classA
-                                ? `${matchPair.classA}${i18n.t({ ko: '반', en: '' })}`
+                                ? `${i18n.t({ ko: "", en: "Class " })}${matchPair.classA}${i18n.t({ ko: "반", en: "" })}`
                                 : i18n.t({ ko: "미정", en: "TBD" })}</span
                         >
                         <span class="text-[0.6rem] text-zinc-400">VS</span>
                         <span
                             >{matchPair.classB
-                                ? `${matchPair.classB}${i18n.t({ ko: '반', en: '' })}`
+                                ? `${i18n.t({ ko: "", en: "Class " })}${matchPair.classB}${i18n.t({ ko: "반", en: "" })}`
                                 : i18n.t({ ko: "미정", en: "TBD" })}</span
                         >
                     </div>
@@ -205,7 +205,7 @@
                                 disabled={isSubmitting}
                                 class="w-full py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-700 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl font-bold text-lg text-zinc-800 dark:text-zinc-100 transition-all"
                             >
-                                {activeResultMatch.classA}{i18n.t({ ko: "반 승리", en: " Win" })}
+                                {i18n.t({ ko: "", en: "Class " })}{activeResultMatch.classA}{i18n.t({ ko: "반 승리", en: " Win" })}
                             </button>
                         </form>
 
@@ -237,7 +237,7 @@
                                 disabled={isSubmitting}
                                 class="w-full py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-700 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl font-bold text-lg text-zinc-800 dark:text-zinc-100 transition-all"
                             >
-                                {activeResultMatch.classB}{i18n.t({ ko: "반 승리", en: " Win" })}
+                                {i18n.t({ ko: "", en: "Class " })}{activeResultMatch.classB}{i18n.t({ ko: "반 승리", en: " Win" })}
                             </button>
                         </form>
                     </div>

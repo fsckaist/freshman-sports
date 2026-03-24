@@ -169,18 +169,18 @@ async function main() {
         const csvPath = path.resolve(process.cwd(), '../data/user.csv');
         const csvContent = fs.readFileSync(csvPath, 'utf8');
         const lines = csvContent.split('\n').filter(line => line.trim() !== '');
-        
+
         // Remove header
         const header = lines.shift();
-        
+
         const usersMap = new Map<string, typeof schema.users.$inferInsert>();
-        
+
         for (const line of lines) {
             const [class_number, student_number, name, phone_number, is_proctor, is_referee, is_manager, is_admin] = line.split(',').map(s => s.trim());
-            
+
             const classNum = parseInt(class_number);
             const targetClass = insertedClasses.find(c => c.classNumber === classNum);
-            
+
             const userData: typeof schema.users.$inferInsert = {
                 name,
                 studentNumber: student_number,
@@ -210,9 +210,9 @@ async function main() {
                 usersMap.set(student_number, userData);
             }
         }
-        
+
         const usersToInsert = Array.from(usersMap.values());
-        
+
         const batchSize = 100;
         let insertedUsers: typeof schema.users.$inferSelect[] = [];
         for (let i = 0; i < usersToInsert.length; i += batchSize) {
@@ -275,7 +275,7 @@ async function seedBrackets(
                 classAId: aIdx < 31 ? insertedClasses[aIdx].id : null,
                 classBId: bIdx < 31 ? insertedClasses[bIdx].id : null,
                 status: 'PENDING_SCHEDULE',
-                name: JSON.stringify({ ko: `32강 - 경기 ${i + 1}`, en: `R32-M${i + 1}` }),
+                name: JSON.stringify({ ko: `R32-M${i + 1}`, en: `R32-M${i + 1}` }),
                 scoreA: 0,
                 scoreB: 0
             });

@@ -194,7 +194,7 @@
                             class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
                         >
                             {match.classA
-                                ? `${match.classA}${i18n.t({ ko: "반", en: "" })}`
+                                ? `${i18n.t({ ko: "", en: "Class " })}${match.classA}${i18n.t({ ko: "반", en: "" })}`
                                 : i18n.t({ ko: "미정", en: "TBD" })}
                         </p>
                         <div
@@ -210,7 +210,7 @@
                             class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-500 dark:text-zinc-400 text-[0.875rem] whitespace-nowrap"
                         >
                             {match.classB
-                                ? `${match.classB}${i18n.t({ ko: "반", en: "" })}`
+                                ? `${i18n.t({ ko: "", en: "Class " })}${match.classB}${i18n.t({ ko: "반", en: "" })}`
                                 : i18n.t({ ko: "미정", en: "TBD" })}
                         </p>
                     </div>
@@ -238,7 +238,7 @@
                         class="relative shrink-0 whitespace-nowrap truncate w-full max-w-[30rem]"
                     >
                         {match.classA
-                            ? `${match.classA}${i18n.t({ ko: "반", en: "" })}`
+                            ? `${i18n.t({ ko: "", en: "Class " })}${match.classA}${i18n.t({ ko: "반", en: "" })}`
                             : i18n.t({ ko: "미정", en: "TBD" })}
                         {i18n.t({
                             ko: "선수 (예정)",
@@ -256,7 +256,7 @@
                         class="relative shrink-0 whitespace-nowrap truncate w-full max-w-[30rem]"
                     >
                         {match.classB
-                            ? `${match.classB}${i18n.t({ ko: "반", en: "" })}`
+                            ? `${i18n.t({ ko: "", en: "Class " })}${match.classB}${i18n.t({ ko: "반", en: "" })}`
                             : i18n.t({ ko: "미정", en: "TBD" })}
                         {i18n.t({
                             ko: "선수 (예정)",

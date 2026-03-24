@@ -102,7 +102,7 @@
         <div
             class="content-stretch flex font-pretendard font-semibold items-center leading-tight relative shrink-0 text-[1rem] gap-[0.0625rem] {textClass}"
         >
-            <p class="relative shrink-0 m-0">{className}</p>
+            <p class="relative shrink-0 m-0">{i18n.t({ ko: '', en: 'Class ' })}{className}</p>
             <p class="relative shrink-0 m-0">{i18n.t({ ko: '반', en: '' })}</p>
         </div>
     {/if}

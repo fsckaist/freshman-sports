@@ -65,12 +65,7 @@ async function syncBracketMatch(sportId: string, targetRound: number, targetPosi
                 status: 'FINISHED',
                 isVerified: true,
                 name: JSON.stringify({
-                    ko: targetRound === 5 && pIdx === 1 ? '3위 결정전' :
-                        targetRound === 5 ? '결승전' :
-                        targetRound === 4 ? '준결승' :
-                        targetRound === 3 ? '8강' :
-                        targetRound === 2 ? '16강' :
-                        '32강',
+                    ko: `${prefix}-M${pIdx + 1}`,
                     en: `${prefix}-M${pIdx + 1}`
                 }),
                 classAId: classA,
@@ -120,7 +115,7 @@ async function syncBracketMatch(sportId: string, targetRound: number, targetPosi
             }).where(eq(tournament_brackets.id, grandTargetNode.id));
             await db.update(tournament_brackets).set({ status: (classA === winnerId && winnerId) ? 'win' : 'lose' }).where(eq(tournament_brackets.id, s1.id));
             await db.update(tournament_brackets).set({ status: (classB === winnerId && winnerId) ? 'win' : 'lose' }).where(eq(tournament_brackets.id, s2.id));
-            
+
             await syncBracketMatch(sportId, nextTargetRound, nextTargetPosition);
         }
         if (mId) {
@@ -134,10 +129,10 @@ async function syncBracketMatch(sportId: string, targetRound: number, targetPosi
                 name: JSON.stringify({
                     ko: targetRound === 5 && pIdx === 1 ? '3위 결정전' :
                         targetRound === 5 ? '결승전' :
-                        targetRound === 4 ? '준결승' :
-                        targetRound === 3 ? '8강' :
-                        targetRound === 2 ? '16강' :
-                        '32강',
+                            targetRound === 4 ? '준결승' :
+                                targetRound === 3 ? '8강' :
+                                    targetRound === 2 ? '16강' :
+                                        '32강',
                     en: `${prefix}-M${pIdx + 1}`
                 }),
                 classAId: classA,
@@ -613,7 +608,7 @@ export const actions: Actions = {
                             await db.update(tournament_brackets)
                                 .set({ classId: winnerClassId })
                                 .where(eq(tournament_brackets.id, nextNodes[0].id));
-                            
+
                             // CALL SHARED HELPER
                             await syncBracketMatch(node.sportId, nextRound, nextPosition);
                         }
@@ -623,16 +618,16 @@ export const actions: Actions = {
                         .set({ status: newStatus })
                         .where(eq(tournament_brackets.id, node.id));
                 }
- 
-                 count++;
-             }
- 
-             // Propagate schedule windows for bye-advanced matches (Optional, syncBracketMatch handles this internally too)
-             for (const match of byeMatches) {
-                 try { await propagateByeWindow(match.id); } catch (e) { console.error('propagateByeWindow error:', e); }
-             }
- 
-             return { success: true, processedCount: count };
+
+                count++;
+            }
+
+            // Propagate schedule windows for bye-advanced matches (Optional, syncBracketMatch handles this internally too)
+            for (const match of byeMatches) {
+                try { await propagateByeWindow(match.id); } catch (e) { console.error('propagateByeWindow error:', e); }
+            }
+
+            return { success: true, processedCount: count };
         } catch (e) {
             console.error('processByeMatches error:', e);
             return fail(500);
@@ -748,7 +743,7 @@ export const actions: Actions = {
                             await db.update(tournament_brackets)
                                 .set({ classId: winnerClassId, isEliminatedSlot: false, status: 'default' })
                                 .where(eq(tournament_brackets.id, nextNodeResult[0].id));
-                            
+
                             // CALL SHARED HELPER
                             await syncBracketMatch(sportId, nextRound, nextPosition);
                         }
@@ -764,7 +759,7 @@ export const actions: Actions = {
                                 eq(tournament_brackets.position, nextPosition)
                             )).limit(1);
 
-                             if (bronzeNodeResult.length > 0) {
+                            if (bronzeNodeResult.length > 0) {
                                 await db.update(tournament_brackets)
                                     .set({ classId: node.classId, isEliminatedSlot: false, status: 'default' })
                                     .where(eq(tournament_brackets.id, bronzeNodeResult[0].id));
@@ -787,7 +782,7 @@ export const actions: Actions = {
                                 await db.update(tournament_brackets)
                                     .set({ classId: node.classId, isEliminatedSlot: false, status: 'default' })
                                     .where(eq(tournament_brackets.id, runnerUpNodeResult[0].id));
-                                
+
                                 // Result column has no matches, but we call sync for consistency (will return early)
                                 await syncBracketMatch(sportId, nextRound, nextPosition);
                             }
@@ -817,12 +812,12 @@ export const actions: Actions = {
 
                         await syncBracketMatch(sportId, nextRound, nextPosition);
                     }
-                    
+
                     // If it was the semifinal and both lose, eliminate both bronze slots
                     if (anyNode.round === 4) {
                         const bronzePos1 = Math.floor((anyNode.position * 2) / 2) + 2; // Position 2
                         const bronzePos2 = Math.floor(((anyNode.position * 2) + 1) / 2) + 2; // Position 3
-                        
+
                         await db.update(tournament_brackets)
                             .set({ isEliminatedSlot: true, classId: null })
                             .where(and(

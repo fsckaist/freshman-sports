@@ -117,7 +117,7 @@
                 <p
                     class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
                 >
-                    {teamA}
+                    {i18n.decode(teamA)}
                 </p>
                 <div
                     class="bg-zinc-400 dark:bg-zinc-600 flex flex-col items-center justify-center px-[0.1875rem] py-px rounded-[0.1875rem] shrink-0 relative"
@@ -131,7 +131,7 @@
                 <p
                     class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-600 dark:text-zinc-300 text-[0.875rem] m-0"
                 >
-                    {teamB}
+                    {i18n.decode(teamB)}
                 </p>
             </div>
 

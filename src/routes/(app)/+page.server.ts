@@ -47,7 +47,7 @@ export const load: PageServerLoad = async ({ locals }) => {
             : '참여 종목 없음';
 
         // QUERY 2: Fetch Class Info (if applicable)
-        let classNumber = null;
+        let classNumber: number | string | null = null;
         let proctorsString = '없음';
         let groupedRosters: Array<{ sport: string, players: string }> = [];
 
@@ -207,8 +207,8 @@ export const load: PageServerLoad = async ({ locals }) => {
                 }),
                 time: formattedTime,
                 status: statusKo,
-                teamA: `${match.teamA}반`,
-                teamB: `${match.teamB}반`,
+                teamA: JSON.stringify({ ko: `${match.teamA}반`, en: `Class ${match.teamA}` }),
+                teamB: JSON.stringify({ ko: `${match.teamB}반`, en: `Class ${match.teamB}` }),
                 location: match.location || '미정',
                 players: playersString || '선수 없음'
             };
@@ -228,7 +228,8 @@ export const load: PageServerLoad = async ({ locals }) => {
             .map(m => {
                 let opponentClass = '미정';
                 if (m.teamA && m.teamB) {
-                    opponentClass = m.teamA === classNumber ? `${m.teamB}반` : `${m.teamA}반`;
+                    const opponentNum = m.teamA === classNumber ? m.teamB : m.teamA;
+                    opponentClass = JSON.stringify({ ko: `${opponentNum}반`, en: `Class ${opponentNum}` });
                 }
 
                 return {
@@ -237,6 +238,10 @@ export const load: PageServerLoad = async ({ locals }) => {
                     opponent: opponentClass
                 };
             });
+
+        if (classNumber == null) {
+            classNumber = 'N/A';
+        }
 
         // 3. Return the mapped data
         return {
