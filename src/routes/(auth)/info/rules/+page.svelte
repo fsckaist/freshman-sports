@@ -1,5 +1,10 @@
 <script lang="ts">
+    import rawSunIcon from "@gravity-ui/icons/svgs/sun.svg?raw";
+    import rawMoonIcon from "@gravity-ui/icons/svgs/moon.svg?raw";
+    import rawGlobeIcon from "@gravity-ui/icons/svgs/globe.svg?raw";
+    import { themeManager } from "$lib/theme.svelte";
     import { i18n } from "$lib/i18n.svelte";
+
     function handleClose() {
         if (window.history.length > 1) {
             window.history.back();
@@ -7,11 +12,43 @@
             window.close();
         }
     }
+
+    const resizeSvg = (svg: string) =>
+        svg.replace('width="16" height="16"', 'width="24" height="24"');
+
+    const ThemeIcon = $derived(
+        themeManager.theme === "dark"
+            ? resizeSvg(rawSunIcon)
+            : resizeSvg(rawMoonIcon),
+    );
 </script>
 
 <div
     class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
+    <!-- Toggles (Top Right) -->
+    <div
+        class="absolute top-4 right-4 md:top-8 md:right-8 z-50 flex items-center gap-2"
+    >
+        <button
+            onclick={() => i18n.toggle()}
+            class="flex items-center justify-center size-12 rounded-xl bg-white/50 hover:bg-zinc-100 dark:bg-zinc-900/50 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-500 backdrop-blur-sm transition-colors cursor-pointer"
+            title={i18n.t({ ko: "언어 변경", en: "Change Language" })}
+        >
+            <div class="size-6 text-current">
+                {@html resizeSvg(rawGlobeIcon)}
+            </div>
+        </button>
+        <button
+            onclick={() => themeManager.toggle()}
+            class="flex items-center justify-center size-12 rounded-xl bg-white/50 hover:bg-zinc-100 dark:bg-zinc-900/50 dark:hover:bg-zinc-800 text-zinc-400 dark:text-zinc-500 backdrop-blur-sm transition-colors cursor-pointer"
+            title={i18n.t({ ko: "테마 변경", en: "Toggle Theme" })}
+        >
+            <div class="size-6 text-current">
+                {@html ThemeIcon}
+            </div>
+        </button>
+    </div>
     <!-- Centered 90rem wrapper so the absolute watermark is properly anchored -->
     <div
         class="relative flex flex-col gap-[1.875rem] h-screen items-start w-full max-w-[90rem] px-6 py-12 md:px-[12.5rem] md:py-[6.25rem]"
@@ -29,18 +66,18 @@
 
         <!-- Title & Button Frame -->
         <div
-            class="content-stretch flex flex-col md:flex-row items-start md:items-end justify-between p-[0.625rem] relative shrink-0 w-full z-10 border-b border-transparent dark:border-zinc-800/50 pb-[1.25rem] gap-4"
+            class="content-stretch flex flex-col md:flex-row items-center md:items-end justify-between p-[0.625rem] relative shrink-0 w-full z-10 border-b border-transparent dark:border-zinc-800/50 pb-[1.25rem] gap-4"
         >
             <div
-                class="content-stretch flex flex-col gap-[0.3125rem] items-start leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100"
+                class="content-stretch flex flex-col gap-[0.3125rem] items-center md:items-start leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 break-keep"
             >
                 <p
-                    class="font-pretendard font-semibold relative shrink-0 text-lg md:text-[1.5rem] m-0"
+                    class="font-pretendard font-semibold relative shrink-0 text-center md:text-left text-lg md:text-[1.5rem] m-0"
                 >
                     {i18n.t({ ko: '2026 봄학기 새내기 체육 대회', en: 'Spring 2026 Freshman Sports' })}
                 </p>
                 <h1
-                    class="font-pretendard font-bold relative shrink-0 text-4xl md:text-[4rem] leading-[1.1] m-0"
+                    class="font-pretendard font-bold relative shrink-0 text-center md:text-left text-4xl md:text-[4rem] leading-[1.1] m-0"
                 >
                     {i18n.t({ ko: '규정', en: 'Rules' })}
                 </h1>
@@ -59,7 +96,7 @@
 
         <!-- Scrollable Document Area -->
         <div
-            class="content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-px overflow-x-hidden overflow-y-auto p-[0.625rem] relative w-full"
+            class="content-stretch flex flex-[1_0_0] flex-col items-start min-h-px min-w-px overflow-x-hidden overflow-y-auto p-[0.625rem] relative w-full break-keep"
         >
             <div
                 class="flex-[1_0_0] font-pretendard font-medium leading-[1.6] min-h-px min-w-px relative text-zinc-800 dark:text-zinc-300 text-lg md:text-[1.25rem] w-full"
@@ -157,7 +194,7 @@
             <p
                 class="font-pretendard font-medium text-zinc-800 dark:text-zinc-100 m-0 p-0 text-[1.125rem]"
             >
-                {i18n.t({ ko: '제23대 새내기학생회', en: '23rd Freshman Council' })} <span class="text-amber-500">{i18n.t({ ko: '샛별', en: 'Saetbyeol' })}</span>
+                {i18n.t({ ko: '제23대 새내기학생회', en: '23rd Freshman Council' })} <span class="text-amber-500 text-center md:text-left">{i18n.t({ ko: '샛별', en: 'Saetbyeol' })}</span>
             </p>
         </div>
     </div>
