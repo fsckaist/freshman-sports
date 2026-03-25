@@ -13,6 +13,39 @@
     let showEndConfirm = $state(false);
     let showDetailsModal = $state(false);
 
+    // --- Approval State ---
+    let approvedA = $state(false);
+    let approvedB = $state(false);
+
+    // --- QR Scanner State ---
+    import { Html5Qrcode } from "html5-qrcode";
+    import { onDestroy } from "svelte";
+    import rawXmarkIcon from "@gravity-ui/icons/svgs/xmark.svg?raw";
+    import rawBarcodeIcon from "@gravity-ui/icons/svgs/qr-code.svg?raw";
+    import { toast } from "$lib/toast.svelte";
+
+    const resizeSvgTo20 = (svg: string) =>
+        svg.replace(
+            'width="16" height="16"',
+            'width="20" height="20" viewBox="0 0 16 16" class="text-current"',
+        );
+
+    const CloseIcon = resizeSvgTo20(rawXmarkIcon);
+    const ScanIcon = resizeSvgTo20(rawBarcodeIcon);
+
+    let scanModalOpen = $state(false);
+    let scanningTarget = $state<"A" | "B">("A");
+    let studentNumberInput = $state("");
+    let html5Qrcode: Html5Qrcode | null = null;
+    let scanError = $state("");
+    let scannedUser = $state<{
+        name: string;
+        studentNumber: string;
+        id: string;
+        class?: number | string;
+    } | null>(null);
+    let isScanPaused = $state(false);
+
     // --- Record Structure & State ---
     interface Stat {
         key: string;
@@ -76,10 +109,12 @@
         teamA: {
             scores: Record<string, Record<string, number>>;
             cards: Record<string, number>;
+            approved?: boolean;
         };
         teamB: {
             scores: Record<string, Record<string, number>>;
             cards: Record<string, number>;
+            approved?: boolean;
         };
     }
 
@@ -163,6 +198,8 @@
             scoreDataB = initialB;
             cardsA = initialCardsA;
             cardsB = initialCardsB;
+            approvedA = !!parsedNotes?.teamA?.approved;
+            approvedB = !!parsedNotes?.teamB?.approved;
         });
     });
 
@@ -201,8 +238,8 @@
 
     const matchNotesJson = $derived(
         JSON.stringify({
-            teamA: { scores: scoreDataA, cards: cardsA },
-            teamB: { scores: scoreDataB, cards: cardsB },
+            teamA: { scores: scoreDataA, cards: cardsA, approved: approvedA },
+            teamB: { scores: scoreDataB, cards: cardsB, approved: approvedB },
         }),
     );
 
@@ -242,6 +279,217 @@
             cardsB = { ...cardsB, [playerName]: (current + 1) % 3 };
         }
     }
+
+    // --- QR Approval Functions ---
+    function openScan(target: "A" | "B") {
+        scanningTarget = target;
+        studentNumberInput = "";
+        scanError = "";
+        isScanPaused = false;
+        scannedUser = null;
+        scanModalOpen = true;
+
+        setTimeout(startScanner, 100);
+    }
+
+    function closeScan() {
+        stopScanner();
+        scanModalOpen = false;
+        studentNumberInput = "";
+    }
+
+    async function startScanner() {
+        if (!html5Qrcode) {
+            html5Qrcode = new Html5Qrcode("qr-reader");
+        }
+        try {
+            await html5Qrcode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                },
+                async (decodedText) => {
+                    if (isSubmitting || isScanPaused || scannedUser) return;
+
+                    isScanPaused = true;
+                    if (html5Qrcode && html5Qrcode.isScanning) {
+                        html5Qrcode.pause();
+                    }
+
+                    try {
+                        const res = await fetch(`/api/user/${decodedText}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            scannedUser = {
+                                name: data.name,
+                                studentNumber: data.studentNumber,
+                                id: data.id,
+                                class: data.class ?? "N/A",
+                            };
+                            studentNumberInput = data.studentNumber;
+                        } else {
+                            toast.error(
+                                res.status === 404
+                                    ? i18n.t({
+                                          ko: "등록되지 않은 인원이거나 유효하지 않은 QR입니다.",
+                                          en: "Unregistered user or invalid QR.",
+                                      })
+                                    : i18n.t({
+                                          ko: "유저 정보를 불러올 수 없습니다.",
+                                          en: "Failed to load user info.",
+                                      }),
+                            );
+                            resumeScanning();
+                        }
+                    } catch (e) {
+                        console.error("Fetch error:", e);
+                        toast.error(
+                            i18n.t({
+                                ko: "네트워크 오류가 발생했습니다.",
+                                en: "Network error occurred.",
+                            }),
+                        );
+                        resumeScanning();
+                    }
+                },
+                (errorMessage) => {},
+            );
+        } catch (err) {
+            console.error("Error starting QR scanner:", err);
+            scanError = i18n.t({
+                ko: "카메라를 시작할 수 없습니다. 권한을 확인해주세요.",
+                en: "Cannot start camera. Please check permissions.",
+            });
+        }
+    }
+
+    async function stopScanner() {
+        if (html5Qrcode && html5Qrcode.isScanning) {
+            try {
+                if (html5Qrcode.getState() === 3) {
+                    html5Qrcode.resume();
+                }
+                await html5Qrcode.stop();
+            } catch (err) {
+                console.error("Error stopping scanner:", err);
+            }
+        }
+    }
+
+    function resumeScanning() {
+        scannedUser = null;
+        studentNumberInput = "";
+        isScanPaused = false;
+        if (html5Qrcode && html5Qrcode.getState() === 3) {
+            html5Qrcode.resume();
+        }
+    }
+
+    async function handleManualApproval() {
+        if (!studentNumberInput) return;
+
+        isSubmitting = true;
+        try {
+            const res = await fetch(`/api/user/${studentNumberInput}`);
+            if (res.ok) {
+                const data = await res.json();
+                const user = {
+                    name: data.name,
+                    studentNumber: data.studentNumber,
+                    id: data.id,
+                    class: data.class ?? "N/A",
+                };
+                
+                // For manual input, approve immediately
+                if (validateUser(user)) {
+                    performApproval(user);
+                    closeScan();
+                }
+            } else {
+                toast.error(
+                    i18n.t({
+                        ko: "유저 정보를 찾을 수 없습니다.",
+                        en: "User not found.",
+                    }),
+                );
+            }
+        } catch (e) {
+            toast.error("Network error");
+        } finally {
+            isSubmitting = false;
+        }
+    }
+
+    function validateUser(user: any) {
+        // Verify class
+        const targetClass =
+            scanningTarget === "A" ? activeMatch.classA : activeMatch.classB;
+        if (Number(user.class) !== Number(targetClass)) {
+            toast.error(
+                i18n.t({
+                    ko: "해당 반의 학생이 아닙니다.",
+                    en: "This student is not in the correct class.",
+                }),
+            );
+            return false;
+        }
+
+        // Verify if the user is in the attendance list (online/planned)
+        const teamAttendance =
+            scanningTarget === "A"
+                ? activeMatch.attendance.teamA
+                : activeMatch.attendance.teamB;
+        const plannedAttendance =
+            scanningTarget === "A"
+                ? activeMatch.attendance.plannedTeamA
+                : activeMatch.attendance.plannedTeamB;
+
+        const isAttendee =
+            teamAttendance.some((u: any) => u.userId === user.id) ||
+            plannedAttendance.some((u: any) => u.userId === user.id);
+
+        if (!isAttendee) {
+            toast.error(
+                i18n.t({
+                    ko: "이 경기에 등록된 선수가 아닙니다.",
+                    en: "This student is not a registered player for this match.",
+                }),
+            );
+            return false;
+        }
+        return true;
+    }
+
+    function performApproval(user: any) {
+        if (scanningTarget === "A") {
+            approvedA = true;
+        } else {
+            approvedB = true;
+        }
+
+        toast.success(
+            i18n.t({
+                ko: "승인되었습니다.",
+                en: "Approved successfully.",
+            }),
+        );
+    }
+
+    function confirmApproval() {
+        if (!scannedUser) return;
+
+        if (validateUser(scannedUser)) {
+            performApproval(scannedUser);
+            closeScan();
+        } else {
+            resumeScanning();
+        }
+    }
+
+    onDestroy(() => {
+        stopScanner();
+    });
 </script>
 
 {#if showDetailsModal}
@@ -250,7 +498,7 @@
         style="backdrop-filter: blur(4px);"
     >
         <div
-            class="bg-white dark:bg-zinc-900 flex flex-col gap-6 items-center justify-start overflow-clip p-6 relative rounded-[1.25rem] shadow-2xl shrink-0 w-[45rem] max-w-full max-h-[90vh] overflow-y-auto border border-zinc-200 dark:border-zinc-800"
+            class="bg-white dark:bg-zinc-900 flex flex-col gap-6 items-center justify-start overflow-clip p-6 relative rounded-[1.25rem] shadow-2xl shrink-0 w-[45rem] max-w-full max-h-[90vh] overflow-y-auto"
         >
             <div class="w-full flex justify-between items-center">
                 <h2
@@ -356,7 +604,9 @@
                                             {#each phase.stats as stat}
                                                 <span
                                                     class="text-zinc-400 dark:text-zinc-500"
-                                                    >{i18n.decode(stat.label)}</span
+                                                    >{i18n.decode(
+                                                        stat.label,
+                                                    )}</span
                                                 >
                                                 <span
                                                     class="font-bold text-right text-zinc-800 dark:text-zinc-200"
@@ -440,7 +690,9 @@
                                             {#each phase.stats as stat}
                                                 <span
                                                     class="text-zinc-400 dark:text-zinc-500"
-                                                    >{i18n.decode(stat.label)}</span
+                                                    >{i18n.decode(
+                                                        stat.label,
+                                                    )}</span
                                                 >
                                                 <span
                                                     class="font-bold text-right text-zinc-800 dark:text-zinc-200"
@@ -716,6 +968,34 @@
             >
                 {teamAPlayers}
             </p>
+
+            <button
+                type="button"
+                onclick={() => openScan("A")}
+                disabled={approvedA}
+                class="w-full mt-2 py-3 {approvedA
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-amber-500 text-white hover:bg-amber-600'} font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-80"
+            >
+                {#if approvedA}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        ><polyline points="20 6 9 17 4 12"></polyline></svg
+                    >
+                    {i18n.t({ ko: "승인됨", en: "Approved" })}
+                {:else}
+                    {@html ScanIcon}
+                    {i18n.t({ ko: "승인받기", en: "Approve" })}
+                {/if}
+            </button>
         </div>
 
         <!-- Vertical Divider -->
@@ -872,6 +1152,34 @@
             >
                 {teamBPlayers}
             </p>
+
+            <button
+                type="button"
+                onclick={() => openScan("B")}
+                disabled={approvedB}
+                class="w-full mt-2 py-3 {approvedB
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-amber-500 text-white hover:bg-amber-600'} font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-80"
+            >
+                {#if approvedB}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        ><polyline points="20 6 9 17 4 12"></polyline></svg
+                    >
+                    {i18n.t({ ko: "승인됨", en: "Approved" })}
+                {:else}
+                    {@html ScanIcon}
+                    {i18n.t({ ko: "승인받기", en: "Approve" })}
+                {/if}
+            </button>
         </div>
     </div>
 
@@ -907,7 +1215,7 @@
         {:else if activeMatch.status === "ONGOING"}
             <!-- Form submit button mapped from the hidden input form setup -->
             <button
-                disabled={isSubmitting}
+                disabled={isSubmitting || !approvedA || !approvedB}
                 onclick={() => (showEndConfirm = true)}
                 class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors content-stretch flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-[0.5rem] relative rounded-[0.9375rem] shrink-0 w-full disabled:opacity-50"
             >
@@ -939,7 +1247,7 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 max-w-full"
         >
             <div
                 class="flex flex-col gap-5 items-center justify-center p-[3.125rem] relative shrink-0 w-full text-center"
@@ -1018,7 +1326,7 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 max-w-full"
         >
             <div
                 class="flex flex-col gap-5 items-center justify-center p-[3.125rem] relative shrink-0 w-full text-center"
@@ -1096,7 +1404,7 @@
         style="backdrop-filter: blur(2px);"
     >
         <div
-            class="bg-zinc-50 dark:bg-zinc-900 border dark:border-zinc-800 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[35.5625rem] max-w-full"
+            class="bg-zinc-50 dark:bg-zinc-900 flex flex-col gap-2.5 items-center justify-center overflow-clip p-5 relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] shrink-0 w-[35.5625rem] max-w-full"
         >
             <div
                 class="flex flex-col items-center justify-center p-[3.125rem] pb-[3.125rem] relative shrink-0 w-full text-center"
@@ -1164,3 +1472,209 @@
         </div>
     </div>
 {/if}
+
+<!-- approval Scan Modal -->
+{#if scanModalOpen}
+    <div
+        class="fixed inset-0 bg-zinc-800/30 flex items-center justify-center z-[10000] p-4"
+        style="backdrop-filter: blur(2px);"
+    >
+        <div
+            class="bg-zinc-50 dark:bg-zinc-900 flex flex-col gap-[1.875rem] items-center justify-center overflow-clip p-[1.875rem] relative rounded-[1.25rem] shadow-[0_0_1.875rem_0_rgba(0,0,0,0.05)] border dark:border-zinc-800 shrink-0 w-[31.3125rem] max-w-full"
+        >
+            <div
+                class="flex flex-col gap-2 items-center justify-center relative shrink-0 w-full text-center"
+            >
+                <p
+                    class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem]"
+                >
+                    {i18n.t({ ko: "경기 결과 승인", en: "Approve Results" })}
+                    ({scanningTarget === "A"
+                        ? activeMatch.classA
+                        : activeMatch.classB}{i18n.t({
+                        ko: "반",
+                        en: "",
+                    })})
+                </p>
+                <p
+                    class="font-['Pretendard_Variable'] font-medium relative shrink-0 text-zinc-600 dark:text-zinc-400 text-[1rem]"
+                >
+                    {i18n.t({
+                        ko: "선수의 QR 코드를 스캔하거나 학번을 입력해주세요.",
+                        en: "Scan player's QR code or enter Student ID.",
+                    })}
+                </p>
+            </div>
+
+            <!-- QR Code Scanner Area -->
+            <div
+                class="w-full aspect-square bg-black rounded-2xl border-2 border-dashed border-zinc-300 dark:border-zinc-700 flex flex-col items-center justify-center relative overflow-hidden shrink-0"
+            >
+                <div
+                    id="qr-reader"
+                    class="w-full h-full absolute inset-0 z-0 flex items-center justify-center"
+                ></div>
+
+                {#if scannedUser}
+                    <!-- 2-Step Confirmation Overlay Layer -->
+                    <div
+                        class="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white"
+                    >
+                        <div class="flex flex-col items-center mb-6">
+                            <span
+                                class="text-[2rem] font-bold font-pretendard mb-1"
+                                >{scannedUser.name}</span
+                            >
+                            <span class="text-xl text-zinc-300 font-medium"
+                                >{scannedUser.studentNumber} · {i18n.t({
+                                    ko: "",
+                                    en: "Class ",
+                                })}{scannedUser.class}{i18n.t({
+                                    ko: "반",
+                                    en: "",
+                                })}</span
+                            >
+                        </div>
+                        <p class="text-lg font-medium mb-4">
+                            {i18n.t({
+                                ko: "위 선수로 승인할까요?",
+                                en: "Approve with this student?",
+                            })}
+                        </p>
+                        <div class="flex justify-center gap-4 w-full px-4 mt-2">
+                            <button
+                                type="button"
+                                onclick={resumeScanning}
+                                class="flex-1 h-12 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl transition-colors flex items-center justify-center"
+                            >
+                                {i18n.t({ ko: "취소", en: "Cancel" })}
+                            </button>
+                            <button
+                                type="button"
+                                onclick={confirmApproval}
+                                class="flex-1 h-12 bg-amber-500 hover:bg-amber-600 rounded-xl transition-colors flex items-center justify-center font-bold"
+                            >
+                                {i18n.t({ ko: "승인", en: "Approve" })}
+                            </button>
+                        </div>
+                    </div>
+                {:else if scanError}
+                    <div
+                        class="z-10 bg-white/90 dark:bg-zinc-900/90 p-4 rounded-xl text-center flex flex-col items-center gap-2"
+                    >
+                        <div
+                            class="text-zinc-500 w-8 h-8 flex items-center justify-center"
+                        >
+                            {@html ScanIcon}
+                        </div>
+                        <p class="text-red-500 font-medium text-sm">
+                            {scanError}
+                        </p>
+                    </div>
+                {:else if !scanModalOpen}
+                    <!-- Placeholder when not scanning -->
+                    <div
+                        class="z-10 text-zinc-500 w-8 h-8 flex items-center justify-center"
+                    >
+                        {@html ScanIcon}
+                    </div>
+                {/if}
+            </div>
+
+            <!-- Manual Input Form -->
+            <div
+                class="w-full flex inset-0 flex-col gap-5 items-center justify-center relative shrink-0"
+            >
+                <div class="w-full flex flex-col gap-2">
+                    <label
+                        for="studentNumber_approval"
+                        class="font-['Pretendard_Variable'] font-semibold text-zinc-700 dark:text-zinc-300 text-[0.875rem]"
+                    >
+                        {i18n.t({
+                            ko: "학번 수동 입력",
+                            en: "Manual Student ID Input",
+                        })}
+                    </label>
+                    <input
+                        type="text"
+                        id="studentNumber_approval"
+                        bind:value={studentNumberInput}
+                        placeholder={i18n.t({
+                            ko: "예: 20240001",
+                            en: "e.g. 20240001",
+                        })}
+                        class="w-full h-[3.125rem] bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-[0.9375rem] px-4 font-['Pretendard_Variable'] text-[1rem] text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                    />
+                </div>
+
+                <div
+                    class="flex gap-2.5 items-start justify-center relative shrink-0 w-full sm:flex-row flex-col pt-2"
+                >
+                    <button
+                        type="button"
+                        onclick={closeScan}
+                        class="bg-zinc-500 hover:bg-zinc-600 active:bg-zinc-800 transition-colors flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] w-full"
+                    >
+                        <p
+                            class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
+                        >
+                            {i18n.t({ ko: "돌아가기", en: "Go Back" })}
+                        </p>
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isSubmitting || !studentNumberInput}
+                        onclick={handleManualApproval}
+                        class="bg-amber-500 hover:bg-amber-600 active:bg-amber-700 transition-colors w-full flex-1 flex flex-col h-[3.125rem] items-center justify-center px-[2.1875rem] py-2 relative rounded-[0.9375rem] disabled:opacity-50"
+                    >
+                        {#if isSubmitting}
+                            <svg
+                                class="animate-spin h-5 w-5 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                        {:else}
+                            <p
+                                class="font-['Pretendard_Variable'] font-semibold relative shrink-0 text-[1rem] text-white whitespace-nowrap"
+                            >
+                                {i18n.t({ ko: "승인하기", en: "Approve" })}
+                            </p>
+                        {/if}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<style>
+    /* Styling to make sure html5-qrcode video scales perfectly */
+    :global(#qr-reader video) {
+        object-fit: cover !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    /* Hide the annoying license/info footer from html5-qrcode */
+    :global(#qr-reader__dashboard_section_swaplink) {
+        display: none !important;
+    }
+    :global(#qr-reader a) {
+        display: none !important;
+    }
+</style>

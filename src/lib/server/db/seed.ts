@@ -220,25 +220,8 @@ async function main() {
             insertedUsers = insertedUsers.concat(rows);
         }
 
-        // --- 6. Rosters (Every student for Every sport) ---
-        console.log("📋 Adding Rosters for ALL students in ALL sports...");
-        const rosterInserts: typeof schema.rosters.$inferInsert[] = [];
-        // Only regular students and proctors participate in sports
-        const participants = insertedUsers.filter(u => u.classId && (u.isProctor || (!u.isAdmin && !u.isManager && !u.isReferee)));
-
-        for (const sport of insertedSports) {
-            for (const participant of participants) {
-                rosterInserts.push({
-                    userId: participant.id,
-                    classId: participant.classId!,
-                    sportId: sport.id
-                });
-            }
-        }
-
-        for (let i = 0; i < rosterInserts.length; i += batchSize) {
-            await db.insert(schema.rosters).values(rosterInserts.slice(i, i + batchSize));
-        }
+        // --- 6. Rosters (Skipped as requested) ---
+        console.log("📋 Skipping automatic rosters...");
 
         // --- 7. Brackets & Matches ---
         await seedBrackets(insertedClasses, insertedSports);

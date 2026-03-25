@@ -16,13 +16,9 @@ export const GET: RequestHandler = async ({ params, locals }) => {
         return json({ error: 'Missing user id' }, { status: 400 });
     }
 
-    // Validate UUID format roughly
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(id)) {
-        return json({ error: 'Invalid user id format' }, { status: 400 });
-    }
-
     try {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
         const result = await db.select({
             id: users.id,
             name: users.name,
@@ -32,7 +28,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
         })
         .from(users)
         .leftJoin(classes, eq(users.classId, classes.id))
-        .where(eq(users.id, id))
+        .where(isUuid ? eq(users.id, id) : eq(users.studentNumber, id))
         .limit(1);
 
         if (result.length === 0) {
