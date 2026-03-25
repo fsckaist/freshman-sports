@@ -818,11 +818,11 @@
     class="bg-white dark:bg-zinc-900 flex flex-col gap-[0.625rem] items-start min-h-[25rem] overflow-clip p-[1.25rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] w-full h-full border border-zinc-100 dark:border-zinc-800"
 >
     <div
-        class="content-stretch flex flex-[1_0_0] gap-[0.625rem] items-center min-h-px min-w-px relative w-full overflow-hidden"
+        class="content-stretch flex flex-col md:flex-row flex-[1_0_0] gap-[0.625rem] items-center min-h-px min-w-px relative w-full overflow-y-auto md:overflow-hidden"
     >
         <!-- Team A Column -->
         <div
-            class="content-stretch flex flex-[1_0_0] flex-col gap-[0.625rem] h-full items-center min-h-px min-w-px overflow-y-auto relative rounded-[1.25rem] px-2"
+            class="content-stretch flex flex-none md:flex-[1_0_0] flex-col gap-[0.625rem] w-full md:h-full items-center min-h-px min-w-px md:overflow-y-auto relative rounded-[1.25rem] px-2 shrink-0"
         >
             <p
                 class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] whitespace-nowrap mt-2"
@@ -969,43 +969,45 @@
                 {teamAPlayers}
             </p>
 
-            <button
-                type="button"
-                onclick={() => openScan("A")}
-                disabled={approvedA}
-                class="w-full mt-2 py-3 {approvedA
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-amber-500 text-white hover:bg-amber-600'} font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-80"
-            >
-                {#if approvedA}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        ><polyline points="20 6 9 17 4 12"></polyline></svg
-                    >
-                    {i18n.t({ ko: "승인됨", en: "Approved" })}
-                {:else}
-                    {@html ScanIcon}
-                    {i18n.t({ ko: "승인받기", en: "Approve" })}
-                {/if}
-            </button>
+            {#if activeMatch.status === "ONGOING"}
+                <button
+                    type="button"
+                    onclick={() => openScan("A")}
+                    disabled={approvedA}
+                    class="w-full mt-2 py-3 {approvedA
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-amber-500 text-white hover:bg-amber-600'} font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-80"
+                >
+                    {#if approvedA}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            ><polyline points="20 6 9 17 4 12"></polyline></svg
+                        >
+                        {i18n.t({ ko: "승인됨", en: "Approved" })}
+                    {:else}
+                        {@html ScanIcon}
+                        {i18n.t({ ko: "승인받기", en: "Approve" })}
+                    {/if}
+                </button>
+            {/if}
         </div>
 
-        <!-- Vertical Divider -->
+        <!-- Vertical/Horizontal Divider -->
         <div
-            class="flex h-full w-px bg-zinc-200 dark:bg-zinc-800 items-center justify-center relative self-center shrink-0 mx-2"
+            class="flex h-px w-full md:h-full md:w-px bg-zinc-200 dark:bg-zinc-800 items-center justify-center relative self-center shrink-0 my-2 md:mx-2 md:my-0"
         ></div>
 
         <!-- Team B Column -->
         <div
-            class="content-stretch flex flex-[1_0_0] flex-col gap-[0.625rem] h-full items-center min-h-px min-w-px overflow-y-auto relative rounded-[1.25rem] px-2"
+            class="content-stretch flex flex-none md:flex-[1_0_0] flex-col gap-[0.625rem] w-full md:h-full items-center min-h-px min-w-px md:overflow-y-auto relative rounded-[1.25rem] px-2 shrink-0"
         >
             <p
                 class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] whitespace-nowrap mt-2"
@@ -1153,33 +1155,35 @@
                 {teamBPlayers}
             </p>
 
-            <button
-                type="button"
-                onclick={() => openScan("B")}
-                disabled={approvedB}
-                class="w-full mt-2 py-3 {approvedB
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-amber-500 text-white hover:bg-amber-600'} font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-80"
-            >
-                {#if approvedB}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        ><polyline points="20 6 9 17 4 12"></polyline></svg
-                    >
-                    {i18n.t({ ko: "승인됨", en: "Approved" })}
-                {:else}
-                    {@html ScanIcon}
-                    {i18n.t({ ko: "승인받기", en: "Approve" })}
-                {/if}
-            </button>
+            {#if activeMatch.status === "ONGOING"}
+                <button
+                    type="button"
+                    onclick={() => openScan("B")}
+                    disabled={approvedB}
+                    class="w-full mt-2 py-3 {approvedB
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-amber-500 text-white hover:bg-amber-600'} font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-80"
+                >
+                    {#if approvedB}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            ><polyline points="20 6 9 17 4 12"></polyline></svg
+                        >
+                        {i18n.t({ ko: "승인됨", en: "Approved" })}
+                    {:else}
+                        {@html ScanIcon}
+                        {i18n.t({ ko: "승인받기", en: "Approve" })}
+                    {/if}
+                </button>
+            {/if}
         </div>
     </div>
 

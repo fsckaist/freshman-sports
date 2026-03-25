@@ -169,8 +169,8 @@ async function main() {
         // 1. Admin (2022...)
         usersToInsert.push({
             name: "총관리자",
-            studentNumber: "20250474",
-            email: "twooyu@kaist.ac.kr",
+            studentNumber: "20220000",
+            email: "admin@kaistfsc.org",
             isAdmin: true,
             isManager: true,
             agreedPrivacy: false,
