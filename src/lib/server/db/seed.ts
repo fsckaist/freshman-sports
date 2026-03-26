@@ -95,7 +95,8 @@ async function main() {
                 round1Deadline: march20,
                 recordStructure: [
                     { key: "half1", label: JSON.stringify({ ko: "전반", en: "1st Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
-                    { key: "half2", label: JSON.stringify({ ko: "후반", en: "2nd Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] }
+                    { key: "half2", label: JSON.stringify({ ko: "후반", en: "2nd Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
+                    { key: "overtime", label: JSON.stringify({ ko: "연장", en: "Overtime" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] }
                 ]
             },
             {

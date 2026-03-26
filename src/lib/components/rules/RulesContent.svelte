@@ -109,8 +109,8 @@
         </p>
         <p class="m-0">
             {i18n.t({
-                ko: "본 대회의 원활한 진행과 공정한 판정을 위하여 기획 및 실무를 총괄하는 '운영위원회'와 경기 판정을 전담하는 '심판진'을 각각 구성한다.",
-                en: "For the smooth progress and fair judging of the Tournament, an 'Organizing Committee' shall be formed to oversee planning and practical affairs, and a 'Referee Panel' shall be formed exclusively for match officiating.",
+                ko: "본 대회의 원활한 진행과 공정한 판정을 위하여 기획 및 실무를 총괄하는 '새내기 체육대회 운영위원회'(이하 '운영위원회'라 한다)와 경기 판정을 전담하는 '심판진'을 각각 구성한다.",
+                en: "For the smooth progress and fair judging of the Tournament, a 'Freshmen Sports Festival Steering Committee' (hereinafter referred to as the 'Steering Committee') shall be formed to oversee planning and practical affairs, and a 'Referee Panel' shall be formed exclusively for match officiating.",
             })}
         </p>
     </section>
@@ -126,8 +126,8 @@
         </p>
         <p class="m-0">
             {i18n.t({
-                ko: "'2026 새내기 체육대회 운영위원회'(이하 '운영위원회'라 한다)는 새내기학생회 기획국 산하 새내기 체육대회 팀을 주축으로 한다. 운영위원회는 위원장, 종목별 팀장, 운영위원으로 구성되며, 각 주체의 역할과 권한은 다음과 같다.",
-                en: "The '2026 Freshmen Sports Day Steering Committee' (hereinafter referred to as the 'Steering Committee') is primarily composed of the Freshmen Sports Day Team under the Planning Bureau of the Freshmen Student Council. The Steering Committee consists of a Chairperson, Event Team Leaders, and Steering Committee Members, with the roles and authorities of each party defined as follows:",
+                ko: "운영위원회는 새내기학생회 기획국 산하 새내기 체육대회 팀을 주축으로 한다. 운영위원회는 위원장, 종목별 팀장, 운영위원으로 구성되며, 각 주체의 역할과 권한은 다음과 같다.",
+                en: "The Steering Committee is primarily composed of the Freshmen Sports Day Team under the Planning Bureau of the Freshmen Student Council. The Steering Committee consists of a Chairperson, Event Team Leaders, and Steering Committee Members, with the roles and authorities of each party defined as follows:",
             })}
         </p>
         <ul class="list-disc pl-6 m-0">
@@ -567,9 +567,29 @@
         <ol class="list-decimal pl-6 m-0">
             <li>
                 {i18n.t({
-                    ko: "각 종목별 파울, 득점 등 세부적인 경기 규칙은 해당 종목 공식 협회의 규정을 준용함을 원칙으로 하되, 본 규정에 명시된 대회 자체 규칙을 최우선으로 적용한다.",
-                    en: "Detailed rules regarding fouls, scoring, etc., for each sport shall follow the official regulations of the respective sports associations, but the Tournament's own rules specified in these regulations shall take precedence.",
+                    ko: "각 종목별 파울, 득점 등 세부적인 경기 규칙은 다음 각 호의 공식 협회 규정을 준용한다. 다만, 본 규정에 별도로 명시된 대회 자체 규칙이 있는 경우 이를 최우선으로 적용한다.",
+                    en: "Detailed match rules regarding fouls, scoring, etc., for each sport shall conform to the official association regulations listed below. However, if there are Tournament-specific rules explicitly stated in these regulations, they shall take precedence.",
                 })}
+                <ul class="list-disc pl-6 m-0 mt-1">
+                    <li>
+                        {i18n.t({
+                            ko: "풋살: 대한축구협회 「풋살 경기 규칙 2024-25」",
+                            en: "Futsal: Korea Football Association 「Futsal Laws of the Game 2024-25」",
+                        })}
+                    </li>
+                    <li>
+                        {i18n.t({
+                            ko: "농구: 대한민국농구협회 「2026 FIBA 3X3 농구 규칙서」",
+                            en: "Basketball: Korea Basketball Association 「2026 FIBA 3x3 Basketball Rules」",
+                        })}
+                    </li>
+                    <li>
+                        {i18n.t({
+                            ko: "배드민턴: 대한배드민턴협회 「2025 배드민턴 경기규정」",
+                            en: "Badminton: Badminton Korea Association 「2025 Badminton Regulations」",
+                        })}
+                    </li>
+                </ul>
             </li>
             <li>
                 {i18n.t({
@@ -726,6 +746,12 @@
                 {i18n.t({
                     ko: "모든 선수는 타인에게 상해를 입힐 수 있는 장신구(반지, 시계, 귀걸이, 날카로운 머리핀 등)를 착용한 채로 경기에 출전할 수 없다. 적발 시 탈거 후 출전 가능하다.",
                     en: "Athletes may not participate in a match wearing jewelry or accessories that could cause injury to others (rings, watches, earrings, sharp hairpins, etc.). They may participate only after removing such items.",
+                })}
+            </li>
+            <li>
+                {i18n.t({
+                    ko: "풋살 종목 참가자는 부상 방지 및 구장 보호를 위해 스터드가 있는 축구화(FG, HG, AG 등) 착용이 금지되며, 반드시 풋살화(TF) 또는 일반 운동화를 착용해야 한다. 이를 위반할 경우 경기에 출전할 수 없다.",
+                    en: "Futsal participants are prohibited from wearing football boots with studs (FG, HG, AG, etc.) to prevent injuries and protect the pitch, and must wear futsal shoes (TF) or regular sneakers. If violated, they cannot participate in the match.",
                 })}
             </li>
             <li>
