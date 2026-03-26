@@ -14,15 +14,15 @@
         class="flex flex-col md:flex-row items-start justify-between gap-4 leading-[normal] relative shrink-0 w-full"
     >
         <div
-            class="flex flex-col gap-[0.625rem] items-start justify-center relative shrink-0"
+            class="flex flex-col gap-[0.625rem] items-start justify-center relative min-w-0 flex-1"
         >
             <h1
-                class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0 leading-tight"
+                class="font-pretendard font-bold relative text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0 leading-tight"
             >
                 {i18n.t({ ko: "선수 지원하기", en: "Apply for Sports" })}
             </h1>
             <div
-                class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-sm md:text-[0.875rem] m-0 leading-tight"
+                class="font-pretendard font-normal relative w-full text-zinc-600 dark:text-zinc-400 text-sm md:text-[0.875rem] m-0 leading-tight break-keep"
             >
                 <p class="m-0">
                     {i18n.t({

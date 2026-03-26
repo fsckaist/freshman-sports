@@ -195,7 +195,7 @@
                     </div>
                     <!-- Rotating Anti-Capture Border -->
                     <div
-                        class="relative flex items-center justify-center rounded-[1.75rem] overflow-hidden w-60 h-60 z-20"
+                        class="relative flex items-center justify-center rounded-[1.75rem] overflow-hidden w-44 h-44 z-20"
                     >
                         <!-- Spinning Gradient -->
                         <div
@@ -209,12 +209,12 @@
                                 <img
                                     src={qrCodeUrl}
                                     alt="QR Code"
-                                    class="w-48 h-48 object-cover pointer-events-none select-none"
+                                    class="w-32 h-32 object-cover pointer-events-none select-none"
                                     draggable="false"
                                 />
                             {:else}
                                 <div
-                                    class="w-48 h-48 bg-zinc-100 animate-pulse rounded-2xl"
+                                    class="w-32 h-32 bg-zinc-100 animate-pulse rounded-2xl"
                                 ></div>
                             {/if}
                         </div>

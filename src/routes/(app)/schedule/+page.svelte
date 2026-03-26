@@ -21,12 +21,12 @@
         class="flex flex-col gap-[0.625rem] items-start justify-center relative shrink-0 w-full"
     >
         <h1
-            class="font-pretendard font-bold relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0 leading-tight"
+            class="font-pretendard font-bold relative text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0 leading-tight"
         >
             {i18n.t({ ko: "일정 정하기", en: "Schedule Match" })}
         </h1>
         <div
-            class="font-pretendard font-normal relative shrink-0 text-zinc-600 dark:text-zinc-400 text-sm md:text-[0.875rem] m-0 leading-tight"
+            class="font-pretendard font-normal relative w-full text-zinc-600 dark:text-zinc-400 text-sm md:text-[0.875rem] m-0 leading-tight break-keep"
         >
             <p class="m-0">
                 {i18n.t({
