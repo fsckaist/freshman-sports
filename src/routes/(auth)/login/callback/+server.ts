@@ -58,9 +58,9 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
         .limit(1);
 
     if (existingUsers.length === 0) {
-        const msg = JSON.stringify({ 
-            ko: `해당 학번(${userData.studentNumber})에 해당하는 학우분께서는 새내기 체육대회에 참가할 수 없습니다. 문제가 있다고 판단되시면 새내기학생회에 문의해주세요.`, 
-            en: `The student with ID (${userData.studentNumber}) is not eligible to participate in the Freshman Sports event. Please contact the Freshman Student Council if you believe this is an error.` 
+        const msg = JSON.stringify({
+            ko: `해당 학번(${userData.studentNumber})에 해당하는 학우분께서는 새내기 체육대회에 참가할 수 없습니다. 문제가 있다고 판단되시면 새내기학생회에 문의해주세요.`,
+            en: `The student with ID (${userData.studentNumber}) is not eligible to participate in the Freshman Sports event. Please contact the Freshman Student Council if you believe this is an error.`
         });
         throw handleAuthError(msg);
     }
@@ -101,7 +101,9 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     });
 
     // Redirect based on agreement status
-    if (dbUser.agreedPrivacy && dbUser.agreedRules) {
+    if (!userData.gender && !dbUser.gender) {
+        throw redirect(303, '/register/gender');
+    } else if (dbUser.agreedPrivacy && dbUser.agreedRules) {
         throw redirect(303, '/');
     } else {
         throw redirect(303, '/register/rules');

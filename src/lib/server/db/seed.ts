@@ -193,7 +193,7 @@ async function main() {
                 isAdmin: is_admin.toUpperCase() === 'TRUE',
                 agreedPrivacy: false,
                 agreedRules: false,
-                gender: 'MALE' // Default
+                gender: null
             };
 
             if (usersMap.has(student_number)) {

@@ -176,7 +176,7 @@ async function main() {
             isManager: true,
             agreedPrivacy: false,
             agreedRules: false,
-            gender: 'MALE'
+            gender: null
         });
 
         // 2. Managers (2023...) - 10 users
@@ -188,7 +188,7 @@ async function main() {
                 isManager: true,
                 agreedPrivacy: false,
                 agreedRules: false,
-                gender: i % 2 === 0 ? 'FEMALE' : 'MALE'
+                gender: null
             });
         }
 
@@ -201,7 +201,7 @@ async function main() {
                 isReferee: true,
                 agreedPrivacy: false,
                 agreedRules: false,
-                gender: i % 2 === 0 ? 'FEMALE' : 'MALE'
+                gender: null
             });
         }
 
@@ -217,7 +217,7 @@ async function main() {
                     isProctor: true,
                     agreedPrivacy: false,
                     agreedRules: false,
-                    gender: i === 1 ? 'MALE' : 'FEMALE'
+                    gender: null
                 });
             }
 
@@ -230,7 +230,7 @@ async function main() {
                     classId: c.id,
                     agreedPrivacy: false,
                     agreedRules: false,
-                    gender: i <= 5 ? 'MALE' : 'FEMALE' // 5 Male, 5 Female
+                    gender: null // 5 Male, 5 Female
                 });
             }
         }

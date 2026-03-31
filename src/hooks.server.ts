@@ -68,15 +68,20 @@ export const handle: Handle = async ({ event, resolve }) => {
         }
     }
     else {
+        const needsGender = !user.gender;
         const needsRules = !user.agreedRules;
         const needsPolicy = !user.agreedPrivacy;
 
-        if (needsRules) {
-            if (pathname !== '/register/rules' && pathname !== '/info/rules') {
+        if (needsGender) {
+            if (pathname !== '/register/gender' && pathname !== '/logout') {
+                throw redirect(303, '/register/gender');
+            }
+        } else if (needsRules) {
+            if (pathname !== '/register/rules' && pathname !== '/info/rules' && pathname !== '/logout') {
                 throw redirect(303, '/register/rules');
             }
         } else if (needsPolicy) {
-            if (pathname !== '/register/privacy' && pathname !== '/info/privacy') {
+            if (pathname !== '/register/privacy' && pathname !== '/info/privacy' && pathname !== '/logout') {
                 throw redirect(303, '/register/privacy');
             }
         }

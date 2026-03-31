@@ -51,7 +51,9 @@ export const actions = {
             maxAge: 60 * 60 * 24 * 7 // 7 days
         });
 
-        if (dbUser.agreedPrivacy && dbUser.agreedRules) {
+        if (!dbUser.gender) {
+            throw redirect(303, '/register/gender');
+        } else if (dbUser.agreedPrivacy && dbUser.agreedRules) {
             throw redirect(303, '/');
         } else {
             throw redirect(303, '/register/rules');
