@@ -485,8 +485,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제14조 (경기 진행 방식 및 일정 협의)",
-                    en: "Article 14 (Match Format and Schedule Negotiation)",
+                    ko: "제15조 (경기 진행 방식 및 일정 협의)",
+                    en: "Article 15 (Match Format and Schedule Negotiation)",
                 })}</strong
             >
         </p>
@@ -522,8 +522,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제15조 (종목별 경기 시간 및 코트 운영)",
-                    en: "Article 15 (Match Duration and Court Operation per Category)",
+                    ko: "제16조 (종목별 경기 시간 및 코트 운영)",
+                    en: "Article 16 (Match Duration and Court Operation per Category)",
                 })}</strong
             >
         </p>
@@ -559,8 +559,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제16조 (세부 경기 규칙)",
-                    en: "Article 16 (Detailed Match Rules)",
+                    ko: "제17조 (세부 경기 규칙)",
+                    en: "Article 17 (Detailed Match Rules)",
                 })}</strong
             >
         </p>
@@ -610,8 +610,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제17조 (경기 일정의 진행 및 조율)",
-                    en: "Article 17 (Management and Coordination of Match Schedule)",
+                    ko: "제18조 (경기 일정의 진행 및 조율)",
+                    en: "Article 18 (Management and Coordination of Match Schedule)",
                 })}</strong
             >
         </p>
@@ -641,8 +641,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제18조 (지각 및 차등 패널티 부여)",
-                    en: "Article 18 (Tardiness and Graduated Penalties)",
+                    ko: "제19조 (지각 및 차등 패널티 부여)",
+                    en: "Article 19 (Tardiness and Graduated Penalties)",
                 })}</strong
             >
         </p>
@@ -692,8 +692,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제19조 (경기 결과 확인)",
-                    en: "Article 19 (Confirmation of Match Results)",
+                    ko: "제20조 (경기 결과 확인)",
+                    en: "Article 20 (Confirmation of Match Results)",
                 })}</strong
             >
         </p>
@@ -722,16 +722,16 @@
     <!-- Chapter 5 -->
     <h3 class="font-bold text-xl m-0 mt-4">
         {i18n.t({
-            ko: "제5장 안전 및 의료",
-            en: "CHAPTER 5. SAFETY AND MEDICAL SUPPORT",
+            ko: "제5장 안전·의료 및 경기 용품",
+            en: "CHAPTER 5. SAFETY, MEDICAL SUPPORT, AND EQUIPMENT",
         })}
     </h3>
     <section class="flex flex-col gap-2">
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제20조 (참가자의 안전 의무)",
-                    en: "Article 20 (Safety Obligations of Participants)",
+                    ko: "제21조 (복장·장비 및 참가자의 안전 의무)",
+                    en: "Article 21 (Attire, Equipment, and Safety Obligations of Participants)",
                 })}</strong
             >
         </p>
@@ -760,6 +760,18 @@
                     en: "Participants must actively comply with the instructions of the Referee Panel and the Organizing Committee for their own safety and the smooth progression of the event.",
                 })}
             </li>
+            <li>
+                {i18n.t({
+                    ko: "배드민턴 종목 참가자는 개인 라켓을 지참하여 경기에 참여하는 것을 원칙으로 한다. 다만, 개인 라켓을 지참하지 못한 선수에 한하여 운영위원회에서 구비된 라켓을 대여할 수 있다.",
+                    en: "Badminton participants must bring their own personal rackets. Rackets are not available for rent at the venue, and those without a racket cannot participate in the match.",
+                })}
+            </li>
+            <li>
+                {i18n.t({
+                    ko: "풋살공, 농구공, 조끼, 셔틀콕 등 경기 진행에 필요한 공용 물품은 운영위원회에서 제공한다.",
+                    en: "The Organizing Committee provides common items necessary for match progression, such as futsal balls, basketballs, vests, and shuttlecocks.",
+                })}
+            </li>
         </ol>
     </section>
 
@@ -767,8 +779,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제21조 (의료 지원 및 응급 상황 대처)",
-                    en: "Article 21 (Medical Support and Emergency Response)",
+                    ko: "제22조 (의료 지원 및 응급 상황 대처)",
+                    en: "Article 22 (Medical Support and Emergency Response)",
                 })}</strong
             >
         </p>
@@ -798,8 +810,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제22조 (부상 발생 시 경기 진행)",
-                    en: "Article 22 (Match Progression in Case of Injury)",
+                    ko: "제23조 (부상 발생 시 경기 진행)",
+                    en: "Article 23 (Match Progression in Case of Injury)",
                 })}</strong
             >
         </p>
@@ -849,8 +861,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제23조 (책임 소재 및 면책)",
-                    en: "Article 23 (Liability and Indemnification)",
+                    ko: "제24조 (책임 소재 및 면책)",
+                    en: "Article 24 (Liability and Indemnification)",
                 })}</strong
             >
         </p>
@@ -887,8 +899,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제24조 (이의 제기 절차)",
-                    en: "Article 24 (Objection Procedure)",
+                    ko: "제25조 (이의 제기 절차)",
+                    en: "Article 25 (Objection Procedure)",
                 })}</strong
             >
         </p>
@@ -918,8 +930,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제25조 (이의 제기의 범위 및 한계)",
-                    en: "Article 25 (Scope and Limits of Objection)",
+                    ko: "제26조 (이의 제기의 범위 및 한계)",
+                    en: "Article 26 (Scope and Limits of Objection)",
                 })}</strong
             >
         </p>
@@ -963,8 +975,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제26조 (비매너 행위 및 징계)",
-                    en: "Article 26 (Unsportsmanlike Conduct and Sanctions)",
+                    ko: "제27조 (비매너 행위 및 징계)",
+                    en: "Article 27 (Unsportsmanlike Conduct and Sanctions)",
                 })}</strong
             >
         </p>
@@ -1052,8 +1064,8 @@
         <p class="m-0">
             <strong
                 >{i18n.t({
-                    ko: "제27조 (최종 결정의 효력)",
-                    en: "Article 27 (Effect of Final Decisions)",
+                    ko: "제28조 (최종 결정의 효력)",
+                    en: "Article 28 (Effect of Final Decisions)",
                 })}</strong
             >
         </p>

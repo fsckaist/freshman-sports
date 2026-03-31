@@ -463,27 +463,13 @@
             class="text-lg sm:text-xl font-bold text-zinc-800 dark:text-zinc-100 m-0 border-b border-zinc-300 dark:border-zinc-600 pb-2"
         >
             {i18n.t({
-                ko: "안전 의무 및 금지 사항",
-                en: "Safety Obligations & Prohibitions",
+                ko: "복장 및 장비 구비와 안전 수칙",
+                en: "Attire, Equipment, and Safety Guidelines",
             })}
         </h3>
         <ul
             class="list-disc pl-5 m-0 text-zinc-800 dark:text-zinc-200 flex flex-col gap-2.5"
         >
-            <li>
-                <span class="font-semibold"
-                    >{i18n.t({
-                        ko: "장신구 등 부상 위험이 있는 물건은 착용할 수 없어요",
-                        en: "You cannot wear items that may cause injury, such as jewelry",
-                    })}</span
-                >
-                <span class="text-zinc-600 dark:text-zinc-300">
-                    {i18n.t({
-                        ko: " — 반지, 시계, 귀걸이, 날카로운 머리핀 등은 착용할 수 없어요. 적발 시 탈거 후 출전 가능해요.",
-                        en: " — Rings, watches, earrings, sharp hairpins, etc. are not allowed. May participate after removal.",
-                    })}
-                </span>
-            </li>
             <li>
                 <span class="font-semibold"
                     >{i18n.t({
@@ -495,6 +481,34 @@
                     {i18n.t({
                         ko: " — FG, HG, AG 등 스터드 축구화는 착용할 수 없어요. 풋살화(TF) 또는 운동화를 착용해주세요.",
                         en: " — FG, HG, AG studs prohibited. Must wear futsal shoes (TF) or sneakers.",
+                    })}
+                </span>
+            </li>
+            <li>
+                <span class="font-semibold"
+                    >{i18n.t({
+                        ko: "배드민턴 경기에서는 개인 라켓을 지참해야해요",
+                        en: "In badminton matches, you must bring your own racket",
+                    })}</span
+                >
+                <span class="text-zinc-600 dark:text-zinc-300">
+                    {i18n.t({
+                        ko: " — 개인 라켓을 지참하여 경기에 참여하는 것이 원칙이에요. 단, 개인 라켓을 지참하지 못한 선수에 한하여 라켓을 대여할 수 있어요.",
+                        en: " — In principle, players should bring their own rackets to the match. For those who cannot, rackets are available to borrow.",
+                    })}
+                </span>
+            </li>
+            <li>
+                <span class="font-semibold"
+                    >{i18n.t({
+                        ko: "장신구 등 부상 위험이 있는 물건은 착용할 수 없어요",
+                        en: "You cannot wear items that may cause injury, such as jewelry",
+                    })}</span
+                >
+                <span class="text-zinc-600 dark:text-zinc-300">
+                    {i18n.t({
+                        ko: " — 반지, 시계, 귀걸이, 날카로운 머리핀 등은 착용할 수 없어요. 적발 시 탈거 후 출전 가능해요.",
+                        en: " — Rings, watches, earrings, sharp hairpins, etc. are not allowed. May participate after removal.",
                     })}
                 </span>
             </li>
