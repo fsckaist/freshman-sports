@@ -61,7 +61,7 @@
 
         <!-- Top Text & Logo Area -->
         <div
-            class="content-stretch flex flex-[1_0_0] flex-col gap-[1.875rem] items-center md:items-start justify-end min-h-px min-w-px p-[0.625rem] relative w-full overflow-visible z-10 border-b border-transparent dark:border-zinc-800/50 pb-[1.875rem]"
+            class="content-stretch flex flex-[1_0_0] flex-col gap-[1.875rem] items-center md:items-start justify-end min-h-px min-w-px p-[0.625rem] relative w-full overflow-visible z-10"
         >
             <div
                 class="content-stretch flex flex-col items-center justify-center overflow-visible relative shrink-0 size-20 md:size-[7.5rem]"
@@ -146,7 +146,7 @@
             </form>
 
             <p
-                class="font-pretendard font-medium leading-[normal] relative shrink-0 text-center md:text-left text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100 border-t border-transparent dark:border-zinc-800/50 w-full pt-[1.25rem]"
+                class="font-pretendard font-medium leading-[normal] relative shrink-0 text-center md:text-left text-[1.125rem] m-0 text-zinc-800 dark:text-zinc-100 w-full pt-[1.25rem]"
             >
                 {i18n.t({
                     ko: "제23대 새내기학생회",

@@ -11,6 +11,14 @@ const db = drizzle(client, { schema });
 async function main() {
     console.log("🌱 Starting Database Seed (Improved)...");
 
+    // Dates for seeding (interpreted as local time)
+    const registrationDeadline = new Date("2026-04-10T23:59:59");
+    const startPeriod = new Date("2026-04-27T00:00:00");
+    const endPeriod = new Date("2026-06-05T23:59:59");
+    const round1SelectionPeriod = new Date("2026-04-27T00:00:00");
+    const round1SelectionEndPeriod = new Date("2026-05-06T23:59:59");
+    const round1Deadline = new Date("2026-04-15T23:59:59");
+
     try {
         // --- 1. Clean Up ---
         console.log("🧹 Cleaning up old data...");
@@ -40,7 +48,7 @@ async function main() {
         console.log("⚙️  Inserting system_config...");
         await db.insert(schema.system_config).values({
             eventState: 'REGISTRATION',
-            registrationDeadline: new Date("2026-03-15T23:59:59")
+            registrationDeadline: registrationDeadline
         });
 
         // --- 3. Classes (31) ---
@@ -48,11 +56,6 @@ async function main() {
         const insertedClasses = await db.insert(schema.classes)
             .values(Array.from({ length: 31 }, (_, i) => ({ classNumber: i + 1 })))
             .returning();
-
-        // Dates for seeding (interpreted as local time)
-        const march13 = new Date("2026-03-13T00:00:00");
-        const march20 = new Date("2026-03-20T23:59:59");
-        const march31 = new Date("2026-03-31T23:59:59");
 
         // --- 4. Sports ---
         console.log("⚽ Inserting Sports with Periods...");
@@ -63,15 +66,15 @@ async function main() {
                 minPlayers: 5,
                 maxPlayers: 10,
                 displayOrder: 1,
-                dailyStartTime: "10:00",
-                dailyEndTime: "16:00",
+                dailyStartTime: "15:00",
+                dailyEndTime: "19:00",
                 timeSlotInterval: 60,
-                maxParallelMatches: 1,
-                periodStart: march13,
-                periodEnd: march31,
-                round1SelectionStart: march13,
-                round1SelectionEnd: march20,
-                round1Deadline: march20,
+                maxParallelMatches: 2,
+                periodStart: startPeriod,
+                periodEnd: endPeriod,
+                round1SelectionStart: round1SelectionPeriod,
+                round1SelectionEnd: round1SelectionEndPeriod,
+                round1Deadline: round1Deadline,
                 recordStructure: [
                     { key: "half1", label: JSON.stringify({ ko: "전반", en: "1st Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
                     { key: "half2", label: JSON.stringify({ ko: "후반", en: "2nd Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
@@ -84,15 +87,15 @@ async function main() {
                 minPlayers: 3,
                 maxPlayers: 8,
                 displayOrder: 2,
-                dailyStartTime: "10:00",
-                dailyEndTime: "16:00",
+                dailyStartTime: "15:00",
+                dailyEndTime: "19:00",
                 timeSlotInterval: 60,
-                maxParallelMatches: 1,
-                periodStart: march13,
-                periodEnd: march31,
-                round1SelectionStart: march13,
-                round1SelectionEnd: march20,
-                round1Deadline: march20,
+                maxParallelMatches: 2,
+                periodStart: startPeriod,
+                periodEnd: endPeriod,
+                round1SelectionStart: round1SelectionPeriod,
+                round1SelectionEnd: round1SelectionEndPeriod,
+                round1Deadline: round1Deadline,
                 recordStructure: [
                     { key: "half1", label: JSON.stringify({ ko: "전반", en: "1st Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
                     { key: "half2", label: JSON.stringify({ ko: "후반", en: "2nd Half" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }, { key: "foul", label: JSON.stringify({ ko: "파울", en: "Foul" }) }] },
@@ -105,15 +108,15 @@ async function main() {
                 minPlayers: 2,
                 maxPlayers: 4,
                 displayOrder: 3,
-                dailyStartTime: "10:00",
-                dailyEndTime: "16:00",
-                timeSlotInterval: 30,
+                dailyStartTime: "15:00",
+                dailyEndTime: "19:00",
+                timeSlotInterval: 60,
                 maxParallelMatches: 2,
-                periodStart: march13,
-                periodEnd: march31,
-                round1SelectionStart: march13,
-                round1SelectionEnd: march20,
-                round1Deadline: march20,
+                periodStart: startPeriod,
+                periodEnd: endPeriod,
+                round1SelectionStart: round1SelectionPeriod,
+                round1SelectionEnd: round1SelectionEndPeriod,
+                round1Deadline: round1Deadline,
                 requiredGender: 'MALE_ONLY',
                 recordStructure: [
                     { key: "set1", label: JSON.stringify({ ko: "1세트", en: "Set 1" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] },
@@ -127,15 +130,15 @@ async function main() {
                 minPlayers: 2,
                 maxPlayers: 4,
                 displayOrder: 4,
-                dailyStartTime: "10:00",
-                dailyEndTime: "16:00",
-                timeSlotInterval: 30,
+                dailyStartTime: "15:00",
+                dailyEndTime: "19:00",
+                timeSlotInterval: 60,
                 maxParallelMatches: 2,
-                periodStart: march13,
-                periodEnd: march31,
-                round1SelectionStart: march13,
-                round1SelectionEnd: march20,
-                round1Deadline: march20,
+                periodStart: startPeriod,
+                periodEnd: endPeriod,
+                round1SelectionStart: round1SelectionPeriod,
+                round1SelectionEnd: round1SelectionEndPeriod,
+                round1Deadline: round1Deadline,
                 requiredGender: 'FEMALE_ONLY',
                 recordStructure: [
                     { key: "set1", label: JSON.stringify({ ko: "1세트", en: "Set 1" }), stats: [{ key: "score", label: JSON.stringify({ ko: "득점", en: "Score" }) }] },
@@ -150,15 +153,12 @@ async function main() {
         const locationData: typeof schema.sport_locations.$inferInsert[] = [];
         for (const sport of insertedSports) {
             if (sport.slug === 'futsal') {
-                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '풋살장 A', en: 'Futsal Court A' }) });
-                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '풋살장 B', en: 'Futsal Court B' }) });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '교내 풋살장 A', en: 'Futsal Court A' }) });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '교내 풋살장 B', en: 'Futsal Court B' }) });
             } else if (sport.slug === 'basketball') {
-                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '실내체육관 농구장', en: 'Indoor Gym Court' }) });
-                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '야외 농구장', en: 'Outdoor Court' }) });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '서측 실내체육관', en: 'West Indoor Gym Court' }) });
             } else {
-                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '체육관 코트 1', en: 'Gym Court 1' }) });
-                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '체육관 코트 2', en: 'Gym Court 2' }) });
-                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '체육관 코트 3', en: 'Gym Court 3' }) });
+                locationData.push({ sportId: sport.id, name: JSON.stringify({ ko: '스포츠 컴플렉스 주경기장', en: 'Sports Complex Main Stadium' }) });
             }
         }
         await db.insert(schema.sport_locations).values(locationData);
@@ -246,18 +246,50 @@ async function seedBrackets(
     insertedClasses: typeof schema.classes.$inferSelect[],
     insertedSports: typeof schema.sports.$inferSelect[]
 ) {
-    console.log("🏆 Seeding Brackets & Matches...");
+    console.log("🏆 Seeding Brackets & Matches from ../data/bracket.csv...");
+    const fs = await import('fs');
+    const path = await import('path');
+    const csvPath = path.resolve(process.cwd(), '../data/bracket.csv');
+    const csvContent = fs.readFileSync(csvPath, 'utf8');
+    const lines = csvContent.split('\n').map(l => l.trim()).filter(l => l !== '');
+
+    // Parse header and map column index to sport slug
+    const header = lines.shift()!.split(',');
+    // Fix typo in CSV header if present (badmintom-w -> badminton-w)
+    const sportSlugs = header.map(s => s.trim());
+
+    // Parse matrix
+    const matrix: (number | null)[][] = lines.map(line => {
+        return line.split(',').map(s => {
+            const val = parseInt(s.trim());
+            return isNaN(val) ? null : val;
+        });
+    });
+
     const bracketNodes: typeof schema.tournament_brackets.$inferInsert[] = [];
 
     for (const sport of insertedSports) {
+        const colIdx = sportSlugs.indexOf(sport.slug);
+        if (colIdx === -1) {
+            console.warn(`No bracket data found for sport ${sport.slug}, skipping...`);
+            continue;
+        }
+
         const round1: typeof schema.matches.$inferInsert[] = [];
         for (let i = 0; i < 16; i++) {
-            const aIdx = i * 2;
-            const bIdx = i * 2 + 1;
+            const r1 = i * 2;
+            const r2 = i * 2 + 1;
+
+            const classNumA = r1 < matrix.length ? matrix[r1][colIdx] : null;
+            const classNumB = r2 < matrix.length ? matrix[r2][colIdx] : null;
+
+            const classAId = classNumA ? insertedClasses.find(c => c.classNumber === classNumA)?.id || null : null;
+            const classBId = classNumB ? insertedClasses.find(c => c.classNumber === classNumB)?.id || null : null;
+
             round1.push({
                 sportId: sport.id,
-                classAId: aIdx < 31 ? insertedClasses[aIdx].id : null,
-                classBId: bIdx < 31 ? insertedClasses[bIdx].id : null,
+                classAId: classAId,
+                classBId: classBId,
                 status: 'PENDING_SCHEDULE',
                 name: JSON.stringify({ ko: `R32-M${i + 1}`, en: `R32-M${i + 1}` }),
                 scoreA: 0,
@@ -267,19 +299,28 @@ async function seedBrackets(
         const inserted = await db.insert(schema.matches).values(round1).returning();
 
         for (let i = 0; i < 16; i++) {
-            const aIdx = i * 2;
-            const bIdx = i * 2 + 1;
+            const r1 = i * 2;
+            const r2 = i * 2 + 1;
+
+            const classNumA = r1 < matrix.length ? matrix[r1][colIdx] : null;
+            const classNumB = r2 < matrix.length ? matrix[r2][colIdx] : null;
+
+            const classAId = classNumA ? insertedClasses.find(c => c.classNumber === classNumA)?.id || null : null;
+            const classBId = classNumB ? insertedClasses.find(c => c.classNumber === classNumB)?.id || null : null;
+
             bracketNodes.push({
-                sportId: sport.id, round: 1, position: aIdx,
-                classId: aIdx < 31 ? insertedClasses[aIdx].id : null,
+                sportId: sport.id, round: 1, position: r1,
+                classId: classAId,
                 matchId: inserted[i].id,
-                isEliminatedSlot: aIdx >= 31, status: 'default'
+                isEliminatedSlot: !classAId,
+                status: 'default'
             });
             bracketNodes.push({
-                sportId: sport.id, round: 1, position: bIdx,
-                classId: bIdx < 31 ? insertedClasses[bIdx].id : null,
+                sportId: sport.id, round: 1, position: r2,
+                classId: classBId,
                 matchId: inserted[i].id,
-                isEliminatedSlot: bIdx >= 31, status: 'default'
+                isEliminatedSlot: !classBId,
+                status: 'default'
             });
         }
 

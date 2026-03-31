@@ -127,12 +127,7 @@ async function syncBracketMatch(sportId: string, targetRound: number, targetPosi
                 sportId,
                 status: 'PENDING_SCHEDULE',
                 name: JSON.stringify({
-                    ko: targetRound === 5 && pIdx === 1 ? '3위 결정전' :
-                        targetRound === 5 ? '결승전' :
-                            targetRound === 4 ? '준결승' :
-                                targetRound === 3 ? '8강' :
-                                    targetRound === 2 ? '16강' :
-                                        '32강',
+                    ko: `${prefix}-M${pIdx + 1}`,
                     en: `${prefix}-M${pIdx + 1}`
                 }),
                 classAId: classA,
@@ -982,13 +977,14 @@ export const actions: Actions = {
 
             const formData = await request.formData();
             const sportId = formData.get('sportId')?.toString();
-            const name = formData.get('name')?.toString();
+            const nameKo = formData.get('nameKo')?.toString();
+            const nameEn = formData.get('nameEn')?.toString();
 
-            if (!sportId || !name) return fail(400, { message: JSON.stringify({ ko: '종목 ID와 장소 이름을 모두 입력해주세요.', en: 'Please enter both Sport ID and location name.' }) });
+            if (!sportId || !nameKo || !nameEn) return fail(400, { message: JSON.stringify({ ko: '현/영 장소 이름을 모두 입력해주세요.', en: 'Please enter both KO/EN location names.' }) });
 
             await db.insert(sport_locations).values({
                 sportId,
-                name: JSON.stringify({ ko: name, en: name })
+                name: JSON.stringify({ ko: nameKo, en: nameEn })
             });
 
             return { success: true };

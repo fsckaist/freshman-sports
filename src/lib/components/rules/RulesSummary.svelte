@@ -266,8 +266,8 @@
                     </span>
                     <span class="font-bold text-amber-600 dark:text-amber-400">
                         {i18n.t({
-                            ko: "4월 10일 (목) 23:59",
-                            en: "April 10 (Thu) 23:59",
+                            ko: "4월 10일 (금) 23:59",
+                            en: "April 10 (Fri) 23:59",
                         })}
                     </span>
                 </div>
