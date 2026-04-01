@@ -27,6 +27,7 @@
         classAId: string | null;
         classBId: string | null;
         refereeName: string | null;
+        refereePhone: string | null;
         managerName: string | null;
         attendance?: Attendance;
     }
@@ -129,7 +130,9 @@
                     >
                         {i18n.decode(match.sportName)}
                         {#if match.name}
-                            <span class="text-lg text-zinc-500 dark:text-zinc-400 ml-2">
+                            <span
+                                class="text-lg text-zinc-500 dark:text-zinc-400 ml-2"
+                            >
                                 {i18n.decode(match.name)}
                             </span>
                         {/if}
@@ -282,7 +285,12 @@
                             ko: "심판 : ",
                             en: "Referee: ",
                         })}{match.refereeName ||
-                            i18n.t({ ko: "미정", en: "TBD" })}
+                            i18n.t({
+                                ko: "미정",
+                                en: "TBD",
+                            })}{#if match.refereeName && match.refereePhone}
+                            &nbsp;({match.refereePhone})
+                        {/if}
                     </p>
                 </div>
             </div>

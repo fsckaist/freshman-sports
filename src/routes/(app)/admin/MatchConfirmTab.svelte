@@ -23,15 +23,22 @@
     let selectedSlotId: string | null = $state(null);
     let selectedRefereeId = $state("");
     let selectedManagerId = $state("");
+    let selectedLocation = $state("");
 
     function openFinalizeModal(slotId: string) {
         selectedSlotId = slotId;
+        selectedRefereeId = activeMatch?.refereeId || "";
+        selectedManagerId = activeMatch?.managerId || "";
+        selectedLocation = activeMatch?.location || "";
         isModalOpen = true;
     }
 
     function closeModal() {
         isModalOpen = false;
         selectedSlotId = null;
+        selectedRefereeId = "";
+        selectedManagerId = "";
+        selectedLocation = "";
     }
 </script>
 
@@ -69,12 +76,18 @@
             <h2
                 class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[1.25rem] m-0"
             >
-                {i18n.t({ ko: '경기 확정 대기 목록', en: 'Pending Match Confirmation' })}
+                {i18n.t({
+                    ko: "경기 확정 대기 목록",
+                    en: "Pending Match Confirmation",
+                })}
             </h2>
             <p
                 class="font-pretendard font-normal text-zinc-500 text-[0.875rem] m-0 mt-1"
             >
-                {i18n.t({ ko: '서로 투표를 진행 중인 반들의 목록입니다. 가장 인원이 많이 겹치는 시간대를 골라 경기를 확정해 주세요.', en: 'List of classes currently voting on schedules. Please select the most overlapping time slot to confirm the match.' })}
+                {i18n.t({
+                    ko: "서로 투표를 진행 중인 반들의 목록입니다. 가장 인원이 많이 겹치는 시간대를 골라 경기를 확정해 주세요.",
+                    en: "List of classes currently voting on schedules. Please select the most overlapping time slot to confirm the match.",
+                })}
             </p>
         </div>
     </div>
@@ -106,25 +119,44 @@
                     <div
                         class="flex gap-2 items-center font-bold text-lg text-zinc-800 dark:text-zinc-100"
                     >
-                        <span>{i18n.t({ ko: "", en: "Class " })}{matchPair.classA}{i18n.t({ ko: "반", en: "" })}</span>
+                        <span
+                            >{i18n.t({
+                                ko: "",
+                                en: "Class ",
+                            })}{matchPair.classA}{i18n.t({
+                                ko: "반",
+                                en: "",
+                            })}</span
+                        >
                         <span
                             class="text-[0.6rem] text-zinc-400 dark:text-zinc-500"
                             >VS</span
                         >
-                        <span>{i18n.t({ ko: "", en: "Class " })}{matchPair.classB}{i18n.t({ ko: "반", en: "" })}</span>
+                        <span
+                            >{i18n.t({
+                                ko: "",
+                                en: "Class ",
+                            })}{matchPair.classB}{i18n.t({
+                                ko: "반",
+                                en: "",
+                            })}</span
+                        >
                     </div>
                     {#if matchPair.scheduleWindowDeadline}
                         <div
                             class="mt-1 text-[0.7rem] font-semibold text-zinc-500 dark:text-zinc-400 w-full text-center rounded py-1"
                         >
-                            {i18n.t({ ko: '신청 마감', en: 'Apply Deadline' })}: {new Date(
+                            {i18n.t({ ko: "신청 마감", en: "Apply Deadline" })}: {new Date(
                                 matchPair.scheduleWindowDeadline,
-                            ).toLocaleString(i18n.locale === 'ko' ? "ko-KR" : "en-US", {
-                                month: "numeric",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
+                            ).toLocaleString(
+                                i18n.locale === "ko" ? "ko-KR" : "en-US",
+                                {
+                                    month: "numeric",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                },
+                            )}
                         </div>
                     {/if}
                 </a>
@@ -133,7 +165,10 @@
                 <div
                     class="text-zinc-400 dark:text-zinc-500 text-sm py-4 text-center"
                 >
-                    {i18n.t({ ko: '경기 확정 대기 중인 매치가 없습니다.', en: 'No matches pending confirmation.' })}
+                    {i18n.t({
+                        ko: "경기 확정 대기 중인 매치가 없습니다.",
+                        en: "No matches pending confirmation.",
+                    })}
                 </div>
             {/if}
         </div>
@@ -149,7 +184,10 @@
                     <p
                         class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0 text-center"
                     >
-                        {i18n.t({ ko: '선택된 매치의 일정이 없습니다.', en: 'No schedule for the selected match.' })}
+                        {i18n.t({
+                            ko: "선택된 매치의 일정이 없습니다.",
+                            en: "No schedule for the selected match.",
+                        })}
                     </p>
                 </div>
             {:else}
@@ -168,6 +206,7 @@
                             onSlotClick={openFinalizeModal}
                             highlightPeriodStart={activeMatch?.scheduleWindowStart}
                             highlightPeriodEnd={activeMatch?.scheduleWindowEnd}
+                            scheduledSlotId={activeMatch?.scheduleId}
                         />
                     </div>
                 </div>
@@ -193,22 +232,29 @@
             <h3
                 class="font-pretendard font-bold text-[1.5rem] text-zinc-800 dark:text-zinc-100 m-0"
             >
-                {i18n.t({ ko: '경기 시간 확정', en: 'Confirm Match Time' })}
+                {i18n.t({ ko: "경기 시간 확정", en: "Confirm Match Time" })}
             </h3>
             <p
                 class="text-center text-zinc-500 dark:text-zinc-400 font-pretendard text-[0.9rem] m-0 leading-relaxed"
             >
-                {i18n.t({ ko: `해당 시간대로 ${activeMatch?.classA ? `${activeMatch.classA}반` : "미정"}과 ${activeMatch?.classB ? `${activeMatch.classB}반` : "미정"}의`, en: `Confirm match between ${activeMatch?.classA ? `Class ${activeMatch.classA}` : "TBD"} and ${activeMatch?.classB ? `Class ${activeMatch.classB}` : "TBD"}` })}<br />
-                <b>{i18n.decode(activeMatch?.sportName)}</b> {i18n.t({ ko: '경기를 확정하시겠습니까?', en: 'at this time?' })}
+                {i18n.t({
+                    ko: `해당 시간대로 ${activeMatch?.classA ? `${activeMatch.classA}반` : "미정"}과 ${activeMatch?.classB ? `${activeMatch.classB}반` : "미정"}의`,
+                    en: `Confirm match between ${activeMatch?.classA ? `Class ${activeMatch.classA}` : "TBD"} and ${activeMatch?.classB ? `Class ${activeMatch.classB}` : "TBD"}`,
+                })}<br />
+                <b>{i18n.decode(activeMatch?.sportName)}</b>
+                {i18n.t({
+                    ko: "경기를 확정하시겠습니까?",
+                    en: "at this time?",
+                })}
             </p>
 
             <form
                 method="POST"
                 action="?/finalizeMatch"
                 use:enhance={() => {
-                    closeModal();
                     return async ({ update }) => {
-                        update();
+                        await update();
+                        closeModal();
                     };
                 }}
                 class="w-full flex flex-col gap-4"
@@ -220,17 +266,28 @@
                     <label
                         for="location"
                         class="text-sm font-semibold text-zinc-700 dark:text-zinc-300"
-                        >{i18n.t({ ko: '경기 장소 선택', en: 'Select Location' })}</label
+                        >{i18n.t({
+                            ko: "경기 장소 선택",
+                            en: "Select Location",
+                        })}</label
                     >
                     <select
                         id="location"
                         name="location"
+                        bind:value={selectedLocation}
                         class="w-full text-base p-3 border border-zinc-300 dark:border-zinc-700 rounded-xl outline-none focus:border-amber-500 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 transition-colors"
                     >
-                        <option value="">{i18n.t({ ko: '장소 선택 안 함', en: 'No Location' })}</option>
+                        <option value=""
+                            >{i18n.t({
+                                ko: "장소 선택 안 함",
+                                en: "No Location",
+                            })}</option
+                        >
                         {#if activeSportId && sports.find((s) => s.id === activeSportId)?.locations}
                             {#each sports.find((s) => s.id === activeSportId).locations as loc}
-                                <option value={loc.name}>{i18n.decode(loc.name)}</option>
+                                <option value={loc.name}
+                                    >{i18n.decode(loc.name)}</option
+                                >
                             {/each}
                         {/if}
                     </select>
@@ -240,7 +297,10 @@
                     <label
                         for="refereeId"
                         class="text-sm font-semibold text-zinc-700 dark:text-zinc-300"
-                        >{i18n.t({ ko: '심판 배정', en: 'Assign Referee' })}</label
+                        >{i18n.t({
+                            ko: "심판 배정",
+                            en: "Assign Referee",
+                        })}</label
                     >
                     <select
                         id="refereeId"
@@ -248,10 +308,18 @@
                         bind:value={selectedRefereeId}
                         class="w-full text-base p-3 border border-zinc-300 dark:border-zinc-700 rounded-xl outline-none focus:border-amber-500 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 transition-colors"
                     >
-                        <option value="">{i18n.t({ ko: '심판 선택 안 함', en: 'No Referee' })}</option>
+                        <option value=""
+                            >{i18n.t({
+                                ko: "심판 선택 안 함",
+                                en: "No Referee",
+                            })}</option
+                        >
                         {#each allUsers.filter((u) => u.isReferee) as user}
                             <option value={user.id}
-                                >{user.name} ({user.studentNumber})</option
+                                >{user.name}{i18n.t({
+                                    ko: ` (${user.refereeCount || 0})`,
+                                    en: ` (${user.refereeCount || 0})`,
+                                })}</option
                             >
                         {/each}
                     </select>
@@ -261,7 +329,10 @@
                     <label
                         for="managerId"
                         class="text-sm font-semibold text-zinc-700 dark:text-zinc-300"
-                        >{i18n.t({ ko: '담당 매니저 배정', en: 'Assign Manager' })}</label
+                        >{i18n.t({
+                            ko: "담당 매니저 배정",
+                            en: "Assign Manager",
+                        })}</label
                     >
                     <select
                         id="managerId"
@@ -269,10 +340,18 @@
                         bind:value={selectedManagerId}
                         class="w-full text-base p-3 border border-zinc-300 dark:border-zinc-700 rounded-xl outline-none focus:border-amber-500 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 transition-colors"
                     >
-                        <option value="">{i18n.t({ ko: '매니저 선택 안 함', en: 'No Manager' })}</option>
+                        <option value=""
+                            >{i18n.t({
+                                ko: "매니저 선택 안 함",
+                                en: "No Manager",
+                            })}</option
+                        >
                         {#each allUsers.filter((u) => u.isManager) as user}
                             <option value={user.id}
-                                >{user.name} ({user.studentNumber})</option
+                                >{user.name}{i18n.t({
+                                    ko: ` (${user.managerCount || 0})`,
+                                    en: ` (${user.managerCount || 0})`,
+                                })}</option
                             >
                         {/each}
                     </select>
@@ -284,13 +363,13 @@
                         class="flex-1 py-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold rounded-xl transition-colors"
                         onclick={closeModal}
                     >
-                        {i18n.t({ ko: '취소하기', en: 'Cancel' })}
+                        {i18n.t({ ko: "취소하기", en: "Cancel" })}
                     </button>
                     <button
                         type="submit"
                         class="flex-1 py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-colors"
                     >
-                        {i18n.t({ ko: '경기 확정', en: 'Confirm Match' })}
+                        {i18n.t({ ko: "경기 확정", en: "Confirm Match" })}
                     </button>
                 </div>
             </form>

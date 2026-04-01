@@ -32,6 +32,7 @@
         onSlotClick = undefined,
         highlightPeriodStart = null,
         highlightPeriodEnd = null,
+        scheduledSlotId = null,
     } = $props<{
         gridData: Record<string, ScheduleSlot[]>;
         currentUserClassId?: string | null;
@@ -44,6 +45,7 @@
         onSlotClick?: (slotId: string) => void;
         highlightPeriodStart?: string | null;
         highlightPeriodEnd?: string | null;
+        scheduledSlotId?: string | null;
     }>();
 
     // Svelte derives sorted dates for rows
@@ -172,6 +174,7 @@
                         {isConfirmMode}
                         scheduledMatchesCount={slot.scheduledMatchesCount}
                         maxParallelMatches={slot.maxParallelMatches}
+                        isScheduledMatchSlot={slot.id === scheduledSlotId}
                         onSlotClick={onSlotClick
                             ? () => onSlotClick?.(slot.id)
                             : undefined}

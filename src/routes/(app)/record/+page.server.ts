@@ -41,6 +41,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             classAId: matches.classAId,
             classBId: matches.classBId,
             refereeName: referee.name,
+            refereePhone: referee.phoneNumber,
             managerName: manager.name,
         })
         .from(matches)
@@ -120,6 +121,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 classB: classB.classNumber,
                 minPlayers: sports.minPlayers,
                 refereeName: referee.name,
+                refereePhone: referee.phoneNumber,
                 managerName: manager.name,
                 matchNotes: matches.matchNotes,
                 recordStructure: sports.recordStructure

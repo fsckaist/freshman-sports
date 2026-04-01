@@ -264,13 +264,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
         // --- TAB 2: Match Confirmation Data ---
         if (activeTab === 'confirm') {
-            const [pendingMatchesRaw, allClassesRaw, staffUsers, scheduledMatchesForSport] = await Promise.all([
+            const [pendingMatchesRaw, allClassesRaw, staffUsersRaw, scheduledMatchesForSport, assignmentCounts] = await Promise.all([
                 db.select({ match: matches, sport: sports })
                     .from(matches)
                     .innerJoin(sports, eq(matches.sportId, sports.id))
                     .where(and(
                         eq(matches.sportId, activeSport.id),
-                        eq(matches.status, 'PENDING_SCHEDULE'),
+                        inArray(matches.status, ['PENDING_SCHEDULE', 'SCHEDULED']),
                         isNotNull(matches.classAId),
                         isNotNull(matches.classBId)
                     )),
@@ -282,7 +282,26 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 db.select({ scheduleId: matches.scheduleId })
                     .from(matches)
                     .where(and(eq(matches.sportId, activeSport.id), eq(matches.status, 'SCHEDULED'))),
+                db.select({
+                    refereeId: matches.refereeId,
+                    managerId: matches.managerId,
+                }).from(matches).where(
+                    or(isNotNull(matches.refereeId), isNotNull(matches.managerId))
+                ),
             ]);
+
+            // Build referee/manager assignment count maps
+            const refereeCountMap = new Map<string, number>();
+            const managerCountMap = new Map<string, number>();
+            for (const row of assignmentCounts) {
+                if (row.refereeId) refereeCountMap.set(row.refereeId, (refereeCountMap.get(row.refereeId) || 0) + 1);
+                if (row.managerId) managerCountMap.set(row.managerId, (managerCountMap.get(row.managerId) || 0) + 1);
+            }
+            const staffUsers = staffUsersRaw.map(u => ({
+                ...u,
+                refereeCount: refereeCountMap.get(u.id) || 0,
+                managerCount: managerCountMap.get(u.id) || 0,
+            }));
 
             const classMap = new Map(allClassesRaw.map(c => [c.id, c.classNumber]));
             const scheduledCountMap = new Map<string, number>();
@@ -297,7 +316,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 classAId: r.match.classAId, classBId: r.match.classBId,
                 scheduleWindowStart: r.match.scheduleWindowStart?.toISOString() ?? null,
                 scheduleWindowEnd: r.match.scheduleWindowEnd?.toISOString() ?? null,
-                scheduleWindowDeadline: r.match.scheduleWindowDeadline?.toISOString() ?? null
+                scheduleWindowDeadline: r.match.scheduleWindowDeadline?.toISOString() ?? null,
+                status: r.match.status,
+                scheduleId: r.match.scheduleId,
+                location: r.match.location,
+                refereeId: r.match.refereeId,
+                managerId: r.match.managerId
             }));
 
             let activeMatchId = url.searchParams.get('matchId');
@@ -643,12 +667,13 @@ export const actions: Actions = {
             if (!matchId || !scheduleId) return fail(400, { message: JSON.stringify({ ko: "매치 ID 또는 스케줄 ID가 없습니다.", en: "Match ID or Schedule ID is missing." }) });
 
             // 1. Get sport info for concurrency limit
-            const matchRow = await db.select({ sportId: matches.sportId }).from(matches).where(eq(matches.id, matchId)).limit(1);
+            const matchRow = await db.select({ sportId: matches.sportId, oldScheduleId: matches.scheduleId }).from(matches).where(eq(matches.id, matchId)).limit(1);
             if (matchRow.length === 0) return fail(404, { message: JSON.stringify({ ko: "매치를 찾을 수 없습니다.", en: "Match not found." }) });
             const sportId = matchRow[0].sportId;
+            const oldScheduleId = matchRow[0].oldScheduleId;
 
-            const sportRow = await db.select({ maxParallelMatches: sports.maxParallelMatches }).from(sports).where(eq(sports.id, sportId)).limit(1);
-            const limit = sportRow[0]?.maxParallelMatches ?? 1;
+            const sportRowInfo = await db.select({ maxParallelMatches: sports.maxParallelMatches }).from(sports).where(eq(sports.id, sportId)).limit(1);
+            const limit = sportRowInfo[0]?.maxParallelMatches ?? 1;
 
             // 2. Set scheduledAt from the chosen schedule slot's startTime
             const scheduleRow = await db.select({ startTime: schedules.startTime })
@@ -677,6 +702,20 @@ export const actions: Actions = {
 
             if (scheduledCount.length >= limit) {
                 await db.update(schedules).set({ isAvailable: false }).where(eq(schedules.id, scheduleId));
+            }
+
+            // 4. Check old schedule and reactivate if necessary
+            if (oldScheduleId && oldScheduleId !== scheduleId) {
+                const oldScheduledCount = await db.select({ id: matches.id })
+                    .from(matches)
+                    .where(and(
+                        eq(matches.scheduleId, oldScheduleId),
+                        eq(matches.status, 'SCHEDULED')
+                    ));
+
+                if (oldScheduledCount.length < limit) {
+                    await db.update(schedules).set({ isAvailable: true }).where(eq(schedules.id, oldScheduleId));
+                }
             }
 
             return { success: true };

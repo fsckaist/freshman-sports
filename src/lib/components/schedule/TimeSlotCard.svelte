@@ -17,6 +17,7 @@
         maxParallelMatches = 1,
         isOpponentUndecided = false,
         isConfirmMode = false,
+        isScheduledMatchSlot = false,
         onSlotClick = undefined,
     } = $props<{
         isAvailable?: boolean;
@@ -30,6 +31,7 @@
         isAdmin?: boolean;
         isOpponentUndecided?: boolean;
         isConfirmMode?: boolean;
+        isScheduledMatchSlot?: boolean;
         scheduledMatchesCount?: number;
         maxParallelMatches?: number;
         onSlotClick?: (e: MouseEvent) => void;
@@ -78,11 +80,19 @@
         (!isEmpty || isAdmin) &&
         !isDisabled &&
         !(isAdmin && isEmpty && !isAtLimit) &&
-        !(isAdmin && isEmpty && isAtLimit)
+        !(isAdmin && isEmpty && isAtLimit) &&
+        !isScheduledMatchSlot
             ? 'border-amber-500 dark:border-zinc-600 cursor-pointer hover:opacity-60 active:opacity-30'
             : '',
-        isEmpty && isAdmin ? 'bg-zinc-100 dark:bg-zinc-900' : '',
-        !isEmpty && isAdmin ? 'bg-amber-50 dark:bg-amber-950/20' : '',
+        isScheduledMatchSlot
+            ? 'border-red-500 bg-red-50 dark:bg-red-950/20 dark:border-red-500 cursor-pointer hover:opacity-80'
+            : '',
+        isEmpty && isAdmin && !isScheduledMatchSlot
+            ? 'bg-zinc-100 dark:bg-zinc-900'
+            : '',
+        !isEmpty && isAdmin && !isScheduledMatchSlot
+            ? 'bg-amber-50 dark:bg-amber-950/20'
+            : '',
         isAdmin && isEmpty && isAtLimit ? 'disabled' : '',
     ])}"
     disabled={(isEmpty && !isAdmin) ||
@@ -102,7 +112,9 @@
                         : 'text-zinc-400 dark:text-zinc-500',
                 ])}"
             >
-                {isEmpty ? i18n.t({ ko: "비활성화", en: "Disabled" }) : i18n.t({ ko: "활성화", en: "Active" })}
+                {isEmpty
+                    ? i18n.t({ ko: "비활성화", en: "Disabled" })
+                    : i18n.t({ ko: "활성화", en: "Active" })}
             </span>
             <span
                 class="font-pretendard font-medium text-[0.625rem] text-zinc-400 dark:text-zinc-500"
@@ -133,9 +145,12 @@
                     <p
                         class="font-pretendard font-extrabold text-[0.75rem] text-white m-0 leading-[0.75rem] tracking-wide
                         {cx([
-                            !isMatchAvailable
+                            !isMatchAvailable && !isScheduledMatchSlot
                                 ? 'dark:text-zinc-500'
                                 : 'dark:text-white',
+                            isScheduledMatchSlot
+                                ? 'text-red-600 dark:text-red-400'
+                                : '',
                         ])}"
                     >
                         VS
@@ -145,7 +160,9 @@
 
             <!-- Metrics Area -->
             <div
-                class="flex flex-[1_0_0] w-full min-h-0 bg-white dark:bg-zinc-950"
+                class="flex flex-[1_0_0] w-full min-h-0 {isScheduledMatchSlot
+                    ? 'bg-transparent'
+                    : 'bg-white dark:bg-zinc-950'}"
             >
                 <!-- Our Data -->
                 <div
@@ -228,7 +245,9 @@
                                 : 'text-zinc-400 dark:text-zinc-500',
                         ])}"
                     >
-                        {isParticipating ? i18n.t({ ko: "참여", en: "In" }) : i18n.t({ ko: "미참여", en: "Out" })}
+                        {isParticipating
+                            ? i18n.t({ ko: "참여", en: "In" })
+                            : i18n.t({ ko: "미참여", en: "Out" })}
                     </p>
                 </div>
             {/if}
