@@ -165,21 +165,11 @@ export async function ensureScheduleSlots(
 }
 
 // ─── Core Window Computation ──────────────────────────────────────────────────
-
-/**
- * Given the match IDs of the TWO feeder matches for a next-round slot,
- * compute the schedule window:
- *   - deadline  = 23:59 of the LATER feeder's scheduledAt
- *   - start     = 3 weekdays after deadline
- *   - end       = start + 5 weekdays
- *
- * Returns null if neither feeder has scheduledAt set.
- */
 /**
  * Given the completion times of feeder matches, compute the schedule window:
- *   - deadline  = 23:59:59 of the LATER feeder's completion
- *   - start     = 3 weekdays after deadline (00:00:00)
- *   - end       = start + 5 weekdays (23:59:59) -> Total 6 days selectable
+ *   - deadline  = 18:00:00 of the LATER feeder's completion
+ *   - start     = 4 weekdays after deadline (00:00:00)
+ *   - end       = start + 4 weekdays (23:59:59) -> Total 5 days selectable
  */
 function computeWindowFromEnds(feederEndTimes: Date[])
     : { start: Date; deadline: Date; end: Date } | null {
@@ -191,14 +181,14 @@ function computeWindowFromEnds(feederEndTimes: Date[])
     // Deadline is the end of the day AFTER the later date (ensuring a full day buffer)
     const deadline = new Date(laterDate);
     deadline.setDate(deadline.getDate() + 1);
-    deadline.setHours(23, 59, 59, 999);
+    deadline.setHours(18, 0, 0, 0);
 
-    // Start is 3 weekdays after deadline
-    const windowStart = addWeekdays(deadline, 3);
+    // Start is 4 weekdays after deadline
+    const windowStart = addWeekdays(deadline, 4);
     windowStart.setHours(0, 0, 0, 0);
 
-    // End is 5 weekdays after start (total 6 days inclusive)
-    const windowEnd = addWeekdays(windowStart, 5);
+    // End is 4 weekdays after start (total 5 days inclusive)
+    const windowEnd = addWeekdays(windowStart, 4);
     windowEnd.setHours(23, 59, 59, 999);
 
     return { start: windowStart, deadline, end: windowEnd };
@@ -359,7 +349,7 @@ export async function propagateByeWindow(byeMatchId: string): Promise<void> {
                     eq(tournament_brackets.round, prevRound),
                     or(eq(tournament_brackets.position, pos1), eq(tournament_brackets.position, pos2))
                 ));
-            
+
             feeders.forEach(f => { if (f.matchId) allFeederMatchIds.add(f.matchId); });
         }
 
@@ -367,9 +357,9 @@ export async function propagateByeWindow(byeMatchId: string): Promise<void> {
             const feederMatches = await db.select({ scheduledAt: matches.scheduledAt })
                 .from(matches)
                 .where(inArray(matches.id, Array.from(allFeederMatchIds)));
-            
+
             const validDates = feederMatches.map(m => m.scheduledAt).filter((d): d is Date => !!d);
-            
+
             if (validDates.length > 0) {
                 const laterDate = new Date(Math.max(...validDates.map(d => d.getTime())));
                 candidateScheduledAt = new Date(laterDate);
