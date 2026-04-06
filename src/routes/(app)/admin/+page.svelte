@@ -6,16 +6,30 @@
     import MatchConfirmTab from "./MatchConfirmTab.svelte";
     import MatchResultTab from "./MatchResultTab.svelte";
     import SettingsTab from "./SettingsTab.svelte";
+    import UserInfoTab from "./UserInfoTab.svelte";
     import { i18n } from "$lib/i18n.svelte";
 
     let { data } = $props();
 
     // The tabs for the admin dashboard
     let tabs = $derived([
-        { id: "schedule", label: i18n.t({ ko: '일정 준비', en: 'Schedule Prep' }) },
-        { id: "confirm", label: i18n.t({ ko: '경기 시간 확정', en: 'Confirm Match Time' }) },
-        { id: "result", label: i18n.t({ ko: '경기 결과 확정', en: 'Confirm Match Result' }) },
-        { id: "settings", label: i18n.t({ ko: '시스템 설정', en: 'System Settings' }) },
+        {
+            id: "schedule",
+            label: i18n.t({ ko: "일정 준비", en: "Schedule Prep" }),
+        },
+        {
+            id: "confirm",
+            label: i18n.t({ ko: "경기 시간 확정", en: "Confirm Match Time" }),
+        },
+        {
+            id: "result",
+            label: i18n.t({ ko: "경기 결과 확정", en: "Confirm Match Result" }),
+        },
+        { id: "users", label: i18n.t({ ko: "사용자 정보", en: "User Info" }) },
+        {
+            id: "settings",
+            label: i18n.t({ ko: "시스템 설정", en: "System Settings" }),
+        },
     ]);
 
     let activeTab = $state("");
@@ -39,7 +53,7 @@
             <h1
                 class="font-pretendard font-bold text-zinc-800 dark:text-zinc-100 text-[1.75rem] md:text-[2rem] m-0"
             >
-                {i18n.t({ ko: '관리자 대시보드', en: 'Admin Dashboard' })}
+                {i18n.t({ ko: "관리자 대시보드", en: "Admin Dashboard" })}
             </h1>
 
             <!-- Impersonate Form -->
@@ -53,7 +67,10 @@
                     type="text"
                     name="studentNumber"
                     bind:value={impersonateStudentNumber}
-                    placeholder={i18n.t({ ko: '학번 입력', en: 'Enter Student ID' })}
+                    placeholder={i18n.t({
+                        ko: "학번 입력",
+                        en: "Enter Student ID",
+                    })}
                     class="px-3 py-1.5 text-sm border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-amber-500 w-32"
                 />
                 <button
@@ -61,7 +78,7 @@
                     disabled={!impersonateStudentNumber.trim()}
                     class="px-3 py-1.5 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-400 rounded-lg transition-colors"
                 >
-                    {i18n.t({ ko: '유저 전환', en: 'Impersonate User' })}
+                    {i18n.t({ ko: "유저 전환", en: "Impersonate User" })}
                 </button>
             </form>
         </div>
@@ -105,6 +122,11 @@
                 sports={data.sports ?? []}
                 registrationDeadline={data.registrationDeadline}
                 activeSportId={data.activeSportId ?? undefined}
+            />
+        {:else if activeTab === "users"}
+            <UserInfoTab
+                allClasses={data.allClasses ?? []}
+                allUserInfo={data.allUserInfo ?? []}
             />
         {/if}
     </div>

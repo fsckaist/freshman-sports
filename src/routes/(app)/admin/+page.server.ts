@@ -208,6 +208,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             allUsers: [],
             finishedMatches: [],
             activeResultMatch: null,
+            allClasses: [],
+            allUserInfo: [],
         };
 
         // --- TAB 1: Schedule Configuration Data (only when schedule tab is active) ---
@@ -454,6 +456,27 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
             baseReturn.finishedMatches = finishedMatches;
             baseReturn.activeResultMatch = activeResultMatchDetails;
+        }
+
+        // --- TAB 4: User Info Data ---
+        if (activeTab === 'users') {
+            const allClassesRaw = await db.select().from(classes).orderBy(asc(classes.classNumber));
+            const allUsersRaw = await db.select({
+                id: users.id,
+                name: users.name,
+                studentNumber: users.studentNumber,
+                phoneNumber: users.phoneNumber,
+                isManager: users.isManager,
+                isReferee: users.isReferee,
+                isAdmin: users.isAdmin,
+                isProctor: users.isProctor,
+                agreedPrivacy: users.agreedPrivacy,
+                agreedRules: users.agreedRules,
+                classId: users.classId
+            }).from(users);
+
+            baseReturn.allClasses = allClassesRaw;
+            baseReturn.allUserInfo = allUsersRaw;
         }
 
         return baseReturn;
