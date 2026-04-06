@@ -20,8 +20,9 @@
         allUserInfo: UserInfo[];
     }>();
 
-    let selectedClassId = $state(
-        allClasses.length > 0 ? allClasses[0].id : null,
+    let userSelectedClassId: string | null = $state(null);
+    let selectedClassId = $derived(
+        userSelectedClassId ?? (allClasses.length > 0 ? allClasses[0].id : null),
     );
 
     let filteredUsers = $derived(
@@ -55,7 +56,7 @@
                            {selectedClassId === c.id
                         ? 'bg-amber-500 text-white shadow-sm'
                         : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}"
-                    onclick={() => (selectedClassId = c.id)}
+                    onclick={() => (userSelectedClassId = c.id)}
                 >
                     {c.classNumber}{i18n.t({ ko: "반", en: "Class" })}
                 </button>
