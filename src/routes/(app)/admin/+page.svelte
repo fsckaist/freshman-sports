@@ -127,6 +127,8 @@
             <UserInfoTab
                 allClasses={data.allClasses ?? []}
                 allUserInfo={data.allUserInfo ?? []}
+                allRosters={data.allRosters ?? []}
+                allSportsInfo={data.allSportsInfo ?? []}
             />
         {/if}
     </div>

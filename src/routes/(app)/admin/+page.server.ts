@@ -210,6 +210,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             activeResultMatch: null,
             allClasses: [],
             allUserInfo: [],
+            allRosters: [],
+            allSportsInfo: [],
         };
 
         // --- TAB 1: Schedule Configuration Data (only when schedule tab is active) ---
@@ -460,23 +462,34 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
         // --- TAB 4: User Info Data ---
         if (activeTab === 'users') {
-            const allClassesRaw = await db.select().from(classes).orderBy(asc(classes.classNumber));
-            const allUsersRaw = await db.select({
-                id: users.id,
-                name: users.name,
-                studentNumber: users.studentNumber,
-                phoneNumber: users.phoneNumber,
-                isManager: users.isManager,
-                isReferee: users.isReferee,
-                isAdmin: users.isAdmin,
-                isProctor: users.isProctor,
-                agreedPrivacy: users.agreedPrivacy,
-                agreedRules: users.agreedRules,
-                classId: users.classId
-            }).from(users);
+            const [allClassesRaw, allUsersRaw, allRostersRaw] = await Promise.all([
+                db.select().from(classes).orderBy(asc(classes.classNumber)),
+                db.select({
+                    id: users.id,
+                    name: users.name,
+                    studentNumber: users.studentNumber,
+                    phoneNumber: users.phoneNumber,
+                    isManager: users.isManager,
+                    isReferee: users.isReferee,
+                    isAdmin: users.isAdmin,
+                    isProctor: users.isProctor,
+                    agreedPrivacy: users.agreedPrivacy,
+                    agreedRules: users.agreedRules,
+                    classId: users.classId
+                }).from(users),
+                db.select({
+                    id: rosters.id,
+                    userId: rosters.userId,
+                    classId: rosters.classId,
+                    sportId: rosters.sportId,
+                    sportName: sports.name,
+                }).from(rosters).innerJoin(sports, eq(rosters.sportId, sports.id)),
+            ]);
 
             baseReturn.allClasses = allClassesRaw;
             baseReturn.allUserInfo = allUsersRaw;
+            baseReturn.allRosters = allRostersRaw;
+            baseReturn.allSportsInfo = allSports.map(s => ({ id: s.id, name: s.name, minPlayers: s.minPlayers }));
         }
 
         return baseReturn;
