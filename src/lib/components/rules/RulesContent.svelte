@@ -19,7 +19,7 @@
         <p class="m-0">
             {i18n.t({
                 ko: "본 규정은 2026년도 봄학기 새내기 체육대회를 통하여 KAIST 새내기들의 화합과 친목을 도모하고, 학교와 새터반 내 소속감을 고취시키며, 공정하고 안전한 체육대회 운영을 위한 전반적인 기준과 원칙을 규정함을 목적으로 한다.",
-                en: "The purpose of these regulations is to promote harmony and friendship among KAIST freshmen through the 2026 Spring Semester Freshman Sports Day, to enhance the sense of belonging within the school and orientation groups (Saeter-ban), and to establish overall standards and principles for fair and safe event operation.",
+                en: "The purpose of these regulations is to promote harmony and friendship among KAIST freshmen through the 2026 Spring Semester Freshman Sports Festival, to enhance the sense of belonging within the school and orientation groups (Saeter-ban), and to establish overall standards and principles for fair and safe event operation.",
             })}
         </p>
     </section>
@@ -36,7 +36,7 @@
         <p class="m-0">
             {i18n.t({
                 ko: "본 행사의 공식 명칭은 '2026년도 봄학기 새내기 체육대회' (이하 '본 대회'라 한다)라 칭한다.",
-                en: "The official title of this event shall be the '2026 Spring Semester Freshman Sports Day' (hereinafter referred to as 'the Tournament').",
+                en: "The official title of this event shall be the '2026 Spring Semester Freshman Sports Festival' (hereinafter referred to as 'the Tournament').",
             })}
         </p>
     </section>
