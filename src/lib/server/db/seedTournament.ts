@@ -4,6 +4,13 @@ import postgres from "postgres";
 import * as schema from "./schema";
 import { eq, inArray } from "drizzle-orm"; // Need to import these if using them
 
+// DB_LOCK 체크: true이면 DB 세팅 스크립트 실행을 차단
+if (process.env.DB_LOCK === "true") {
+    console.error("❌ DB_LOCK is enabled. Database seeding is blocked.");
+    console.error("   Set DB_LOCK=false in .env to allow seeding.");
+    process.exit(1);
+}
+
 const connectionString =
     process.env.DATABASE_URL ||
     "postgres://postgres:postgres@localhost:5432/postgres";
