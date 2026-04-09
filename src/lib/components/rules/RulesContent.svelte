@@ -19,7 +19,7 @@
         <p class="m-0">
             {i18n.t({
                 ko: "본 규정은 2026년도 봄학기 새내기 체육대회를 통하여 KAIST 새내기들의 화합과 친목을 도모하고, 학교와 새터반 내 소속감을 고취시키며, 공정하고 안전한 체육대회 운영을 위한 전반적인 기준과 원칙을 규정함을 목적으로 한다.",
-                en: "The purpose of these regulations is to promote harmony and friendship among KAIST freshmen through the 2026 Spring Semester Freshman Sports Day, to enhance the sense of belonging within the school and orientation groups (Saeter-ban), and to establish overall standards and principles for fair and safe event operation.",
+                en: "The purpose of these regulations is to promote harmony and friendship among KAIST freshmen through the 2026 Spring Semester Freshman Sports Festival, to enhance the sense of belonging within the school and orientation groups (Saeter-ban), and to establish overall standards and principles for fair and safe event operation.",
             })}
         </p>
     </section>
@@ -36,7 +36,7 @@
         <p class="m-0">
             {i18n.t({
                 ko: "본 행사의 공식 명칭은 '2026년도 봄학기 새내기 체육대회' (이하 '본 대회'라 한다)라 칭한다.",
-                en: "The official title of this event shall be the '2026 Spring Semester Freshman Sports Day' (hereinafter referred to as 'the Tournament').",
+                en: "The official title of this event shall be the '2026 Spring Semester Freshman Sports Festival' (hereinafter referred to as 'the Tournament').",
             })}
         </p>
     </section>
@@ -567,8 +567,43 @@
         <ol class="list-decimal pl-6 m-0">
             <li>
                 {i18n.t({
-                    ko: "각 종목별 파울, 득점 등 세부적인 경기 규칙은 다음 각 호의 공식 협회 규정을 준용한다. 다만, 본 규정에 별도로 명시된 대회 자체 규칙이 있는 경우 이를 최우선으로 적용한다.",
-                    en: "Detailed match rules regarding fouls, scoring, etc., for each sport shall conform to the official association regulations listed below. However, if there are Tournament-specific rules explicitly stated in these regulations, they shall take precedence.",
+                    ko: "각 종목의 세부 경기 규칙은 본 대회의 자체 규정을 최우선으로 적용하며, 그 외의 사항은 해당 종목을 주관하는 동아리(또는 심판진)에서 제공하는 세부 규정을 따른다.",
+                    en: "The detailed competition rules for each sport shall primarily be governed by the tournament's own regulations. For all other matters, the specific rules provided by the club (or referee team) overseeing the respective sport shall apply.",
+                })}
+                <div class="mt-2 mb-2">
+                    <a
+                        href="/aquila_futsal_rulebook.pdf"
+                        download="아퀼라배 풋살대회 규칙(Rule book).pdf"
+                        class="inline-flex items-center gap-1 text-sm font-medium text-amber-500 hover:text-amber-600 hover:underline"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                            />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        {i18n.t({
+                            ko: "아퀼라배 풋살대회 규칙 다운로드",
+                            en: "Download Aquila Cup Futsal Rule Book",
+                        })}
+                    </a>
+                </div>
+            </li>
+            <li>
+                {i18n.t({
+                    ko: "제1항 및 본 규정에 명시되지 않은 경기 규칙은 다음 각 호의 공식 협회 규정을 준용한다.",
+                    en: "Any competition rules not stipulated in Paragraph 1 or within these regulations shall follow the official association rules outlined in the following subparagraphs.",
                 })}
                 <ul class="list-disc pl-6 m-0 mt-1">
                     <li>

@@ -79,7 +79,7 @@
                     >
                         {i18n.t({
                             ko: "새내기 체육 대회 규정집",
-                            en: "Freshman Sports Rules",
+                            en: "Freshman Sports Festival Rules",
                         })}
                     </h2>
 

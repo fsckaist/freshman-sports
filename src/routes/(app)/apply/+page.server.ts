@@ -87,9 +87,9 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 
         // Evaluate Alert Message (if not already set by gender check)
         if (!alertMessage && currentSpots < sport.minPlayers) {
-            alertMessage = JSON.stringify({ 
-                ko: `최소 참여 인원이 충족되지 않았어요. (${currentSpots}/${sport.minPlayers})`, 
-                en: `Minimum participation not met. (${currentSpots}/${sport.minPlayers})` 
+            alertMessage = JSON.stringify({
+                ko: `최소 참여 인원이 충족되지 않았어요. (${currentSpots}/${sport.minPlayers})`,
+                en: `Minimum participation not met. (${currentSpots}/${sport.minPlayers})`
             });
         }
 
@@ -101,12 +101,12 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 
         // Dynamically create description lines
         const descriptionLines = [
-            JSON.stringify({ 
-                ko: `주전 선수 ${sport.minPlayers}명 + 예비 선수 (총 ${sport.maxPlayers}명)`, 
-                en: `${sport.minPlayers} players + substitutes (total ${sport.maxPlayers})` 
+            JSON.stringify({
+                ko: `주전 선수 ${sport.minPlayers}명 + 예비 선수 (총 ${sport.maxPlayers}명)`,
+                en: `${sport.minPlayers} players + substitutes (total ${sport.maxPlayers})`
             })
         ];
-        if (sport.slug === 'futsal') descriptionLines.push(JSON.stringify({ ko: "전반 20분 / 휴식 5분 / 후반 20분", en: "20m 1st / 5m break / 20m 2nd" }));
+        if (sport.slug === 'futsal') descriptionLines.push(JSON.stringify({ ko: "전반 15분 / 휴식 5분 / 후반 15분", en: "15m 1st / 5m break / 15m 2nd" }));
         if (sport.slug === 'basketball') descriptionLines.push(JSON.stringify({ ko: "전반 10분 / 휴식 5분 / 후반 10분", en: "10m 1st / 5m break / 10m 2nd" }));
         if (sport.slug.includes('badminton')) descriptionLines.push(JSON.stringify({ ko: "21점 3세트", en: "3 sets, 21 points each" }));
 
