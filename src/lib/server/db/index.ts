@@ -9,11 +9,12 @@ class DBMutationLogger implements Logger {
     logQuery(query: string, params: unknown[]): void {
         const upperQuery = query.toUpperCase();
         if (upperQuery.startsWith('INSERT') || upperQuery.startsWith('UPDATE') || upperQuery.startsWith('DELETE')) {
-            console.log('\n[DB Modification] ==============================');
+            const timestamp = new Date().toISOString();
+            console.log(`\n[DB Modification | ${timestamp}] ==============================`);
             console.log(`Action: ${upperQuery.split(' ')[0]}`);
             console.log(`Query:  ${query}`);
             console.log(`Params: ${JSON.stringify(params)}`);
-            console.log('================================================\n');
+            console.log('======================================================================\n');
         }
     }
 }

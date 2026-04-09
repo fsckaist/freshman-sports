@@ -21,6 +21,10 @@
     );
 </script>
 
+<svelte:head>
+    <link rel="preload" href="/logo.png" as="image" fetchpriority="high" />
+</svelte:head>
+
 <div
     class="relative size-full min-h-screen bg-white dark:bg-zinc-950 overflow-hidden flex justify-center"
 >
@@ -60,6 +64,8 @@
                 src="/logo.png"
                 alt="watermark logo"
                 class="absolute inset-0 max-w-none object-cover pointer-events-none size-full"
+                fetchpriority="high"
+                decoding="async"
             />
         </div>
 
@@ -74,6 +80,8 @@
                     src="/logo.png"
                     alt={i18n.t({ ko: "샛별 로고", en: "Saetbyeol Logo" })}
                     class="absolute max-w-none object-contain h-[6rem] w-[6rem] md:h-[10.625rem] md:w-[10.625rem] left-[-0.5rem] top-[-0.5rem] md:left-[-1.5625rem] md:top-[-1.5625rem]"
+                    fetchpriority="high"
+                    decoding="async"
                 />
             </div>
 

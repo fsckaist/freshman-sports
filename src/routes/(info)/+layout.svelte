@@ -62,6 +62,8 @@
                     src="/logo.png"
                     alt="watermark logo"
                     class="absolute inset-0 max-w-none object-cover pointer-events-none size-full"
+                    fetchpriority="high"
+                    decoding="async"
                 />
             </div>
 
