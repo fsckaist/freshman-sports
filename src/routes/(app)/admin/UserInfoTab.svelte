@@ -13,6 +13,7 @@
         agreedPrivacy: boolean | null;
         agreedRules: boolean | null;
         classId: string | null;
+        gender: "MALE" | "FEMALE" | null;
     }
 
     interface RosterEntry {
@@ -79,6 +80,28 @@
         });
     });
 
+    // --- Summary Stats ---
+    let registeredCount = $derived(
+        filteredUsers.filter((u: UserInfo) => u.agreedPrivacy && u.agreedRules)
+            .length,
+    );
+    let unregisteredCount = $derived(filteredUsers.length - registeredCount);
+    let totalCount = $derived(filteredUsers.length);
+    let registeredPct = $derived(
+        totalCount > 0 ? (registeredCount / totalCount) * 100 : 0,
+    );
+
+    // SVG donut chart helpers
+    const DONUT_RADIUS = 40;
+    const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
+    let registeredArc = $derived((registeredPct / 100) * DONUT_CIRCUMFERENCE);
+    let unregisteredArc = $derived(DONUT_CIRCUMFERENCE - registeredArc);
+
+    // Proctors for the selected class
+    let classProctors = $derived(
+        filteredUsers.filter((u: UserInfo) => u.isProctor),
+    );
+
     function getRoleTags(user: UserInfo): RoleTag[] {
         const tags: RoleTag[] = [];
         if (user.isAdmin)
@@ -122,7 +145,7 @@
     <div
         class="flex items-center gap-4 px-[1.875rem] py-4 shrink-0 border-b border-zinc-100 dark:border-zinc-800"
     >
-        <div class="flex gap-2 overflow-x-auto min-w-0 scrollbar-hide">
+        <div class="flex gap-2 overflow-x-auto min-w-0 scrollbar-thin">
             {#each allClasses as c}
                 <button
                     class="px-4 py-2 rounded-lg font-medium text-sm transition-colors shrink-0
@@ -142,6 +165,307 @@
 
     <!-- Scrollable Content -->
     <div class="flex-1 overflow-auto p-[1.875rem]">
+        <!-- ===== Summary Dashboard ===== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+            <!-- Registration Stats Card -->
+            <div
+                class="flex flex-col gap-4 p-5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl"
+            >
+                <h3
+                    class="text-sm font-semibold text-zinc-800 dark:text-zinc-100 uppercase tracking-wide"
+                >
+                    {i18n.t({ ko: "등록 현황", en: "Registration Status" })}
+                </h3>
+                <div class="flex items-center gap-6">
+                    <!-- Donut Chart -->
+                    <div class="relative shrink-0">
+                        <svg
+                            width="110"
+                            height="110"
+                            viewBox="0 0 110 110"
+                            class="transform -rotate-90"
+                        >
+                            <!-- Background circle -->
+                            <circle
+                                cx="55"
+                                cy="55"
+                                r={DONUT_RADIUS}
+                                fill="none"
+                                stroke="currentColor"
+                                class="text-zinc-200 dark:text-zinc-700"
+                                stroke-width="12"
+                            />
+                            <!-- Registered arc (green) -->
+                            {#if totalCount > 0}
+                                <circle
+                                    cx="55"
+                                    cy="55"
+                                    r={DONUT_RADIUS}
+                                    fill="none"
+                                    stroke="#22c55e"
+                                    stroke-width="12"
+                                    stroke-dasharray="{registeredArc} {unregisteredArc}"
+                                    stroke-linecap="round"
+                                    class="transition-all duration-500 ease-out"
+                                />
+                            {/if}
+                        </svg>
+                        <!-- Center text -->
+                        <div
+                            class="absolute inset-0 flex flex-col items-center justify-center"
+                        >
+                            <span
+                                class="text-lg font-bold text-zinc-800 dark:text-zinc-100"
+                                >{totalCount}</span
+                            >
+                            <span
+                                class="text-[0.625rem] text-zinc-500 dark:text-zinc-400"
+                                >{i18n.t({ ko: "전체", en: "Total" })}</span
+                            >
+                        </div>
+                    </div>
+                    <!-- Legend -->
+                    <div class="flex flex-col gap-3 flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <div
+                                    class="w-3 h-3 rounded-full bg-green-500 shrink-0"
+                                ></div>
+                                <span
+                                    class="text-sm text-zinc-700 dark:text-zinc-300 truncate"
+                                    >{i18n.t({
+                                        ko: "등록 완료",
+                                        en: "Registered",
+                                    })}</span
+                                >
+                            </div>
+                            <div class="flex items-baseline gap-1.5 shrink-0">
+                                <span
+                                    class="text-lg font-bold text-green-600 dark:text-green-400"
+                                    >{registeredCount}</span
+                                >
+                                <span
+                                    class="text-xs text-zinc-400 dark:text-zinc-500"
+                                    >({totalCount > 0
+                                        ? Math.round(registeredPct)
+                                        : 0}%)</span
+                                >
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <div
+                                    class="w-3 h-3 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0"
+                                ></div>
+                                <span
+                                    class="text-sm text-zinc-700 dark:text-zinc-300 truncate"
+                                    >{i18n.t({
+                                        ko: "미등록",
+                                        en: "Unregistered",
+                                    })}</span
+                                >
+                            </div>
+                            <div class="flex items-baseline gap-1.5 shrink-0">
+                                <span
+                                    class="text-lg font-bold text-zinc-500 dark:text-zinc-400"
+                                    >{unregisteredCount}</span
+                                >
+                                <span
+                                    class="text-xs text-zinc-400 dark:text-zinc-500"
+                                    >({totalCount > 0
+                                        ? Math.round(100 - registeredPct)
+                                        : 0}%)</span
+                                >
+                            </div>
+                        </div>
+                        <!-- Progress bar -->
+                        <div
+                            class="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden mt-1"
+                        >
+                            <div
+                                class="h-full bg-green-500 rounded-full transition-all duration-500 ease-out"
+                                style="width: {registeredPct}%"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Proctor Info -->
+                {#if classProctors.length > 0}
+                    <div
+                        class="mt-1 pt-4 border-t border-zinc-200 dark:border-zinc-700"
+                    >
+                        <div class="flex items-center gap-1.5 mb-2.5">
+                            <svg
+                                class="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                /></svg
+                            >
+                            <span
+                                class="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide"
+                                >{i18n.t({ ko: "프락터", en: "Proctor" })}</span
+                            >
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            {#each classProctors as proctor}
+                                <div
+                                    class="flex items-center justify-between gap-3 px-3 py-2 bg-zinc-50 dark:bg-zinc-800/60 rounded-lg border border-zinc-200 dark:border-zinc-700"
+                                >
+                                    <span
+                                        class="text-sm font-medium text-zinc-800 dark:text-zinc-200"
+                                        >{proctor.name || "-"}</span
+                                    >
+                                    <span
+                                        class="text-xs text-zinc-500 dark:text-zinc-400 font-mono"
+                                        >{proctor.phoneNumber ||
+                                            "-"}</span
+                                    >
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+            </div>
+
+            <!-- Sport Summary Table Card -->
+            <div
+                class="flex flex-col gap-4 p-5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl"
+            >
+                <h3
+                    class="text-sm font-semibold text-zinc-800 dark:text-zinc-100 uppercase tracking-wide"
+                >
+                    {i18n.t({
+                        ko: "종목별 지원 현황",
+                        en: "Sport Registration Summary",
+                    })}
+                </h3>
+                <div class="w-full overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead>
+                            <tr
+                                class="border-b border-zinc-200 dark:border-zinc-700"
+                            >
+                                <th
+                                    class="pb-2 pr-3 font-medium text-xs text-zinc-500 dark:text-zinc-400 uppercase whitespace-nowrap"
+                                >
+                                    {i18n.t({ ko: "종목", en: "Sport" })}
+                                </th>
+                                <th
+                                    class="pb-2 px-3 font-medium text-xs text-zinc-500 dark:text-zinc-400 uppercase text-center whitespace-nowrap"
+                                >
+                                    {i18n.t({ ko: "지원자", en: "Applied" })}
+                                </th>
+                                <th
+                                    class="pb-2 px-3 font-medium text-xs text-zinc-500 dark:text-zinc-400 uppercase text-center whitespace-nowrap"
+                                >
+                                    {i18n.t({ ko: "최소 인원", en: "Min Req" })}
+                                </th>
+                                <th
+                                    class="pb-2 pl-3 font-medium text-xs text-zinc-500 dark:text-zinc-400 uppercase text-center whitespace-nowrap"
+                                >
+                                    {i18n.t({ ko: "상태", en: "Status" })}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody
+                            class="divide-y divide-zinc-100 dark:divide-zinc-700/50"
+                        >
+                            {#each sportRosterData as sport}
+                                <tr>
+                                    <td
+                                        class="py-2.5 pr-3 font-medium text-zinc-800 dark:text-zinc-200 whitespace-nowrap"
+                                    >
+                                        {i18n.decode(sport.sportName)}
+                                    </td>
+                                    <td
+                                        class="py-2.5 px-3 text-center font-semibold text-zinc-700 dark:text-zinc-300"
+                                    >
+                                        {sport.count}
+                                    </td>
+                                    <td
+                                        class="py-2.5 px-3 text-center text-zinc-500 dark:text-zinc-400"
+                                    >
+                                        {sport.minPlayers}
+                                    </td>
+                                    <td class="py-2.5 pl-3 text-center">
+                                        {#if sport.count >= sport.minPlayers}
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
+                                            >
+                                                <svg
+                                                    class="w-3 h-3"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    stroke-width="2.5"
+                                                    ><path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M5 13l4 4L19 7"
+                                                    /></svg
+                                                >
+                                                {i18n.t({
+                                                    ko: "충족",
+                                                    en: "Met",
+                                                })}
+                                            </span>
+                                        {:else if sport.count > 0}
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
+                                            >
+                                                <svg
+                                                    class="w-3 h-3"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    stroke-width="2.5"
+                                                    ><path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                    /></svg
+                                                >
+                                                {i18n.t({
+                                                    ko: "부족",
+                                                    en: "Short",
+                                                })}
+                                            </span>
+                                        {:else}
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+                                            >
+                                                {i18n.t({
+                                                    ko: "없음",
+                                                    en: "None",
+                                                })}
+                                            </span>
+                                        {/if}
+                                    </td>
+                                </tr>
+                            {:else}
+                                <tr>
+                                    <td
+                                        colspan="4"
+                                        class="py-4 text-center text-sm text-zinc-400 dark:text-zinc-500"
+                                    >
+                                        {i18n.t({
+                                            ko: "종목 정보가 없습니다.",
+                                            en: "No sport data available.",
+                                        })}
+                                    </td>
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         <!-- User Table (Desktop) -->
         <div
             class="hidden md:block w-full border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden bg-white dark:bg-zinc-800"
@@ -492,11 +816,21 @@
 </div>
 
 <style>
-    .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(161, 161, 170, 0.4) transparent;
     }
-    .scrollbar-hide::-webkit-scrollbar {
-        display: none;
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 4px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: rgba(161, 161, 170, 0.4);
+        border-radius: 9999px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(161, 161, 170, 0.6);
     }
 </style>

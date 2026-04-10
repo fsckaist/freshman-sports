@@ -475,7 +475,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     isProctor: users.isProctor,
                     agreedPrivacy: users.agreedPrivacy,
                     agreedRules: users.agreedRules,
-                    classId: users.classId
+                    classId: users.classId,
+                    gender: users.gender
                 }).from(users),
                 db.select({
                     id: rosters.id,
