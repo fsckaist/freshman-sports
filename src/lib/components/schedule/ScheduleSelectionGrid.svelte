@@ -48,6 +48,9 @@
         scheduledSlotId?: string | null;
     }>();
 
+    // Track loading state for optimistic UI feedback
+    let loadingSlots: Record<string, boolean> = $state({});
+
     // Svelte derives sorted dates for rows
     let dates = $derived(Object.keys(gridData).sort());
 
@@ -149,11 +152,18 @@
                     action={isAdmin
                         ? "?/toggleSlotAvailability"
                         : "?/toggleVote"}
-                    use:enhance
+                    use:enhance={() => {
+                        loadingSlots[slot.id] = true;
+                        return async ({ update }) => {
+                            await update();
+                            loadingSlots[slot.id] = false;
+                        };
+                    }}
                     class="m-0 p-0 block"
                 >
                     <input type="hidden" name="slotId" value={slot.id} />
                     <TimeSlotCard
+                        isLoading={loadingSlots[slot.id] || false}
                         isAvailable={slot.isSlotAvailable}
                         isVoted={slot.isVoted}
                         ourCount={slot.registrations.filter(
