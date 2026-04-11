@@ -693,7 +693,7 @@
             </h2>
 
             {#each sportRosterData as sport}
-                {@const availableUsers = filteredUsers.filter(u => !sport.participants.some(p => p.id === u.id))}
+                {@const availableUsers = filteredUsers.filter((u: UserInfo) => !sport.participants.some((p: UserInfo) => p.id === u.id))}
                 <div
                     class="w-full border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden bg-white dark:bg-zinc-800"
                 >
@@ -820,7 +820,7 @@
                                     <form action="?/removeUserFromRoster" method="POST" use:enhance class="shrink-0 flex items-center h-full">
                                         <input type="hidden" name="sportId" value={sport.sportId} />
                                         <input type="hidden" name="userId" value={p.id} />
-                                        <button type="submit" class="p-2 text-zinc-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/30">
+                                        <button type="submit" class="p-2 text-zinc-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/30" title={i18n.t({ko: "삭제", en: "Delete"})} aria-label={i18n.t({ko: "삭제", en: "Delete"})}>
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
