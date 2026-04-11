@@ -1088,6 +1088,54 @@ export const actions: Actions = {
         }
     },
 
+    addUserToRoster: async ({ request, locals }) => {
+        try {
+            const user = locals.user;
+            if (!user?.isAdmin) return fail(403);
+
+            const formData = await request.formData();
+            const sportId = formData.get('sportId')?.toString();
+            const classId = formData.get('classId')?.toString();
+            const userId = formData.get('userId')?.toString();
+
+            if (!sportId || !classId || !userId) return fail(400);
+
+            try {
+                await db.insert(rosters).values({
+                    sportId,
+                    classId,
+                    userId
+                });
+            } catch (err: any) {
+                if (err.code !== '23505') throw err;
+            }
+
+            return { success: true };
+        } catch (e) {
+            console.error('addUserToRoster error:', e);
+            return fail(500);
+        }
+    },
+    removeUserFromRoster: async ({ request, locals }) => {
+        try {
+            const user = locals.user;
+            if (!user?.isAdmin) return fail(403);
+
+            const formData = await request.formData();
+            const sportId = formData.get('sportId')?.toString();
+            const userId = formData.get('userId')?.toString();
+
+            if (!sportId || !userId) return fail(400);
+
+            await db.delete(rosters).where(and(eq(rosters.sportId, sportId), eq(rosters.userId, userId)));
+
+            return { success: true };
+        } catch (e) {
+            console.error('removeUserFromRoster error:', e);
+            return fail(500);
+        }
+    },
+
     impersonate: async ({ request, locals, cookies }) => {
         try {
             const user = locals.user;

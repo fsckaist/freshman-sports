@@ -25,7 +25,7 @@
             id: "result",
             label: i18n.t({ ko: "경기 결과 확정", en: "Confirm Match Result" }),
         },
-        { id: "users", label: i18n.t({ ko: "사용자 정보", en: "User Info" }) },
+        { id: "users", label: i18n.t({ ko: "사용자 관리", en: "User Management" }) },
         {
             id: "settings",
             label: i18n.t({ ko: "시스템 설정", en: "System Settings" }),

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { i18n } from "$lib/i18n.svelte";
+    import { enhance } from "$app/forms";
 
     interface UserInfo {
         id: string;
@@ -692,6 +693,7 @@
             </h2>
 
             {#each sportRosterData as sport}
+                {@const availableUsers = filteredUsers.filter(u => !sport.participants.some(p => p.id === u.id))}
                 <div
                     class="w-full border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden bg-white dark:bg-zinc-800"
                 >
@@ -747,6 +749,12 @@
                                                 en: "Contact",
                                             })}</th
                                         >
+                                        <th class="px-4 py-2.5 font-medium w-16 text-center"
+                                            >{i18n.t({
+                                                ko: "관리",
+                                                en: "Manage",
+                                            })}</th
+                                        >
                                     </tr>
                                 </thead>
                                 <tbody
@@ -770,6 +778,17 @@
                                             <td class="px-4 py-2.5"
                                                 >{p.phoneNumber || "-"}</td
                                             >
+                                            <td class="px-4 py-2.5 text-center">
+                                                <form action="?/removeUserFromRoster" method="POST" use:enhance class="inline">
+                                                    <input type="hidden" name="sportId" value={sport.sportId} />
+                                                    <input type="hidden" name="userId" value={p.id} />
+                                                    <button type="submit" class="text-zinc-400 hover:text-red-500 transition-colors" title={i18n.t({ko: "삭제", en: "Delete"})}>
+                                                        <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     {/each}
                                 </tbody>
@@ -781,21 +800,32 @@
                             class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700 md:hidden"
                         >
                             {#each sport.participants as p, idx}
-                                <div class="flex items-center gap-3 px-4 py-3">
-                                    <span
-                                        class="text-xs font-medium text-zinc-400 dark:text-zinc-500 w-5 text-center shrink-0"
-                                        >{idx + 1}</span
-                                    >
-                                    <div class="flex flex-col min-w-0">
+                                <div class="flex items-center justify-between px-4 py-3">
+                                    <div class="flex items-center gap-3">
                                         <span
-                                            class="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate"
-                                            >{p.name || "-"}</span
+                                            class="text-xs font-medium text-zinc-400 dark:text-zinc-500 w-5 text-center shrink-0"
+                                            >{idx + 1}</span
                                         >
-                                        <span
-                                            class="text-xs text-zinc-500 dark:text-zinc-400"
-                                            >{p.studentNumber}</span
-                                        >
+                                        <div class="flex flex-col min-w-0">
+                                            <span
+                                                class="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate"
+                                                >{p.name || "-"}</span
+                                            >
+                                            <span
+                                                class="text-xs text-zinc-500 dark:text-zinc-400"
+                                                >{p.studentNumber}</span
+                                            >
+                                        </div>
                                     </div>
+                                    <form action="?/removeUserFromRoster" method="POST" use:enhance class="shrink-0 flex items-center h-full">
+                                        <input type="hidden" name="sportId" value={sport.sportId} />
+                                        <input type="hidden" name="userId" value={p.id} />
+                                        <button type="submit" class="p-2 text-zinc-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/30">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
                                 </div>
                             {/each}
                         </div>
@@ -807,6 +837,24 @@
                                 ko: "신청자가 없습니다.",
                                 en: "No registrations.",
                             })}
+                        </div>
+                    {/if}
+
+                    {#if availableUsers.length > 0}
+                        <div class="px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-200 dark:border-zinc-700 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+                            <span class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{i18n.t({ko: "학생 수동 추가", en: "Manual Add Student"})}</span>
+                            <form action="?/addUserToRoster" method="POST" use:enhance class="flex flex-1 items-center gap-2 max-w-sm">
+                                <input type="hidden" name="sportId" value={sport.sportId} />
+                                <input type="hidden" name="classId" value={selectedClassId} />
+                                <select name="userId" class="flex-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-amber-500 outline-none text-zinc-800 dark:text-zinc-100 min-w-0 font-medium h-9">
+                                    {#each availableUsers as au}
+                                        <option value={au.id}>{au.name || "-"} ({au.studentNumber})</option>
+                                    {/each}
+                                </select>
+                                <button type="submit" class="px-4 py-1.5 h-9 text-xs font-medium bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors shrink-0 shadow-sm border border-transparent">
+                                    {i18n.t({ ko: "추가", en: "Add" })}
+                                </button>
+                            </form>
                         </div>
                     {/if}
                 </div>
