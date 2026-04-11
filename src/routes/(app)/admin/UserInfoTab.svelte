@@ -51,7 +51,9 @@
 
     let filteredUsers = $derived(
         selectedClassId
-            ? allUserInfo.filter((u: UserInfo) => u.classId === selectedClassId)
+            ? allUserInfo
+                  .filter((u: UserInfo) => u.classId === selectedClassId)
+                  .sort((a: UserInfo, b: UserInfo) => a.studentNumber.localeCompare(b.studentNumber))
             : [],
     );
 
@@ -70,7 +72,8 @@
             );
             const participants = entries
                 .map((r: RosterEntry) => userMap.get(r.userId))
-                .filter((u: UserInfo | undefined): u is UserInfo => !!u);
+                .filter((u: UserInfo | undefined): u is UserInfo => !!u)
+                .sort((a: UserInfo, b: UserInfo) => a.studentNumber.localeCompare(b.studentNumber));
             return {
                 sportId: sport.id,
                 sportName: sport.name,
