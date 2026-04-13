@@ -40,6 +40,20 @@
         selectedManagerId = "";
         selectedLocation = "";
     }
+
+    let isForfeitModalOpen = $state(false);
+    let forfeitWinner = $state<string | null>("");
+
+    function openForfeitModal() {
+        if (!activeMatch) return;
+        forfeitWinner = "";
+        isForfeitModalOpen = true;
+    }
+
+    function closeForfeitModal() {
+        isForfeitModalOpen = false;
+        forfeitWinner = "";
+    }
 </script>
 
 <div
@@ -177,6 +191,17 @@
         <div
             class="flex-1 flex flex-col overflow-auto w-0 min-w-0 min-h-0 relative py-6 bg-white dark:bg-zinc-950"
         >
+            {#if activeMatch}
+                <div class="flex justify-end px-[1.875rem] w-full mb-4 shrink-0">
+                    <button
+                        class="px-4 py-2 border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold rounded-xl text-sm transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
+                        onclick={() => openForfeitModal()}
+                    >
+                        {i18n.t({ ko: "기권승/몰수패 처리", en: "Set Forfeit" })}
+                    </button>
+                </div>
+            {/if}
+
             {#if Object.keys(confirmGridData).length === 0}
                 <div
                     class="flex items-center justify-center w-full h-full py-12"
@@ -370,6 +395,80 @@
                         class="flex-1 py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-colors"
                     >
                         {i18n.t({ ko: "경기 확정", en: "Confirm Match" })}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{/if}
+
+<!-- Forfeit Modal -->
+{#if isForfeitModalOpen}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div
+        class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 cursor-pointer"
+        onclick={closeForfeitModal}
+    >
+        <div
+            class="bg-white dark:bg-zinc-900 rounded-[1.5rem] w-full max-w-[28rem] flex flex-col items-center justify-center p-[2rem] gap-[1.5rem] shadow-2xl cursor-default border dark:border-zinc-800"
+            onclick={(e) => e.stopPropagation()}
+        >
+            <h3 class="font-pretendard font-bold text-[1.5rem] text-zinc-800 dark:text-zinc-100 m-0">
+                {i18n.t({ ko: "기권패/몰수패 설정", en: "Set Forfeit" })}
+            </h3>
+            <p class="text-center text-zinc-500 dark:text-zinc-400 font-pretendard text-[0.9rem] m-0 leading-relaxed">
+                {i18n.t({
+                    ko: "경기 시간을 확정하지 않고 바로 승리 팀을 지정합니다.",
+                    en: "Specify a winning team without confirming the match time."
+                })}
+            </p>
+
+            <form
+                method="POST"
+                action="?/finalizeMatchResult"
+                use:enhance={() => {
+                    return async ({ update }) => {
+                        await update();
+                        closeForfeitModal();
+                    };
+                }}
+                class="w-full flex flex-col gap-4"
+            >
+                <input type="hidden" name="matchId" value={activeMatch?.id} />
+                <input type="hidden" name="isForfeit" value="true" />
+                
+                <div class="flex flex-col gap-2 w-full">
+                    <label class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                        {i18n.t({ ko: "승리 팀 (기권승)", en: "Winning Team (Forfeit Win)" })}
+                    </label>
+                    <select
+                        name="winnerClassId"
+                        bind:value={forfeitWinner}
+                        class="w-full text-base p-3 border border-zinc-300 dark:border-zinc-700 rounded-xl outline-none focus:border-amber-500 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 transition-colors"
+                        required
+                    >
+                        <option value="" disabled selected>{i18n.t({ ko: "승리 팀 선택", en: "Select Winning Team" })}</option>
+                        <option value={activeMatch?.classAId}>{i18n.t({ko: "Class", en: "Class"})} {activeMatch?.classA}{i18n.t({ko:"반", en:""})}</option>
+                        <option value={activeMatch?.classBId}>{i18n.t({ko: "Class", en: "Class"})} {activeMatch?.classB}{i18n.t({ko:"반", en:""})}</option>
+                        <option value="none">{i18n.t({ ko: "양 팀 모두 기권 (동반 탈락)", en: "Both teams forfeit (Both eliminated)" })}</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 w-full mt-4">
+                    <button
+                        type="button"
+                        class="flex-1 py-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold rounded-xl transition-colors"
+                        onclick={closeForfeitModal}
+                    >
+                        {i18n.t({ ko: "취소하기", en: "Cancel" })}
+                    </button>
+                    <button
+                        type="submit"
+                        class="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50"
+                        disabled={!forfeitWinner}
+                    >
+                        {i18n.t({ ko: "확인", en: "Confirm" })}
                     </button>
                 </div>
             </form>

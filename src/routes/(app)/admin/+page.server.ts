@@ -773,12 +773,20 @@ export const actions: Actions = {
             if (!matchId || !rawWinnerClassId) return fail(400, { message: JSON.stringify({ ko: "매치 ID 또는 승자 데이터가 누락되었습니다.", en: "Match ID or winner data is missing." }) });
 
             const winnerClassId = rawWinnerClassId === 'none' ? null : rawWinnerClassId;
+            const isForfeit = formData.get('isForfeit') === 'true';
 
             // Mark match as verified and save winner (or null if both lose)
-            await db.update(matches).set({
+            const updateData: any = {
                 winnerClassId,
                 isVerified: true
-            }).where(eq(matches.id, matchId));
+            };
+
+            if (isForfeit) {
+                updateData.status = 'FINISHED';
+                updateData.matchNotes = JSON.stringify({ ko: '기권패로 인한 지정 승리', en: 'Forfeit Win' });
+            }
+
+            await db.update(matches).set(updateData).where(eq(matches.id, matchId));
 
             const currentNodes = await db.select().from(tournament_brackets).where(eq(tournament_brackets.matchId, matchId));
 
