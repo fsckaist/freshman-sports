@@ -176,9 +176,15 @@
                         ourMax={minPlayers}
                         oppMax={minPlayers}
                         {isOpponentUndecided}
-                        participantNames={slot.registrations.map(
-                            (r: Participant) => r.name,
-                        )}
+                        participantNames={
+                            isConfirmMode || isAdmin
+                                ? slot.registrations.map(
+                                      (r: Participant) => r.classId ? `${r.classId}반 ${r.name}` : r.name
+                                  )
+                                : slot.registrations
+                                      .filter((r: Participant) => !currentUserClassId || r.classId === currentUserClassId)
+                                      .map((r: Participant) => r.name)
+                        }
                         isDisabled={isAdmin ? false : isDisabled}
                         {isAdmin}
                         {isConfirmMode}
