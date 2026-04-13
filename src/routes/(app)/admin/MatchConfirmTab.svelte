@@ -439,10 +439,11 @@
                 <input type="hidden" name="isForfeit" value="true" />
                 
                 <div class="flex flex-col gap-2 w-full">
-                    <label class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                    <label for="forfeitWinnerSelect" class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
                         {i18n.t({ ko: "승리 팀 (기권승)", en: "Winning Team (Forfeit Win)" })}
                     </label>
                     <select
+                        id="forfeitWinnerSelect"
                         name="winnerClassId"
                         bind:value={forfeitWinner}
                         class="w-full text-base p-3 border border-zinc-300 dark:border-zinc-700 rounded-xl outline-none focus:border-amber-500 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 transition-colors"
