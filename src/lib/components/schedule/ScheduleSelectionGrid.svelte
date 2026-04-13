@@ -7,6 +7,7 @@
         name: string;
         userId: string;
         classId: string | null;
+        className?: string | number | null;
     }
 
     interface ScheduleSlot {
@@ -179,7 +180,7 @@
                         participantNames={
                             isConfirmMode || isAdmin
                                 ? slot.registrations.map(
-                                      (r: Participant) => r.classId ? `${r.classId}반 ${r.name}` : r.name
+                                      (r: Participant) => r.className ? `${r.className}반 ${r.name}` : r.name
                                   )
                                 : slot.registrations
                                       .filter((r: Participant) => !currentUserClassId || r.classId === currentUserClassId)

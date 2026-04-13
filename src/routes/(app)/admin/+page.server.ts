@@ -369,7 +369,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
                     if (isRelevantClass && row.user) {
                         daySlots.get(schedId)!.registrations.push({
-                            name: row.user.name ?? "익명", userId: row.user.id, classId: row.user.classId
+                            name: row.user.name ?? "익명", 
+                            userId: row.user.id, 
+                            classId: row.user.classId,
+                            className: row.user.classId ? classMap.get(row.user.classId) : null
                         });
                         daySlots.get(schedId)!.totalVotes++;
                     }
