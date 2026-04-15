@@ -75,24 +75,7 @@
         <div
             class="flex flex-[1_0_0] flex-col overflow-y-auto w-full px-[1.875rem] py-[0px] min-h-0"
         >
-            {#if !data.isEligible}
-                <div
-                    class="flex items-center justify-center w-full h-full py-12"
-                >
-                    <p
-                        class="font-pretendard font-normal text-zinc-400 dark:text-zinc-500 text-[0.875rem] m-0 text-center"
-                    >
-                        {i18n.t({
-                            ko: "해당 종목의 출전 선수가 아니에요.",
-                            en: "You are not participating in this sport.",
-                        })}<br />
-                        {i18n.t({
-                            ko: "출전 선수만 일정을 선택할 수 있어요.",
-                            en: "Only players can schedule matches.",
-                        })}
-                    </p>
-                </div>
-            {:else if !data.hasPendingMatch}
+            {#if !data.hasPendingMatch}
                 <div
                     class="flex items-center justify-center w-full h-full py-12"
                 >
@@ -142,6 +125,14 @@
                 </div>
             {:else}
                 <div class="py-6 flex flex-col items-center gap-6">
+                    {#if !data.isEligible}
+                        <div class="flex items-center gap-[0.625rem] bg-zinc-100 dark:bg-zinc-800 px-5 py-4 rounded-xl max-w-[40rem] mx-[1.25rem]">
+                            <div class="w-[1.125rem] h-[1.125rem] text-zinc-500 shrink-0 select-none">{@html resizeSvg(triangleExclamationSvg)}</div>
+                            <p class="font-pretendard font-medium text-[0.875rem] md:text-[0.9375rem] text-zinc-600 dark:text-zinc-400 m-0 break-keep leading-snug">
+                                {i18n.t({ ko: "해당 종목의 출전 선수가 아니어서 일정을 선택할 수 없어요. 투표 현황만 조회 가능해요.", en: "You are not participating in this sport, so you cannot vote for schedules. You can only view the voting status." })}
+                            </p>
+                        </div>
+                    {/if}
                     <div class="mx-auto w-fit">
                         <ScheduleSelectionGrid
                             gridData={data.gridData}
@@ -149,7 +140,7 @@
                             opponentClassId={data.opponentClassId}
                             isOpponentUndecided={data.isOpponentUndecided}
                             minPlayers={data.minPlayers}
-                            isDisabled={data.deadlinePassed}
+                            isDisabled={data.deadlinePassed || !data.isEligible}
                         />
                     </div>
                 </div>
@@ -160,7 +151,7 @@
         <div
             class="flex items-center justify-center shrink-0 w-full px-[0.625rem]"
         >
-            {#if data.isEligible && data.hasPendingMatch && data.deadlineAt && !data.isWindowUndetermined}
+            {#if data.hasPendingMatch && data.deadlineAt && !data.isWindowUndetermined}
                 <p
                     class="font-pretendard font-normal text-[0.875rem] text-zinc-600 dark:text-zinc-400 m-0"
                 >
