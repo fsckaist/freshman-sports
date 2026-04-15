@@ -145,39 +145,50 @@
         >
             {#if data.hasPendingMatch && !data.isWindowUndetermined}
                 {#if !data.isEligible}
-                    <div class="flex items-center gap-[0.625rem] bg-zinc-100 dark:bg-zinc-800 px-5 py-4 rounded-xl max-w-[40rem] mx-[1.25rem]">
-                        <div class="w-[1.125rem] h-[1.125rem] text-zinc-500 shrink-0 select-none">{@html resizeSvg(triangleExclamationSvg)}</div>
-                        <p class="font-pretendard font-medium text-[0.875rem] md:text-[0.9375rem] text-zinc-600 dark:text-zinc-400 m-0 break-keep leading-snug">
-                            {i18n.t({ ko: "해당 종목의 출전 선수가 아니어서 일정을 선택할 수 없어요. 투표 현황만 조회 가능해요.", en: "You are not participating in this sport, so you cannot vote for schedules. You can only view the voting status." })}
-                        </p>
+                    <div
+                        class="w-[1.125rem] h-[1.125rem] text-zinc-500 shrink-0 select-none"
+                    >
+                        {@html resizeSvg(triangleExclamationSvg)}
                     </div>
+                    <p
+                        class="font-pretendard font-normal text-[0.875rem] text-zinc-600 dark:text-zinc-400 m-0"
+                    >
+                        {i18n.t({
+                            ko: "해당 종목의 출전 선수가 아니어서 일정을 선택할 수 없어요. 투표 현황만 조회 가능해요.",
+                            en: "You are not participating in this sport, so you cannot vote for schedules. You can only view the voting status.",
+                        })}
+                    </p>
                 {:else if data.deadlineAt}
                     <p
                         class="font-pretendard font-normal text-[0.875rem] text-zinc-600 dark:text-zinc-400 m-0"
                     >
-                    {#if !data.deadlinePassed}
-                        '{i18n.decode(
-                            data.sports.find(
-                                (s: any) => s.id === data.activeSportId,
-                            )?.name ??
-                                i18n.t({ ko: "해당 종목", en: "This sport" }),
-                        )}' {i18n.t({
-                            ko: "일정 정하기는 ",
-                            en: "scheduling is open until ",
-                        })}{i18n.decode(data.deadlineAt)}{i18n.t({
-                            ko: "까지 할 수 있어요. 마감까지 ",
-                            en: ". ",
-                        })}{i18n.decode(data.timeRemaining)}
-                        {i18n.t({ ko: "남았어요.", en: " left." })}
-                    {:else}
-                        <span class="text-red-500 dark:text-red-400 font-bold"
-                            >{i18n.t({
-                                ko: "일정 정하기가 마감되었어요",
-                                en: "Scheduling is closed",
-                            })}</span
-                        >
-                    {/if}
-                </p>
+                        {#if !data.deadlinePassed}
+                            '{i18n.decode(
+                                data.sports.find(
+                                    (s: any) => s.id === data.activeSportId,
+                                )?.name ??
+                                    i18n.t({
+                                        ko: "해당 종목",
+                                        en: "This sport",
+                                    }),
+                            )}' {i18n.t({
+                                ko: "일정 정하기는 ",
+                                en: "scheduling is open until ",
+                            })}{i18n.decode(data.deadlineAt)}{i18n.t({
+                                ko: "까지 할 수 있어요. 마감까지 ",
+                                en: ". ",
+                            })}{i18n.decode(data.timeRemaining)}
+                            {i18n.t({ ko: "남았어요.", en: " left." })}
+                        {:else}
+                            <span
+                                class="text-red-500 dark:text-red-400 font-bold"
+                                >{i18n.t({
+                                    ko: "일정 정하기가 마감되었어요",
+                                    en: "Scheduling is closed",
+                                })}</span
+                            >
+                        {/if}
+                    </p>
                 {/if}
             {/if}
         </div>
