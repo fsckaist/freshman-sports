@@ -145,11 +145,6 @@
         >
             {#if data.hasPendingMatch && !data.isWindowUndetermined}
                 {#if !data.isEligible}
-                    <div
-                        class="w-[1.125rem] h-[1.125rem] text-zinc-500 shrink-0 select-none"
-                    >
-                        {@html resizeSvg(triangleExclamationSvg)}
-                    </div>
                     <p
                         class="font-pretendard font-normal text-[0.875rem] text-zinc-600 dark:text-zinc-400 m-0"
                     >
