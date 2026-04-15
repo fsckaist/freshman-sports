@@ -194,31 +194,31 @@ function computeWindowFromEnds(feederEndTimes: Date[])
     return { start: windowStart, deadline, end: windowEnd };
 }
 
+// ─── Recursive Helpers with Caching ─────────────────────────────────────────────
+
+type CacheContext = {
+    brackets: Map<string, { isEliminatedSlot: boolean | null; matchId: string | null; position: number; round: number }>;
+    matches: Map<string, { scheduledAt: Date | null }>;
+};
+
 /**
  * Recursive helper to find the "completion time" of a bracket branch.
- * - If the node has a scheduled match, its completion time is scheduledAt + duration.
- * - If the node is a "Bye" (only has ONE active feeder in the previous round), 
- *   it inherits that feeder's completion time.
+ * Uses in-memory CacheContext to prevent N+1 queries.
  */
 async function getBranchCompletionTime(
     sportId: string,
     round: number,
     position: number,
-    durationMs: number
+    durationMs: number,
+    cache: CacheContext
 ): Promise<Date | "undetermined" | null> {
-    const [node] = await db.select()
-        .from(tournament_brackets)
-        .where(and(
-            eq(tournament_brackets.sportId, sportId),
-            eq(tournament_brackets.round, round),
-            eq(tournament_brackets.position, position)
-        )).limit(1);
+    const node = cache.brackets.get(`${round}-${position}`);
 
     if (!node || node.isEliminatedSlot) return null;
 
     // 1. If match is scheduled, use its end time
     if (node.matchId) {
-        const [m] = await db.select({ scheduledAt: matches.scheduledAt }).from(matches).where(eq(matches.id, node.matchId)).limit(1);
+        const m = cache.matches.get(node.matchId);
         if (m?.scheduledAt) {
             return new Date(m.scheduledAt.getTime() + durationMs);
         }
@@ -246,39 +246,40 @@ export async function computeOrUpdateNextMatchWindow(triggerMatchId: string): Pr
     if (!sport) return;
     const durationMs = (sport.timeSlotInterval || 60) * 60 * 1000;
 
-    // 2. Delegate to internal helper (avoids duplicated bracket-traversal logic)
-    await propagateWindowForMatch(triggerMatchId, sportId, durationMs);
+    // OPTIMIZATION: Cache brackets and matches to avoid DB queries during deep recursion
+    const allBrackets = await db.select().from(tournament_brackets).where(eq(tournament_brackets.sportId, sportId));
+    const bracketMap = new Map();
+    for (const b of allBrackets) {
+        bracketMap.set(`${b.round}-${b.position}`, b);
+    }
+
+    const allMatches = await db.select({ id: matches.id, scheduledAt: matches.scheduledAt }).from(matches).where(eq(matches.sportId, sportId));
+    const matchCache = new Map();
+    for (const m of allMatches) {
+        matchCache.set(m.id, m);
+    }
+
+    const cache: CacheContext = { brackets: bracketMap, matches: matchCache };
+
+    // 2. Delegate to internal helper
+    await propagateWindowForMatch(triggerMatchId, sportId, durationMs, cache);
 }
 
 /** Internal helper: propagate schedule windows from a match to its next-round match(es). */
-async function propagateWindowForMatch(matchId: string, sportId: string, durationMs: number): Promise<void> {
-    const relatedNodes = await db.select()
-        .from(tournament_brackets)
-        .where(and(
-            eq(tournament_brackets.sportId, sportId),
-            eq(tournament_brackets.matchId, matchId)
-        ));
+async function propagateWindowForMatch(matchId: string, sportId: string, durationMs: number, cache: CacheContext): Promise<void> {
+    const relatedNodes = Array.from(cache.brackets.values()).filter(b => b.matchId === matchId);
 
     const nextMatchIdsToUpdate = new Set<string>();
     for (const node of relatedNodes) {
         const nextRound = node.round + 1;
         const nextPosition = Math.floor(node.position / 2);
 
-        const [nextNode] = await db.select({ matchId: tournament_brackets.matchId })
-            .from(tournament_brackets)
-            .where(and(
-                eq(tournament_brackets.sportId, sportId),
-                eq(tournament_brackets.round, nextRound),
-                eq(tournament_brackets.position, nextPosition)
-            )).limit(1);
-
+        const nextNode = cache.brackets.get(`${nextRound}-${nextPosition}`);
         if (nextNode?.matchId) nextMatchIdsToUpdate.add(nextNode.matchId);
     }
 
     for (const nextMatchId of nextMatchIdsToUpdate) {
-        const targetNodes = await db.select({ position: tournament_brackets.position, round: tournament_brackets.round })
-            .from(tournament_brackets)
-            .where(eq(tournament_brackets.matchId, nextMatchId));
+        const targetNodes = Array.from(cache.brackets.values()).filter(b => b.matchId === nextMatchId);
 
         if (targetNodes.length === 0) continue;
         const prevRound = targetNodes[0].round - 1;
@@ -287,11 +288,11 @@ async function propagateWindowForMatch(matchId: string, sportId: string, duratio
         let canCompute = true;
 
         for (const node of targetNodes) {
-            const c1 = await getBranchCompletionTime(sportId, prevRound, node.position * 2, durationMs);
+            const c1 = await getBranchCompletionTime(sportId, prevRound, node.position * 2, durationMs, cache);
             if (c1 === "undetermined") { canCompute = false; break; }
             if (c1) feederEndTimes.push(c1);
 
-            const c2 = await getBranchCompletionTime(sportId, prevRound, node.position * 2 + 1, durationMs);
+            const c2 = await getBranchCompletionTime(sportId, prevRound, node.position * 2 + 1, durationMs, cache);
             if (c2 === "undetermined") { canCompute = false; break; }
             if (c2) feederEndTimes.push(c2);
         }
@@ -308,7 +309,7 @@ async function propagateWindowForMatch(matchId: string, sportId: string, duratio
                 await ensureScheduleSlots(sportId, window.start, window.end);
 
                 // Recurse: propagate to subsequent rounds (needed for Byes)
-                await propagateWindowForMatch(nextMatchId, sportId, durationMs);
+                await propagateWindowForMatch(nextMatchId, sportId, durationMs, cache);
             }
         } else {
             await db.update(matches).set({

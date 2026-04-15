@@ -5,6 +5,32 @@ import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { verifyToken } from '$lib/server/jwt';
 
+// --- In-Memory TTL Cache ---
+const CACHE_TTL_MS = 60 * 1000; // 1 minute
+const userCache = new Map<string, { data: any, expiry: number }>();
+
+function getCachedUser(id: string) {
+    const item = userCache.get(id);
+    if (!item) return null;
+    if (Date.now() > item.expiry) {
+        userCache.delete(id);
+        return null;
+    }
+    return item.data;
+}
+
+function setCachedUser(id: string, data: any) {
+    userCache.set(id, { data, expiry: Date.now() + CACHE_TTL_MS });
+    // Cleanup if cache grows too large to prevent memory leak
+    if (userCache.size > 1000) {
+        let count = 0;
+        for (const [key, val] of userCache.entries()) {
+            if (Date.now() > val.expiry || count++ > 200) userCache.delete(key);
+        }
+    }
+}
+// ---------------------------
+
 export const handle: Handle = async ({ event, resolve }) => {
     const token = event.cookies.get('session');
 
@@ -14,24 +40,32 @@ export const handle: Handle = async ({ event, resolve }) => {
             // Validate that dbUserId looks like a UUID before querying
             const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
             if (payload?.dbUserId && uuidRegex.test(payload.dbUserId)) {
-                const fetchedUsers = await db.select({
-                    id: users.id,
-                    authId: users.authId,
-                    studentNumber: users.studentNumber,
-                    email: users.email,
-                    phoneNumber: users.phoneNumber,
-                    name: users.name,
-                    gender: users.gender,
-                    classId: users.classId,
-                    isManager: users.isManager,
-                    isReferee: users.isReferee,
-                    isAdmin: users.isAdmin,
-                    isProctor: users.isProctor,
-                    agreedRules: users.agreedRules,
-                    agreedPrivacy: users.agreedPrivacy
-                }).from(users).where(eq(users.id, payload.dbUserId)).limit(1);
-                if (fetchedUsers.length > 0) {
-                    event.locals.user = fetchedUsers[0];
+                let userObj = getCachedUser(payload.dbUserId);
+                if (!userObj) {
+                    const fetchedUsers = await db.select({
+                        id: users.id,
+                        authId: users.authId,
+                        studentNumber: users.studentNumber,
+                        email: users.email,
+                        phoneNumber: users.phoneNumber,
+                        name: users.name,
+                        gender: users.gender,
+                        classId: users.classId,
+                        isManager: users.isManager,
+                        isReferee: users.isReferee,
+                        isAdmin: users.isAdmin,
+                        isProctor: users.isProctor,
+                        agreedRules: users.agreedRules,
+                        agreedPrivacy: users.agreedPrivacy
+                    }).from(users).where(eq(users.id, payload.dbUserId)).limit(1);
+                    if (fetchedUsers.length > 0) {
+                        userObj = fetchedUsers[0];
+                        setCachedUser(payload.dbUserId, userObj);
+                    }
+                }
+                
+                if (userObj) {
+                    event.locals.user = userObj;
                 }
             } else if (token) {
                 // Invalid or legacy cookie — clear it

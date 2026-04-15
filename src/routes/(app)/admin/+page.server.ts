@@ -146,7 +146,7 @@ async function syncBracketMatch(sportId: string, targetRound: number, targetPosi
     }
 }
 
-export const load: PageServerLoad = async ({ url, locals }) => {
+export const load: PageServerLoad = async ({ url, locals, parent }) => {
     try {
         const user = locals.user;
         if (!user) {
@@ -160,15 +160,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
         const activeTab = url.searchParams.get('tab') ?? 'schedule';
 
+        const { eventState, registrationDeadline } = await parent();
+
         // --- SHARED: Always needed (lightweight, parallelized) ---
-        const [configRows, allSports, allLocations] = await Promise.all([
-            db.select().from(system_config).limit(1),
+        const [allSports, allLocations] = await Promise.all([
             db.select().from(sports).orderBy(asc(sports.displayOrder)),
             db.select().from(sport_locations),
         ]);
-
-        const eventState = (configRows[0]?.eventState ?? 'REGISTRATION') as EventState;
-        const registrationDeadline = configRows[0]?.registrationDeadline ?? null;
 
         // Group locations by sportId
         const locationsMap = new Map<string, any[]>();
@@ -628,6 +626,9 @@ export const actions: Actions = {
                 return nodes.some(n => n.isEliminatedSlot && n.classId === null);
             });
 
+            // Pre-fetch the entire bracket for this sport to avoid N+1 inside the loop
+            const entireBracket = await db.select().from(tournament_brackets).where(eq(tournament_brackets.sportId, sportId));
+
             let count = 0;
             for (const match of byeMatches) {
                 const nodes = nodesByMatch.get(match.id)!;
@@ -643,11 +644,8 @@ export const actions: Actions = {
                     isVerified: true
                 }).where(eq(matches.id, match.id));
 
-                // Update tournament_brackets for this match
-                const bracketNodes = await db.select().from(tournament_brackets)
-                    .where(eq(tournament_brackets.matchId, match.id));
-
-                for (const node of bracketNodes) {
+                // Rely on the already fetched nodes for this match, no need to query again
+                for (const node of nodes) {
                     let newStatus: 'win' | 'lose' | 'default' = 'lose';
 
                     if (node.classId === winnerClassId) {
@@ -657,16 +655,14 @@ export const actions: Actions = {
                         const nextRound = node.round + 1;
                         const nextPosition = Math.floor(node.position / 2);
 
-                        const nextNodes = await db.select().from(tournament_brackets).where(and(
-                            eq(tournament_brackets.sportId, node.sportId),
-                            eq(tournament_brackets.round, nextRound),
-                            eq(tournament_brackets.position, nextPosition)
-                        ));
+                        const nextNode = entireBracket.find(n => 
+                            n.round === nextRound && n.position === nextPosition
+                        );
 
-                        if (nextNodes.length > 0) {
+                        if (nextNode) {
                             await db.update(tournament_brackets)
                                 .set({ classId: winnerClassId })
-                                .where(eq(tournament_brackets.id, nextNodes[0].id));
+                                .where(eq(tournament_brackets.id, nextNode.id));
 
                             // CALL SHARED HELPER
                             await syncBracketMatch(node.sportId, nextRound, nextPosition);

@@ -22,8 +22,13 @@ class DBMutationLogger implements Logger {
 // In seed scripts we won't have $env/dynamic/private loaded, so we define a fallback
 const connectionString = process.env.DATABASE_URL || env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/postgres';
 
-// Setup postgres client
-const client = postgres(connectionString);
+// Setup postgres client with connection pool settings
+const client = postgres(connectionString, {
+    max: 20,              // Max number of connections
+    idle_timeout: 20,     // Close idle connections after 20 seconds
+    connect_timeout: 10,  // Connection timeout after 10 seconds
+    max_lifetime: 60 * 30 // Replace connections after 30 minutes
+});
 
 // Export standalone sql for raw queries
 export const sql = client;

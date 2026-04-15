@@ -33,150 +33,128 @@ export const load: PageServerLoad = async ({ locals }) => {
             phoneNumber: user.phoneNumber
         };
 
-        // QUERY: Fetch user's registered sports
-        const userSports = await db.select({
-            name: sports.name
-        })
-            .from(rosters)
-            .innerJoin(sports, eq(rosters.sportId, sports.id))
-            .where(eq(rosters.userId, userProfile.id))
-            .orderBy(asc(sports.displayOrder));
+        // Prepare alias for matches query
+        const classA = alias(classes, 'classA');
+        const classB = alias(classes, 'classB');
+
+        // BATCH QUERIES: 6 distinct sequential queries combined into 1 parallel fetch
+        const [
+            userSports,
+            classMatches,
+            proctorsList,
+            allSports,
+            rawRosters,
+            userMatches
+        ] = await Promise.all([
+            // 1. Fetch user's registered sports
+            db.select({ name: sports.name })
+                .from(rosters)
+                .innerJoin(sports, eq(rosters.sportId, sports.id))
+                .where(eq(rosters.userId, userProfile.id))
+                .orderBy(asc(sports.displayOrder)),
+
+            // 2. Fetch Class Info
+            userProfile.classId
+                ? db.select({ classNumber: classes.classNumber })
+                    .from(classes)
+                    .where(eq(classes.id, userProfile.classId))
+                    .limit(1)
+                : Promise.resolve([]),
+
+            // 3. Fetch Proctors
+            userProfile.classId
+                ? db.select({ name: users.name })
+                    .from(users)
+                    .where(and(eq(users.classId, userProfile.classId), eq(users.isProctor, true)))
+                : Promise.resolve([]),
+
+            // 4. Fetch ALL sports
+            db.select({
+                id: sports.id,
+                name: sports.name,
+                displayOrder: sports.displayOrder
+            }).from(sports).orderBy(asc(sports.displayOrder)),
+
+            // 5. Fetch class rosters
+            userProfile.classId
+                ? db.select({ sportId: rosters.sportId, playerName: users.name })
+                    .from(rosters)
+                    .innerJoin(users, eq(rosters.userId, users.id))
+                    .where(eq(rosters.classId, userProfile.classId))
+                : Promise.resolve([]),
+
+            // 6. Fetch Matches associated with the user's class
+            db.select({
+                id: matches.id,
+                name: matches.name,
+                time: schedules.startTime,
+                location: matches.location,
+                status: matches.status,
+                teamA: classA.classNumber,
+                teamB: classB.classNumber,
+                sportName: sports.name,
+                sportId: sports.id
+            })
+                .from(matches)
+                .leftJoin(schedules, eq(matches.scheduleId, schedules.id))
+                .innerJoin(sports, eq(matches.sportId, sports.id))
+                .innerJoin(classA, eq(matches.classAId, classA.id))
+                .innerJoin(classB, eq(matches.classBId, classB.id))
+                .where(
+                    userProfile.classId ? or(
+                        eq(matches.classAId, userProfile.classId),
+                        eq(matches.classBId, userProfile.classId)
+                    ) : eq(matches.id, '00000000-0000-0000-0000-000000000000') // Dummy false condition
+                )
+                .orderBy(
+                    asc(sql`CASE 
+                        WHEN ${matches.status} = 'ONGOING' THEN 1 
+                        WHEN ${matches.status} = 'SCHEDULED' THEN 2 
+                        WHEN ${matches.status} = 'PENDING_SCHEDULE' THEN 3 
+                        WHEN ${matches.status} = 'FINISHED' THEN 4 
+                        ELSE 5 
+                    END`),
+                    asc(schedules.startTime)
+                )
+        ]);
 
         const userSportsString = userSports.length > 0
             ? userSports.map(s => s.name).join(', ')
             : '참여 종목 없음';
 
-        // QUERY 2: Fetch Class Info (if applicable)
         let classNumber: number | string | null = null;
         let proctorsString = '없음';
         let groupedRosters: Array<{ sport: string, players: string }> = [];
+        let rosterBySport = new Map<string, string[]>();
 
         if (userProfile.classId) {
-            // Get the class number
-            const classMatches = await db.select({
-                classNumber: classes.classNumber
-            })
-                .from(classes)
-                .where(eq(classes.id, userProfile.classId))
-                .limit(1);
-
             if (classMatches.length > 0) {
                 classNumber = classMatches[0].classNumber;
             }
-
-            // Get proctors for this class
-            const proctorsList = await db.select({
-                name: users.name
-            })
-                .from(users)
-                .where(and(
-                    eq(users.classId, userProfile.classId),
-                    eq(users.isProctor, true)
-                ));
 
             if (proctorsList.length > 0) {
                 proctorsString = proctorsList.map(p => p.name || '알수없음').join(', ');
             }
 
-            // Fetch ALL sports to ensure every sport is represented
-            const allSports = await db.select({
-                id: sports.id,
-                name: sports.name,
-                displayOrder: sports.displayOrder
-            }).from(sports).orderBy(asc(sports.displayOrder));
-
-            // Get Rosters grouped by Sport
-            const rawRosters = await db.select({
-                sportId: rosters.sportId,
-                playerName: users.name
-            })
-                .from(rosters)
-                .innerJoin(users, eq(rosters.userId, users.id))
-                .where(eq(rosters.classId, userProfile.classId));
-
             // Group the raw rosters by sportId
-            const rostersMap = new Map<string, string[]>();
             for (const r of rawRosters) {
-                if (!rostersMap.has(r.sportId)) {
-                    rostersMap.set(r.sportId, []);
+                if (!rosterBySport.has(r.sportId)) {
+                    rosterBySport.set(r.sportId, []);
                 }
                 if (r.playerName) {
-                    rostersMap.get(r.sportId)!.push(r.playerName);
+                    rosterBySport.get(r.sportId)!.push(r.playerName);
                 }
             }
 
             // Map all available sports, pulling from the grouped Map
             groupedRosters = allSports.map((sport) => {
-                const playersList = rostersMap.get(sport.id) || [];
+                const playersList = rosterBySport.get(sport.id) || [];
                 // If there are players, comma join them. Else return '출전 선수가 없어요.'
                 return {
                     sport: sport.name,
                     players: playersList.length > 0 ? playersList.join(', ') : '출전 선수가 없어요.'
                 };
             });
-        }
-
-        // QUERY 3: Fetch Matches associated with the user's class
-        const classA = alias(classes, 'classA');
-        const classB = alias(classes, 'classB');
-
-        const userMatches = await db.select({
-            id: matches.id,
-            name: matches.name,
-            time: schedules.startTime,
-            location: matches.location,
-            status: matches.status,
-            teamA: classA.classNumber,
-            teamB: classB.classNumber,
-            sportName: sports.name,
-            sportId: sports.id
-        })
-            .from(matches)
-            .leftJoin(schedules, eq(matches.scheduleId, schedules.id))
-            .innerJoin(sports, eq(matches.sportId, sports.id))
-            .innerJoin(classA, eq(matches.classAId, classA.id))
-            .innerJoin(classB, eq(matches.classBId, classB.id))
-            .where(
-                userProfile.classId ? or(
-                    eq(matches.classAId, userProfile.classId),
-                    eq(matches.classBId, userProfile.classId)
-                ) : eq(matches.id, '00000000-0000-0000-0000-000000000000') // Dummy false condition if no class
-            )
-            .orderBy(
-                asc(sql`CASE 
-                    WHEN ${matches.status} = 'ONGOING' THEN 1 
-                    WHEN ${matches.status} = 'SCHEDULED' THEN 2 
-                    WHEN ${matches.status} = 'PENDING_SCHEDULE' THEN 3 
-                    WHEN ${matches.status} = 'FINISHED' THEN 4 
-                    ELSE 5 
-                END`),
-                asc(schedules.startTime)
-            );
-
-        // Formatter for dates (Korean format)
-        const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
-
-        // QUERY 4: Pre-fetch all class rosters once to avoid N+1 queries per match
-        let rosterBySport = new Map<string, string[]>();
-        if (userProfile.classId) {
-            const allClassRosters = await db.select({
-                sportId: rosters.sportId,
-                playerName: users.name
-            })
-                .from(rosters)
-                .innerJoin(users, eq(rosters.userId, users.id))
-                .where(eq(rosters.classId, userProfile.classId));
-
-            for (const r of allClassRosters) {
-                if (!rosterBySport.has(r.sportId)) rosterBySport.set(r.sportId, []);
-                if (r.playerName) rosterBySport.get(r.sportId)!.push(r.playerName);
-            }
         }
 
         const formattedAllMatches = userMatches.map((match) => {

@@ -137,23 +137,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
             .then(res => res[0]);
 
         if (activeMatch) {
-            // Fetch EXPECTED rosters for Team A and Team B
-            const teamARoster = await db
-                .select({ userId: rosters.userId })
-                .from(rosters)
-                .where(and(eq(rosters.classId, activeMatch.classAId!), eq(rosters.sportId, activeMatch.sportId!)));
-
-            const teamBRoster = await db
-                .select({ userId: rosters.userId })
-                .from(rosters)
-                .where(and(eq(rosters.classId, activeMatch.classBId!), eq(rosters.sportId, activeMatch.sportId!)));
-
-            const teamAUserIds = new Set(teamARoster.map(r => r.userId));
-            const teamBUserIds = new Set(teamBRoster.map(r => r.userId));
-
-            // Fetch ACTUAL registers for this schedule
-            const matchRegisters = await db
-                .select({
+            // OPTIMIZATION: Fetch EXPECTED rosters and ACTUAL registers in parallel
+            const [teamARoster, teamBRoster, matchRegisters] = await Promise.all([
+                db.select({ userId: rosters.userId })
+                    .from(rosters)
+                    .where(and(eq(rosters.classId, activeMatch.classAId!), eq(rosters.sportId, activeMatch.sportId!))),
+                db.select({ userId: rosters.userId })
+                    .from(rosters)
+                    .where(and(eq(rosters.classId, activeMatch.classBId!), eq(rosters.sportId, activeMatch.sportId!))),
+                db.select({
                     registerId: registers.id,
                     userId: users.id,
                     name: users.name,
@@ -162,9 +154,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                     checkedInAt: registers.checkedInAt,
                     isCheering: registers.isCheering
                 })
-                .from(registers)
-                .innerJoin(users, eq(registers.userId, users.id))
-                .where(eq(registers.scheduleId, activeMatch.scheduleId!));
+                    .from(registers)
+                    .innerJoin(users, eq(registers.userId, users.id))
+                    .where(eq(registers.scheduleId, activeMatch.scheduleId!))
+            ]);
+
+            const teamAUserIds = new Set(teamARoster.map(r => r.userId));
+            const teamBUserIds = new Set(teamBRoster.map(r => r.userId));
 
             // Separate cheering into Class A and Class B
             const teamACheckedIn = [];
