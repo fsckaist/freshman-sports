@@ -341,7 +341,7 @@
                         >
                         {#each allUsers.filter((u) => u.isReferee) as user}
                             <option value={user.id}
-                                >{user.name}{i18n.t({
+                                >{user.studentNumber ? `${user.studentNumber} ` : ''}{user.name}{i18n.t({
                                     ko: ` (${user.refereeCount || 0})`,
                                     en: ` (${user.refereeCount || 0})`,
                                 })}</option
@@ -373,7 +373,7 @@
                         >
                         {#each allUsers.filter((u) => u.isManager) as user}
                             <option value={user.id}
-                                >{user.name}{i18n.t({
+                                >{user.studentNumber ? `${user.studentNumber} ` : ''}{user.name}{i18n.t({
                                     ko: ` (${user.managerCount || 0})`,
                                     en: ` (${user.managerCount || 0})`,
                                 })}</option

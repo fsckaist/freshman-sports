@@ -8,6 +8,24 @@ import { computeOrUpdateNextMatchWindow, propagateByeWindow, addWeekdays, ensure
 import { signToken, verifyToken } from '$lib/server/jwt';
 import { dev } from '$app/environment';
 
+const matchPrefixRank: Record<string, number> = { 'R32': 1, 'R16': 2, 'QF': 3, 'SF': 4, 'BM': 5, 'GF': 6 };
+function getMatchSortKey(matchNameStr: string | null) {
+    if (!matchNameStr) return { rank: 99, num: 999 };
+    try {
+        const obj = JSON.parse(matchNameStr);
+        const name = obj.en || obj.ko || "";
+        const parts = name.split('-');
+        if (parts.length >= 2) {
+            const prefix = parts[0];
+            const numStr = parts[1].replace(/\D/g, '');
+            const rank = matchPrefixRank[prefix] ?? 99;
+            const num = numStr ? parseInt(numStr, 10) : 999;
+            return { rank, num };
+        }
+    } catch(e) {}
+    return { rank: 99, num: 999 };
+}
+
 /** 
  * Shared helper to ensure a Match object exists and is synchronized with the bracket nodes 
  * for a specific round and position. Handles automated GF/BM naming and bye propagation.
@@ -280,7 +298,8 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
                 db.select({
                     id: users.id, name: users.name, studentNumber: users.studentNumber,
                     isManager: users.isManager, isReferee: users.isReferee,
-                }).from(users).where(or(eq(users.isManager, true), eq(users.isReferee, true))),
+                }).from(users).where(or(eq(users.isManager, true), eq(users.isReferee, true)))
+                  .orderBy(asc(users.studentNumber)),
                 db.select({ scheduleId: matches.scheduleId })
                     .from(matches)
                     .where(and(eq(matches.sportId, activeSport.id), eq(matches.status, 'SCHEDULED'))),
@@ -324,7 +343,12 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
                 location: r.match.location,
                 refereeId: r.match.refereeId,
                 managerId: r.match.managerId
-            }));
+            })).sort((a, b) => {
+                const keyA = getMatchSortKey(a.matchName);
+                const keyB = getMatchSortKey(b.matchName);
+                if (keyA.rank !== keyB.rank) return keyA.rank - keyB.rank;
+                return keyA.num - keyB.num;
+            });
 
             let activeMatchId = url.searchParams.get('matchId');
             let activeMatch = pendingMatches.find(m => m.id === activeMatchId);
@@ -405,7 +429,12 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
                 classB: r.match.classBId ? classMap.get(r.match.classBId) : null,
                 classAId: r.match.classAId, classBId: r.match.classBId,
                 scoreA: r.match.scoreA, scoreB: r.match.scoreB
-            }));
+            })).sort((a, b) => {
+                const keyA = getMatchSortKey(a.matchName);
+                const keyB = getMatchSortKey(b.matchName);
+                if (keyA.rank !== keyB.rank) return keyA.rank - keyB.rank;
+                return keyA.num - keyB.num;
+            });
 
             let activeResultMatchId = url.searchParams.get('resultMatchId');
             let baseResultMatch = finishedMatches.find(m => m.id === activeResultMatchId);
