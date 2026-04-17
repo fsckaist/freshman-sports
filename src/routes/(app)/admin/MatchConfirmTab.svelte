@@ -351,7 +351,7 @@
                                 en: "No Referee",
                             })}</option
                         >
-                        {#each allUsers.filter((u) => u.isReferee && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId) as user}
+                        {#each allUsers.filter((u) => u.isReferee && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId && (!selectedSlotId || !u.busyAssignments?.some((ba: any) => ba.scheduleId === selectedSlotId && ba.matchId !== activeMatch?.id))) as user}
                             <option value={user.id}
                                 >{user.studentNumber ? `${user.studentNumber} ` : ''}{user.name}{i18n.t({
                                     ko: ` (${user.refereeCount || 0})`,
@@ -383,7 +383,7 @@
                                 en: "No Manager",
                             })}</option
                         >
-                        {#each allUsers.filter((u) => u.isManager && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId) as user}
+                        {#each allUsers.filter((u) => u.isManager && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId && (!selectedSlotId || !u.busyAssignments?.some((ba: any) => ba.scheduleId === selectedSlotId && ba.matchId !== activeMatch?.id))) as user}
                             <option value={user.id}
                                 >{user.studentNumber ? `${user.studentNumber} ` : ''}{user.name}{i18n.t({
                                     ko: ` (${user.managerCount || 0})`,

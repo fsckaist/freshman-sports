@@ -304,8 +304,11 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
                     .from(matches)
                     .where(and(eq(matches.sportId, activeSport.id), eq(matches.status, 'SCHEDULED'))),
                 db.select({
+                    id: matches.id,
+                    scheduleId: matches.scheduleId,
                     refereeId: matches.refereeId,
                     managerId: matches.managerId,
+                    status: matches.status
                 }).from(matches).where(
                     or(isNotNull(matches.refereeId), isNotNull(matches.managerId))
                 ),
@@ -314,14 +317,29 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
             // Build referee/manager assignment count maps
             const refereeCountMap = new Map<string, number>();
             const managerCountMap = new Map<string, number>();
+            const busyAssignmentsMap = new Map<string, { scheduleId: string, matchId: string }[]>();
+            
             for (const row of assignmentCounts) {
-                if (row.refereeId) refereeCountMap.set(row.refereeId, (refereeCountMap.get(row.refereeId) || 0) + 1);
-                if (row.managerId) managerCountMap.set(row.managerId, (managerCountMap.get(row.managerId) || 0) + 1);
+                if (row.refereeId) {
+                    refereeCountMap.set(row.refereeId, (refereeCountMap.get(row.refereeId) || 0) + 1);
+                    if (row.scheduleId && row.status !== 'CANCELLED') {
+                        if (!busyAssignmentsMap.has(row.refereeId)) busyAssignmentsMap.set(row.refereeId, []);
+                        busyAssignmentsMap.get(row.refereeId)!.push({ scheduleId: row.scheduleId, matchId: row.id });
+                    }
+                }
+                if (row.managerId) {
+                    managerCountMap.set(row.managerId, (managerCountMap.get(row.managerId) || 0) + 1);
+                    if (row.scheduleId && row.status !== 'CANCELLED') {
+                        if (!busyAssignmentsMap.has(row.managerId)) busyAssignmentsMap.set(row.managerId, []);
+                        busyAssignmentsMap.get(row.managerId)!.push({ scheduleId: row.scheduleId, matchId: row.id });
+                    }
+                }
             }
             const staffUsers = staffUsersRaw.map(u => ({
                 ...u,
                 refereeCount: refereeCountMap.get(u.id) || 0,
                 managerCount: managerCountMap.get(u.id) || 0,
+                busyAssignments: busyAssignmentsMap.get(u.id) || [],
             }));
 
             const classMap = new Map(allClassesRaw.map(c => [c.id, c.classNumber]));
