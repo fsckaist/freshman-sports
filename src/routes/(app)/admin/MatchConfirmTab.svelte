@@ -1,6 +1,6 @@
 <script lang="ts">
     import ScheduleSelectionGrid from "$lib/components/schedule/ScheduleSelectionGrid.svelte";
-    import { loadingEnhance } from '$lib/actions/loading';
+    import { loadingEnhance } from "$lib/actions/loading";
     import { i18n } from "$lib/i18n.svelte";
 
     let {
@@ -25,7 +25,8 @@
         if (!selectedSlotId) return null;
         for (const [, slots] of Object.entries(confirmGridData)) {
             for (const slot of slots) {
-                if (slot.id === selectedSlotId) return new Date(slot.startTime).getTime();
+                if (slot.id === selectedSlotId)
+                    return new Date(slot.startTime).getTime();
             }
         }
         return null;
@@ -192,17 +193,31 @@
                             )}
                         </div>
                     {/if}
-                    
+
                     {#if matchPair.scheduledAt}
-                        <div class="mt-1 text-[0.7rem] font-bold text-amber-600 dark:text-amber-400 w-full text-center">
-                            {i18n.t({ ko: "경기 일정", en: "Match Time" })}: {new Date(matchPair.scheduledAt).toLocaleString(
+                        <div
+                            class="mt-1 text-[0.7rem] font-bold text-amber-600 dark:text-amber-400 w-full text-center"
+                        >
+                            {i18n.t({ ko: "경기 일정", en: "Match Time" })}: {new Date(
+                                matchPair.scheduledAt,
+                            ).toLocaleString(
                                 i18n.locale === "ko" ? "ko-KR" : "en-US",
-                                { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }
+                                {
+                                    month: "numeric",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                },
                             )}
                         </div>
                     {:else}
-                        <div class="mt-1 text-[0.7rem] font-semibold text-zinc-400 dark:text-zinc-500 w-full text-center">
-                            {i18n.t({ ko: "경기 일정 미설정", en: "Match Time Not Set" })}
+                        <div
+                            class="mt-1 text-[0.7rem] font-semibold text-zinc-400 dark:text-zinc-500 w-full text-center"
+                        >
+                            {i18n.t({
+                                ko: "경기 일정 미설정",
+                                en: "Match Time Not Set",
+                            })}
                         </div>
                     {/if}
                 </a>
@@ -362,7 +377,9 @@
                         >
                         {#each allUsers.filter((u) => u.isReferee && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId && (!selectedSlotTime || !u.busyAssignments?.some((ba: any) => ba.scheduledAtTime === selectedSlotTime && ba.matchId !== activeMatch?.id))) as user}
                             <option value={user.id}
-                                >{user.studentNumber ? `${user.studentNumber} ` : ''}{user.name}{i18n.t({
+                                >{user.studentNumber
+                                    ? `${user.studentNumber} `
+                                    : ""}{user.name}{i18n.t({
                                     ko: ` (${user.refereeCount || 0})`,
                                     en: ` (${user.refereeCount || 0})`,
                                 })}</option
@@ -394,7 +411,9 @@
                         >
                         {#each allUsers.filter((u) => u.isManager && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId && (!selectedSlotTime || !u.busyAssignments?.some((ba: any) => ba.scheduledAtTime === selectedSlotTime && ba.matchId !== activeMatch?.id))) as user}
                             <option value={user.id}
-                                >{user.studentNumber ? `${user.studentNumber} ` : ''}{user.name}{i18n.t({
+                                >{user.studentNumber
+                                    ? `${user.studentNumber} `
+                                    : ""}{user.name}{i18n.t({
                                     ko: ` (${user.managerCount || 0})`,
                                     en: ` (${user.managerCount || 0})`,
                                 })}</option
@@ -409,7 +428,7 @@
                         class="flex-1 py-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold rounded-xl transition-colors"
                         onclick={closeModal}
                     >
-                        {i18n.t({ ko: "취소하기", en: "Cancel" })}
+                        {i18n.t({ ko: "돌아가기", en: "Back" })}
                     </button>
                     <button
                         type="submit"
@@ -435,13 +454,17 @@
             class="bg-white dark:bg-zinc-900 rounded-[1.5rem] w-full max-w-[28rem] flex flex-col items-center justify-center p-[2rem] gap-[1.5rem] shadow-2xl cursor-default border dark:border-zinc-800"
             onclick={(e) => e.stopPropagation()}
         >
-            <h3 class="font-pretendard font-bold text-[1.5rem] text-zinc-800 dark:text-zinc-100 m-0">
+            <h3
+                class="font-pretendard font-bold text-[1.5rem] text-zinc-800 dark:text-zinc-100 m-0"
+            >
                 {i18n.t({ ko: "기권패/몰수패 설정", en: "Set Forfeit" })}
             </h3>
-            <p class="text-center text-zinc-500 dark:text-zinc-400 font-pretendard text-[0.9rem] m-0 leading-relaxed">
+            <p
+                class="text-center text-zinc-500 dark:text-zinc-400 font-pretendard text-[0.9rem] m-0 leading-relaxed"
+            >
                 {i18n.t({
                     ko: "경기 시간을 확정하지 않고 바로 승리 팀을 지정합니다.",
-                    en: "Specify a winning team without confirming the match time."
+                    en: "Specify a winning team without confirming the match time.",
                 })}
             </p>
 
@@ -458,10 +481,16 @@
             >
                 <input type="hidden" name="matchId" value={activeMatch?.id} />
                 <input type="hidden" name="isForfeit" value="true" />
-                
+
                 <div class="flex flex-col gap-2 w-full">
-                    <label for="forfeitWinnerSelect" class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                        {i18n.t({ ko: "승리 팀 (기권승)", en: "Winning Team (Forfeit Win)" })}
+                    <label
+                        for="forfeitWinnerSelect"
+                        class="text-sm font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                        {i18n.t({
+                            ko: "승리 팀 (기권승)",
+                            en: "Winning Team (Forfeit Win)",
+                        })}
                     </label>
                     <select
                         id="forfeitWinnerSelect"
@@ -470,10 +499,32 @@
                         class="w-full text-base p-3 border border-zinc-300 dark:border-zinc-700 rounded-xl outline-none focus:border-amber-500 bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 transition-colors"
                         required
                     >
-                        <option value="" disabled selected>{i18n.t({ ko: "승리 팀 선택", en: "Select Winning Team" })}</option>
-                        <option value={activeMatch?.classAId}>{i18n.t({ko: "Class", en: "Class"})} {activeMatch?.classA}{i18n.t({ko:"반", en:""})}</option>
-                        <option value={activeMatch?.classBId}>{i18n.t({ko: "Class", en: "Class"})} {activeMatch?.classB}{i18n.t({ko:"반", en:""})}</option>
-                        <option value="none">{i18n.t({ ko: "양 팀 모두 기권 (동반 탈락)", en: "Both teams forfeit (Both eliminated)" })}</option>
+                        <option value="" disabled selected
+                            >{i18n.t({
+                                ko: "승리 팀 선택",
+                                en: "Select Winning Team",
+                            })}</option
+                        >
+                        <option value={activeMatch?.classAId}
+                            >{i18n.t({ ko: "Class", en: "Class" })}
+                            {activeMatch?.classA}{i18n.t({
+                                ko: "반",
+                                en: "",
+                            })}</option
+                        >
+                        <option value={activeMatch?.classBId}
+                            >{i18n.t({ ko: "Class", en: "Class" })}
+                            {activeMatch?.classB}{i18n.t({
+                                ko: "반",
+                                en: "",
+                            })}</option
+                        >
+                        <option value="none"
+                            >{i18n.t({
+                                ko: "양 팀 모두 기권 (동반 탈락)",
+                                en: "Both teams forfeit (Both eliminated)",
+                            })}</option
+                        >
                     </select>
                 </div>
 
