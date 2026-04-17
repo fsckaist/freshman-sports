@@ -46,7 +46,7 @@
             .replace(/height="16"/g, 'height="14"');
 
     // Derived states mapping to the old UI logic
-    let isEmpty = $derived(!isAvailable);
+    let isEmpty = $derived(!isAvailable && !isScheduledMatchSlot);
     let isOurTeamAvailable = $derived(ourCount >= ourMax);
     let isOppTeamAvailable = $derived(oppCount >= oppMax);
     let isMatchAvailable = $derived(isOurTeamAvailable && isOppTeamAvailable);

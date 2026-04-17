@@ -79,6 +79,13 @@ async function checkIntegrity() {
         }
     }
 
+    // 클래스 정보 가져오기 (이름 출력을 위해)
+    const allClasses = await db.select().from(schema.classes);
+    const classesMap = new Map();
+    for (const c of allClasses) {
+        classesMap.set(c.id, c.classNumber);
+    }
+
     // 시간 겹침 위반 출력
     for (const [timeKey, timeSlotMap] of timeAssignments.entries()) {
         const timeStr = new Date(timeKey).toLocaleString('ko-KR');
@@ -100,11 +107,57 @@ async function checkIntegrity() {
         }
     }
 
+    // 조건 3: 한 반이 같은 날에 두 가지 이상의 경기가 배정되었는지 체크
+    const classDateAssignments = new Map<string, any[]>();
+    let violation3Count = 0;
+
+    const allScheduledMatches = await db.select().from(schema.matches);
+    for (const match of allScheduledMatches) {
+        if (!match.scheduledAt || match.status === 'CANCELED') continue;
+        
+        const dateObj = match.scheduledAt;
+        // YYYY-MM-DD 형식으로 날짜 키 생성
+        const dateKey = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+        
+        const registerMatchForClass = (classId: string | null) => {
+            if (!classId) return;
+            const key = `${dateKey}_${classId}`;
+            if (!classDateAssignments.has(key)) {
+                classDateAssignments.set(key, []);
+            }
+            classDateAssignments.get(key)!.push({
+                matchId: match.id,
+                matchName: match.name,
+                sportName: sportsMap.get(match.sportId)
+            });
+        };
+
+        registerMatchForClass(match.classAId);
+        registerMatchForClass(match.classBId);
+    }
+
+    for (const [key, matches] of classDateAssignments.entries()) {
+        if (matches.length > 1) {
+            const [dateStr, classId] = key.split('_');
+            const classNumber = classesMap.get(classId) || "알수없음";
+            
+            const matchNames = matches.map((m: any) => {
+                let nameDisplay = m.matchId;
+                try { nameDisplay = JSON.parse(m.matchName || "{}").ko || m.matchId; } catch (e) { }
+                return `[${m.sportName || "알수없음"}] ${nameDisplay}`;
+            }).join(", ");
+            
+            console.error(`[위반 3 - 같은 날짜 중복 경기 배정] 반: ${classNumber}반, 날짜: ${dateStr}, 경기들: ${matchNames}`);
+            violation3Count++;
+        }
+    }
+
     console.log(`\n=== 검사 종료 ===`);
     console.log(`조건 1 (동시간대 중복 배정): ${violation1Count}건 위반`);
     console.log(`조건 2 (자기 반 경기 배정): ${violation2Count}건 위반`);
+    console.log(`조건 3 (하루 2경기 이상 배정된 반): ${violation3Count}건 위반`);
 
-    if (violation1Count === 0 && violation2Count === 0) {
+    if (violation1Count === 0 && violation2Count === 0 && violation3Count === 0) {
         console.log("✅ 모든 무결성 조건이 만족되었습니다!");
     } else {
         console.log("❌ 문제되는 경기 배정을 확인하고 수정하세요.");
