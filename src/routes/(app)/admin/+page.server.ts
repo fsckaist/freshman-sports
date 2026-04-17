@@ -297,7 +297,7 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
                 db.select().from(classes),
                 db.select({
                     id: users.id, name: users.name, studentNumber: users.studentNumber,
-                    isManager: users.isManager, isReferee: users.isReferee,
+                    isManager: users.isManager, isReferee: users.isReferee, classId: users.classId
                 }).from(users).where(or(eq(users.isManager, true), eq(users.isReferee, true)))
                   .orderBy(asc(users.studentNumber)),
                 db.select({ scheduleId: matches.scheduleId })
