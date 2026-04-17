@@ -20,6 +20,14 @@ async function checkIntegrity() {
         usersMap.set(u.id, u);
     }
 
+    const allSports = await db.select().from(schema.sports);
+    const sportsMap = new Map();
+    for (const s of allSports) {
+        let sportName = s.name;
+        try { sportName = JSON.parse(s.name || "{}").ko || s.name; } catch(e) {}
+        sportsMap.set(s.id, sportName);
+    }
+
     const allMatches = await db.select().from(schema.matches).where(
         or(isNotNull(schema.matches.refereeId), isNotNull(schema.matches.managerId))
     );
@@ -43,7 +51,7 @@ async function checkIntegrity() {
             if (!timeSlotMap.has(userId)) {
                 timeSlotMap.set(userId, []);
             }
-            timeSlotMap.get(userId)!.push({ matchId: match.id, role, matchName: match.name });
+            timeSlotMap.get(userId)!.push({ matchId: match.id, role, matchName: match.name, sportName: sportsMap.get(match.sportId) });
         };
 
         const checkClassOverlap = (userId: string, role: string) => {
@@ -54,7 +62,8 @@ async function checkIntegrity() {
             if (user.classId && (user.classId === match.classAId || user.classId === match.classBId)) {
                 let matchNameDisplay = match.id;
                 try { matchNameDisplay = JSON.parse(match.name || "{}").ko || match.id; } catch (e) { }
-                console.error(`[위반 2 - 자기 반 경기 배정] 이름: ${user.name}(${user.studentNumber}), 역할: ${role}, 경기: ${matchNameDisplay}`);
+                const sportName = sportsMap.get(match.sportId) || "알수없음";
+                console.error(`[위반 2 - 자기 반 경기 배정] 이름: ${user.name}(${user.studentNumber}), 역할: ${role}, 경기: [${sportName}] ${matchNameDisplay}`);
                 violation2Count++;
             }
         };
@@ -75,11 +84,15 @@ async function checkIntegrity() {
         const timeStr = new Date(timeKey).toLocaleString('ko-KR');
         for (const [userId, assignments] of timeSlotMap.entries()) {
             if (assignments.length > 1) {
+                // 예외 허용: 동일한 하나의 경기에서 심판과 매니저를 둘 다 맡은 경우는 중복 배정 위반으로 보지 않음
+                const isSameMatch = assignments.every((a: any) => a.matchId === assignments[0].matchId);
+                if (isSameMatch) continue;
+
                 const user = usersMap.get(userId);
-                const matchNames = assignments.map(a => {
+                const matchNames = assignments.map((a: any) => {
                     let nameDisplay = a.matchId;
                     try { nameDisplay = JSON.parse(a.matchName || "{}").ko || a.matchId; } catch (e) { }
-                    return `${nameDisplay} (${a.role})`;
+                    return `[${a.sportName || "알수없음"}] ${nameDisplay} (${a.role})`;
                 }).join(", ");
                 console.error(`[위반 1 - 동시간대 중복 배정] 이름: ${user?.name}(${user?.studentNumber}), 경기들: ${matchNames}, 공통 시간: ${timeStr}`);
                 violation1Count++;

@@ -323,14 +323,14 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
             for (const row of assignmentCounts) {
                 if (row.refereeId) {
                     refereeCountMap.set(row.refereeId, (refereeCountMap.get(row.refereeId) || 0) + 1);
-                    if (row.scheduledAt && row.status !== 'CANCELLED') {
+                    if (row.scheduledAt && row.status !== 'CANCELED') {
                         if (!busyAssignmentsMap.has(row.refereeId)) busyAssignmentsMap.set(row.refereeId, []);
                         busyAssignmentsMap.get(row.refereeId)!.push({ scheduledAtTime: row.scheduledAt.getTime(), matchId: row.id });
                     }
                 }
                 if (row.managerId) {
                     managerCountMap.set(row.managerId, (managerCountMap.get(row.managerId) || 0) + 1);
-                    if (row.scheduledAt && row.status !== 'CANCELLED') {
+                    if (row.scheduledAt && row.status !== 'CANCELED') {
                         if (!busyAssignmentsMap.has(row.managerId)) busyAssignmentsMap.set(row.managerId, []);
                         busyAssignmentsMap.get(row.managerId)!.push({ scheduledAtTime: row.scheduledAt.getTime(), matchId: row.id });
                     }
