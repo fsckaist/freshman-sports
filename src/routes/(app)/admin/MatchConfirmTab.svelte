@@ -185,14 +185,14 @@
                     {/if}
                     
                     {#if matchPair.scheduledAt}
-                        <div class="mt-1 text-[0.75rem] font-bold text-emerald-600 dark:text-emerald-400 w-full text-center rounded py-1 bg-emerald-50 dark:bg-emerald-900/20">
+                        <div class="mt-1 text-[0.7rem] font-bold text-amber-600 dark:text-amber-400 w-full text-center">
                             {i18n.t({ ko: "경기 일정", en: "Match Time" })}: {new Date(matchPair.scheduledAt).toLocaleString(
                                 i18n.locale === "ko" ? "ko-KR" : "en-US",
                                 { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }
                             )}
                         </div>
                     {:else}
-                        <div class="mt-1 text-[0.75rem] font-semibold text-zinc-400 dark:text-zinc-500 w-full text-center rounded py-1 bg-zinc-100 dark:bg-zinc-800">
+                        <div class="mt-1 text-[0.7rem] font-semibold text-zinc-400 dark:text-zinc-500 w-full text-center">
                             {i18n.t({ ko: "경기 일정 미설정", en: "Match Time Not Set" })}
                         </div>
                     {/if}
