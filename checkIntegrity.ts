@@ -25,20 +25,20 @@ async function checkIntegrity() {
     );
 
     // 조건 1: 각 심판과 매니저는 같은 시간대에 하나의 경기에만 참여해야 한다.
-    const scheduleAssignments = new Map<string, Map<string, any[]>>();
+    const timeAssignments = new Map<number, Map<string, any[]>>();
 
     let violation1Count = 0;
     let violation2Count = 0;
 
     for (const match of allMatches) {
-        const scheduleId = match.scheduleId;
-        if (!scheduleId || match.status === 'CANCELED') continue;
+        if (!match.scheduledAt || match.status === 'CANCELED') continue;
+        const timeKey = match.scheduledAt.getTime();
 
         const checkUserTimeOverlap = (userId: string, role: string) => {
-            if (!scheduleAssignments.has(scheduleId)) {
-                scheduleAssignments.set(scheduleId, new Map());
+            if (!timeAssignments.has(timeKey)) {
+                timeAssignments.set(timeKey, new Map());
             }
-            const timeSlotMap = scheduleAssignments.get(scheduleId)!;
+            const timeSlotMap = timeAssignments.get(timeKey)!;
 
             if (!timeSlotMap.has(userId)) {
                 timeSlotMap.set(userId, []);
@@ -71,7 +71,8 @@ async function checkIntegrity() {
     }
 
     // 시간 겹침 위반 출력
-    for (const [scheduleId, timeSlotMap] of scheduleAssignments.entries()) {
+    for (const [timeKey, timeSlotMap] of timeAssignments.entries()) {
+        const timeStr = new Date(timeKey).toLocaleString('ko-KR');
         for (const [userId, assignments] of timeSlotMap.entries()) {
             if (assignments.length > 1) {
                 const user = usersMap.get(userId);
@@ -80,7 +81,7 @@ async function checkIntegrity() {
                     try { nameDisplay = JSON.parse(a.matchName || "{}").ko || a.matchId; } catch (e) { }
                     return `${nameDisplay} (${a.role})`;
                 }).join(", ");
-                console.error(`[위반 1 - 동시간대 중복 배정] 이름: ${user?.name}(${user?.studentNumber}), 경기들: ${matchNames}, 공통 Schedule ID: ${scheduleId}`);
+                console.error(`[위반 1 - 동시간대 중복 배정] 이름: ${user?.name}(${user?.studentNumber}), 경기들: ${matchNames}, 공통 시간: ${timeStr}`);
                 violation1Count++;
             }
         }

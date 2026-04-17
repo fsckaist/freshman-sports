@@ -306,6 +306,7 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
                 db.select({
                     id: matches.id,
                     scheduleId: matches.scheduleId,
+                    scheduledAt: matches.scheduledAt,
                     refereeId: matches.refereeId,
                     managerId: matches.managerId,
                     status: matches.status
@@ -317,21 +318,21 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
             // Build referee/manager assignment count maps
             const refereeCountMap = new Map<string, number>();
             const managerCountMap = new Map<string, number>();
-            const busyAssignmentsMap = new Map<string, { scheduleId: string, matchId: string }[]>();
+            const busyAssignmentsMap = new Map<string, { scheduledAtTime: number, matchId: string }[]>();
             
             for (const row of assignmentCounts) {
                 if (row.refereeId) {
                     refereeCountMap.set(row.refereeId, (refereeCountMap.get(row.refereeId) || 0) + 1);
-                    if (row.scheduleId && row.status !== 'CANCELLED') {
+                    if (row.scheduledAt && row.status !== 'CANCELLED') {
                         if (!busyAssignmentsMap.has(row.refereeId)) busyAssignmentsMap.set(row.refereeId, []);
-                        busyAssignmentsMap.get(row.refereeId)!.push({ scheduleId: row.scheduleId, matchId: row.id });
+                        busyAssignmentsMap.get(row.refereeId)!.push({ scheduledAtTime: row.scheduledAt.getTime(), matchId: row.id });
                     }
                 }
                 if (row.managerId) {
                     managerCountMap.set(row.managerId, (managerCountMap.get(row.managerId) || 0) + 1);
-                    if (row.scheduleId && row.status !== 'CANCELLED') {
+                    if (row.scheduledAt && row.status !== 'CANCELLED') {
                         if (!busyAssignmentsMap.has(row.managerId)) busyAssignmentsMap.set(row.managerId, []);
-                        busyAssignmentsMap.get(row.managerId)!.push({ scheduleId: row.scheduleId, matchId: row.id });
+                        busyAssignmentsMap.get(row.managerId)!.push({ scheduledAtTime: row.scheduledAt.getTime(), matchId: row.id });
                     }
                 }
             }

@@ -21,6 +21,15 @@
 
     let isModalOpen = $state(false);
     let selectedSlotId: string | null = $state(null);
+    let selectedSlotTime = $derived.by(() => {
+        if (!selectedSlotId) return null;
+        for (const [, slots] of Object.entries(confirmGridData)) {
+            for (const slot of slots) {
+                if (slot.id === selectedSlotId) return new Date(slot.startTime).getTime();
+            }
+        }
+        return null;
+    });
     let selectedRefereeId = $state("");
     let selectedManagerId = $state("");
     let selectedLocation = $state("");
@@ -351,7 +360,7 @@
                                 en: "No Referee",
                             })}</option
                         >
-                        {#each allUsers.filter((u) => u.isReferee && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId && (!selectedSlotId || !u.busyAssignments?.some((ba: any) => ba.scheduleId === selectedSlotId && ba.matchId !== activeMatch?.id))) as user}
+                        {#each allUsers.filter((u) => u.isReferee && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId && (!selectedSlotTime || !u.busyAssignments?.some((ba: any) => ba.scheduledAtTime === selectedSlotTime && ba.matchId !== activeMatch?.id))) as user}
                             <option value={user.id}
                                 >{user.studentNumber ? `${user.studentNumber} ` : ''}{user.name}{i18n.t({
                                     ko: ` (${user.refereeCount || 0})`,
@@ -383,7 +392,7 @@
                                 en: "No Manager",
                             })}</option
                         >
-                        {#each allUsers.filter((u) => u.isManager && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId && (!selectedSlotId || !u.busyAssignments?.some((ba: any) => ba.scheduleId === selectedSlotId && ba.matchId !== activeMatch?.id))) as user}
+                        {#each allUsers.filter((u) => u.isManager && u.classId !== activeMatch?.classAId && u.classId !== activeMatch?.classBId && (!selectedSlotTime || !u.busyAssignments?.some((ba: any) => ba.scheduledAtTime === selectedSlotTime && ba.matchId !== activeMatch?.id))) as user}
                             <option value={user.id}
                                 >{user.studentNumber ? `${user.studentNumber} ` : ''}{user.name}{i18n.t({
                                     ko: ` (${user.managerCount || 0})`,
