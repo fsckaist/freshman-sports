@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from "$app/stores";
-    import { enhance } from "$app/forms";
+    import { loadingEnhance } from '$lib/actions/loading';
     import TabGroup from "./TabGroup.svelte";
     import ScheduleConfigTab from "./ScheduleConfigTab.svelte";
     import MatchConfirmTab from "./MatchConfirmTab.svelte";
@@ -60,7 +60,7 @@
             <form
                 method="POST"
                 action="?/impersonate"
-                use:enhance
+                use:loadingEnhance
                 class="flex items-center gap-2"
             >
                 <input

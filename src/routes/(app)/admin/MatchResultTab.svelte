@@ -1,6 +1,6 @@
 <script lang="ts">
     import MatchLogPanel from "$lib/components/record/MatchLogPanel.svelte";
-    import { enhance } from "$app/forms";
+    import { loadingEnhance } from '$lib/actions/loading';
     import { i18n } from "$lib/i18n.svelte";
 
     let {
@@ -68,7 +68,7 @@
         <form
             method="POST"
             action="?/processByeMatches"
-            use:enhance={() => {
+            use:loadingEnhance={() => {
                 isByeProcessing = true;
                 return async ({ result, update }) => {
                     isByeProcessing = false;
@@ -181,7 +181,7 @@
                         <form
                             method="POST"
                             action="?/finalizeMatchResult"
-                            use:enhance={() => {
+                            use:loadingEnhance={() => {
                                 isSubmitting = true;
                                 return async ({ update }) => {
                                     isSubmitting = false;
@@ -213,7 +213,7 @@
                         <form
                             method="POST"
                             action="?/finalizeMatchResult"
-                            use:enhance={() => {
+                            use:loadingEnhance={() => {
                                 isSubmitting = true;
                                 return async ({ update }) => {
                                     isSubmitting = false;
@@ -246,7 +246,7 @@
                     <form
                         method="POST"
                         action="?/finalizeMatchResult"
-                        use:enhance={() => {
+                        use:loadingEnhance={() => {
                             isSubmitting = true;
                             return async ({ update }) => {
                                 isSubmitting = false;

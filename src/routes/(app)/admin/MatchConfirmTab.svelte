@@ -1,6 +1,6 @@
 <script lang="ts">
     import ScheduleSelectionGrid from "$lib/components/schedule/ScheduleSelectionGrid.svelte";
-    import { enhance } from "$app/forms";
+    import { loadingEnhance } from '$lib/actions/loading';
     import { i18n } from "$lib/i18n.svelte";
 
     let {
@@ -297,7 +297,7 @@
             <form
                 method="POST"
                 action="?/finalizeMatch"
-                use:enhance={() => {
+                use:loadingEnhance={() => {
                     return async ({ update }) => {
                         await update();
                         closeModal();
@@ -448,7 +448,7 @@
             <form
                 method="POST"
                 action="?/finalizeMatchResult"
-                use:enhance={() => {
+                use:loadingEnhance={() => {
                     return async ({ update }) => {
                         await update();
                         closeForfeitModal();

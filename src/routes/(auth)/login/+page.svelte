@@ -5,6 +5,7 @@
     import rawGlobeIcon from "@gravity-ui/icons/svgs/globe.svg?raw";
     import { themeManager } from "$lib/theme.svelte";
     import { i18n } from "$lib/i18n.svelte";
+    import { loadingEnhance } from "$lib/actions/loading";
 
     const resizeSvg = (svg: string) =>
         svg.replace('width="16" height="16"', 'width="24" height="24"');
@@ -139,6 +140,7 @@
                     <form
                         method="POST"
                         action="?/login"
+                        use:loadingEnhance
                         class="flex flex-col gap-3 w-full max-w-[20rem]"
                     >
                         <input

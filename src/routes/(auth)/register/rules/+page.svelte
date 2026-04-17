@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { enhance } from "$app/forms";
+    import { loadingEnhance } from '$lib/actions/loading';
     import rawSunIcon from "@gravity-ui/icons/svgs/sun.svg?raw";
     import rawMoonIcon from "@gravity-ui/icons/svgs/moon.svg?raw";
     import rawGlobeIcon from "@gravity-ui/icons/svgs/globe.svg?raw";
@@ -126,7 +126,7 @@
             <form
                 method="POST"
                 action="?/agree"
-                use:enhance
+                use:loadingEnhance
                 class="content-stretch flex flex-col gap-[1rem] items-center md:items-start relative shrink-0 break-keep"
             >
                 <p

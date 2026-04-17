@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { enhance } from "$app/forms";
+    import { loadingEnhance } from '$lib/actions/loading';
     import { i18n } from "$lib/i18n.svelte";
 
     let {
@@ -186,7 +186,7 @@
                     <form
                         method="POST"
                         action="?/setEventState"
-                        use:enhance={() => {
+                        use:loadingEnhance={() => {
                             isUpdating = true;
                             return async ({ update }) => {
                                 isUpdating = false;
@@ -264,7 +264,7 @@
             <form
                 method="POST"
                 action="?/setRegistrationDeadline"
-                use:enhance={() => {
+                use:loadingEnhance={() => {
                     isDeadlineUpdating = true;
                     return async ({ update }) => {
                         isDeadlineUpdating = false;
@@ -350,7 +350,7 @@
                         <form
                             method="POST"
                             action="?/setRound1Schedule"
-                            use:enhance={({ action, cancel, formData }) => {
+                            use:loadingEnhance={({ action, cancel, formData }) => {
                                 if (action.search.includes("addSportLocation")) {
                                     if (!formData.get("nameKo") || !formData.get("nameEn")) {
                                         alert(i18n.t({ ko: "한국어와 영어 장소명을 모두 입력해주세요.", en: "Please enter both Korean and English location names." }));

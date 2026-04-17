@@ -1,6 +1,6 @@
 <script lang="ts">
     import { i18n } from "$lib/i18n.svelte";
-    import { enhance } from "$app/forms";
+    import { loadingEnhance } from '$lib/actions/loading';
 
     interface UserInfo {
         id: string;
@@ -782,7 +782,7 @@
                                                 >{p.phoneNumber || "-"}</td
                                             >
                                             <td class="px-4 py-2.5 text-center">
-                                                <form action="?/removeUserFromRoster" method="POST" use:enhance class="inline">
+                                                <form action="?/removeUserFromRoster" method="POST" use:loadingEnhance class="inline">
                                                     <input type="hidden" name="sportId" value={sport.sportId} />
                                                     <input type="hidden" name="userId" value={p.id} />
                                                     <button type="submit" class="text-zinc-400 hover:text-red-500 transition-colors" title={i18n.t({ko: "삭제", en: "Delete"})}>
@@ -820,7 +820,7 @@
                                             >
                                         </div>
                                     </div>
-                                    <form action="?/removeUserFromRoster" method="POST" use:enhance class="shrink-0 flex items-center h-full">
+                                    <form action="?/removeUserFromRoster" method="POST" use:loadingEnhance class="shrink-0 flex items-center h-full">
                                         <input type="hidden" name="sportId" value={sport.sportId} />
                                         <input type="hidden" name="userId" value={p.id} />
                                         <button type="submit" class="p-2 text-zinc-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/30" title={i18n.t({ko: "삭제", en: "Delete"})} aria-label={i18n.t({ko: "삭제", en: "Delete"})}>
@@ -846,7 +846,7 @@
                     {#if availableUsers.length > 0}
                         <div class="px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-200 dark:border-zinc-700 flex flex-col md:flex-row items-stretch md:items-center gap-3">
                             <span class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{i18n.t({ko: "학생 수동 추가", en: "Manual Add Student"})}</span>
-                            <form action="?/addUserToRoster" method="POST" use:enhance class="flex flex-1 items-center gap-2 max-w-sm">
+                            <form action="?/addUserToRoster" method="POST" use:loadingEnhance class="flex flex-1 items-center gap-2 max-w-sm">
                                 <input type="hidden" name="sportId" value={sport.sportId} />
                                 <input type="hidden" name="classId" value={selectedClassId} />
                                 <select name="userId" class="flex-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm rounded-lg px-3 py-1.5 focus:ring-1 focus:ring-amber-500 outline-none text-zinc-800 dark:text-zinc-100 min-w-0 font-medium h-9">

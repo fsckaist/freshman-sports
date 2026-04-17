@@ -1,6 +1,6 @@
 <script lang="ts">
     import rawBriefcaseSlashIcon from "@gravity-ui/icons/svgs/ban.svg?raw";
-    import { enhance } from "$app/forms";
+    import { loadingEnhance } from '$lib/actions/loading';
     import { i18n } from "$lib/i18n.svelte";
 
     const ErrorIcon = rawBriefcaseSlashIcon.replace(
@@ -39,7 +39,7 @@
             })}
         </p>
 
-        <form method="POST" action="/logout" use:enhance class="mt-6">
+        <form method="POST" action="/logout" use:loadingEnhance class="mt-6">
             <button
                 type="submit"
                 class="px-6 py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-pretendard font-semibold rounded-xl transition-colors text-[1rem]"

@@ -4,7 +4,7 @@
     import rawGlobeIcon from "@gravity-ui/icons/svgs/globe.svg?raw";
     import { themeManager } from "$lib/theme.svelte";
     import { i18n } from "$lib/i18n.svelte";
-    import { enhance } from "$app/forms";
+    import { loadingEnhance } from '$lib/actions/loading';
 
     const resizeSvg = (svg: string) =>
         svg.replace('width="16" height="16"', 'width="24" height="24"');
@@ -98,7 +98,7 @@
                 <form
                     method="POST"
                     action="/logout"
-                    use:enhance
+                    use:loadingEnhance
                     class="w-full max-w-[20rem]"
                 >
                     <button
