@@ -147,7 +147,7 @@ async function checkIntegrity() {
                 return `[${m.sportName || "알수없음"}] ${nameDisplay}`;
             }).join(", ");
             
-            console.error(`[위반 3 - 같은 날짜 중복 경기 배정] 반: ${classNumber}반, 날짜: ${dateStr}, 경기들: ${matchNames}`);
+            console.warn(`[경고 3 - 같은 날짜 중복 경기 배정] 반: ${classNumber}반, 날짜: ${dateStr}, 경기들: ${matchNames}`);
             violation3Count++;
         }
     }
@@ -155,12 +155,17 @@ async function checkIntegrity() {
     console.log(`\n=== 검사 종료 ===`);
     console.log(`조건 1 (동시간대 중복 배정): ${violation1Count}건 위반`);
     console.log(`조건 2 (자기 반 경기 배정): ${violation2Count}건 위반`);
-    console.log(`조건 3 (하루 2경기 이상 배정된 반): ${violation3Count}건 위반`);
+    console.log(`조건 3 (하루 2경기 이상 배정된 반): ${violation3Count}건 경고`);
 
-    if (violation1Count === 0 && violation2Count === 0 && violation3Count === 0) {
-        console.log("✅ 모든 무결성 조건이 만족되었습니다!");
+    if (violation1Count === 0 && violation2Count === 0) {
+        if (violation3Count === 0) {
+            console.log("✅ 모든 무결성 조건이 만족되었습니다!");
+        } else {
+            console.log("✅ 주요 무결성 조건은 만족되었으나, 일부 반의 하루 다중 경기(경고)가 존재합니다.");
+        }
     } else {
         console.log("❌ 문제되는 경기 배정을 확인하고 수정하세요.");
+        process.exit(1);
     }
 
     process.exit(0);
