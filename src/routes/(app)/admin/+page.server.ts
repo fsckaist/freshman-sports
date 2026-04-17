@@ -338,6 +338,7 @@ export const load: PageServerLoad = async ({ url, locals, parent }) => {
                 scheduleWindowStart: r.match.scheduleWindowStart?.toISOString() ?? null,
                 scheduleWindowEnd: r.match.scheduleWindowEnd?.toISOString() ?? null,
                 scheduleWindowDeadline: r.match.scheduleWindowDeadline?.toISOString() ?? null,
+                scheduledAt: r.match.scheduledAt?.toISOString() ?? null,
                 status: r.match.status,
                 scheduleId: r.match.scheduleId,
                 location: r.match.location,

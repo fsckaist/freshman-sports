@@ -104,6 +104,16 @@
                 })}
             </p>
         </div>
+        {#if activeMatch}
+            <div class="flex items-center shrink-0 ml-4">
+                <button
+                    class="px-4 py-2 border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold rounded-xl text-sm transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
+                    onclick={() => openForfeitModal()}
+                >
+                    {i18n.t({ ko: "기권승/몰수패 처리", en: "Set Forfeit" })}
+                </button>
+            </div>
+        {/if}
     </div>
 
     <!-- Main Content Area: Left Sidebar (Matches) & Right Content (Grid) -->
@@ -173,6 +183,19 @@
                             )}
                         </div>
                     {/if}
+                    
+                    {#if matchPair.scheduledAt}
+                        <div class="mt-1 text-[0.75rem] font-bold text-emerald-600 dark:text-emerald-400 w-full text-center rounded py-1 bg-emerald-50 dark:bg-emerald-900/20">
+                            {i18n.t({ ko: "경기 일정", en: "Match Time" })}: {new Date(matchPair.scheduledAt).toLocaleString(
+                                i18n.locale === "ko" ? "ko-KR" : "en-US",
+                                { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }
+                            )}
+                        </div>
+                    {:else}
+                        <div class="mt-1 text-[0.75rem] font-semibold text-zinc-400 dark:text-zinc-500 w-full text-center rounded py-1 bg-zinc-100 dark:bg-zinc-800">
+                            {i18n.t({ ko: "경기 일정 미설정", en: "Match Time Not Set" })}
+                        </div>
+                    {/if}
                 </a>
             {/each}
             {#if completedClasses.length === 0}
@@ -191,17 +214,6 @@
         <div
             class="flex-1 flex flex-col overflow-auto w-0 min-w-0 min-h-0 relative py-6 bg-white dark:bg-zinc-950"
         >
-            {#if activeMatch}
-                <div class="flex justify-end px-[1.875rem] w-full mb-4 shrink-0">
-                    <button
-                        class="px-4 py-2 border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold rounded-xl text-sm transition-colors hover:bg-red-100 dark:hover:bg-red-900/40"
-                        onclick={() => openForfeitModal()}
-                    >
-                        {i18n.t({ ko: "기권승/몰수패 처리", en: "Set Forfeit" })}
-                    </button>
-                </div>
-            {/if}
-
             {#if Object.keys(confirmGridData).length === 0}
                 <div
                     class="flex items-center justify-center w-full h-full py-12"
