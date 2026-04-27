@@ -124,7 +124,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
                 refereePhone: referee.phoneNumber,
                 managerName: manager.name,
                 matchNotes: matches.matchNotes,
-                recordStructure: sports.recordStructure
+                recordStructure: sports.recordStructure,
+                isVerified: matches.isVerified
             })
             .from(matches)
             .innerJoin(sports, eq(matches.sportId, sports.id))
@@ -251,6 +252,10 @@ export const actions: Actions = {
 
         if (!match || !match.scheduleId) {
             return fail(404, { message: 'Match not found' });
+        }
+
+        if (match.isVerified) {
+            return fail(400, { message: JSON.stringify({ ko: '이미 확정된 경기의 출석 정보는 수정할 수 없습니다.', en: 'Attendance information cannot be modified for verified matches.' }) });
         }
 
         const user = await db.query.users.findFirst({

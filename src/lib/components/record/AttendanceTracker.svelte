@@ -33,7 +33,7 @@
         class?: number | string;
     } | null>(null);
     let isScanPaused = $state(false);
-    const isMatchFinished = $derived(activeMatch.status === "FINISHED");
+    const isMatchVerified = $derived(activeMatch.isVerified === true);
 
     let activeTab = $state("teamA");
 
@@ -286,7 +286,7 @@
 
         <button
             type="button"
-            disabled={isMatchFinished}
+            disabled={isMatchVerified}
             onclick={() =>
                 openScan(
                     activeTab === "teamA"
