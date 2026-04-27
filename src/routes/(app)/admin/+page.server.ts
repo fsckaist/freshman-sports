@@ -961,7 +961,12 @@ export const actions: Actions = {
 
             // Auto-compute schedule window for the next-round match
             if (winnerClassId) {
-                try { await computeOrUpdateNextMatchWindow(matchId); } catch (e) { console.error('computeOrUpdateNextMatchWindow error:', e); }
+                const matchCheck = await db.select({ scheduledAt: matches.scheduledAt }).from(matches).where(eq(matches.id, matchId)).limit(1);
+                if (!matchCheck[0]?.scheduledAt) {
+                    try { await propagateByeWindow(matchId); } catch (e) { console.error('propagateByeWindow error:', e); }
+                } else {
+                    try { await computeOrUpdateNextMatchWindow(matchId); } catch (e) { console.error('computeOrUpdateNextMatchWindow error:', e); }
+                }
             }
 
             return { success: true };
