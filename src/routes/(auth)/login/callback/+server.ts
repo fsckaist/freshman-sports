@@ -25,8 +25,14 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     let rawUserInfo;
     try {
         rawUserInfo = await ssoClient.getUserInfo(code);
-    } catch (e) {
+    } catch (e: any) {
         console.error('SSO getUserInfo error:', e);
+        
+        // Automatically restart login flow if the authorization code is invalid/expired
+        if (e?.response?.data?.code === 'INVALID_CODE') {
+            throw redirect(303, '/login/sso');
+        }
+
         const msg = JSON.stringify({ ko: 'SSO 서버와 통신 중 오류가 발생했습니다.', en: 'An error occurred while communicating with the SSO server.' });
         throw redirect(303, '/login?error=' + encodeURIComponent(msg));
     }
