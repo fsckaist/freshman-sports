@@ -29,6 +29,10 @@ function setCachedUser(id: string, data: any) {
         }
     }
 }
+
+export function invalidateUserCache(id: string) {
+    userCache.delete(id);
+}
 // ---------------------------
 
 export const handle: Handle = async ({ event, resolve }) => {

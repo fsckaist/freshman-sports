@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import { ssoClient, parseUserData } from '$lib/server/sso';
 import { signToken } from '$lib/server/jwt';
 import type { RequestHandler } from './$types';
+import { invalidateUserCache } from '../../../../hooks.server';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
     const code = url.searchParams.get('code');
@@ -88,6 +89,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
                 gender: userData.gender || dbUser.gender,
             })
             .where(eq(users.id, dbUser.id));
+        invalidateUserCache(dbUser.id);
     }
 
     // Sign JWT and set as session cookie

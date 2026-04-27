@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
+import { invalidateUserCache } from '../../../../hooks.server';
 
 export const load: PageServerLoad = async (event) => {
     // Require authentication to hit the registration flow
@@ -37,6 +38,8 @@ export const actions = {
             console.error('Failed to update user gender:', e);
             return fail(500, { error: 'Failed to save gender. Please try again.' });
         }
+
+        invalidateUserCache(event.locals.user.id);
 
         if (event.locals.user.agreedRules) {
             if (event.locals.user.agreedPrivacy) {
