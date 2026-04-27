@@ -93,7 +93,9 @@ export const load: PageServerLoad = async ({ locals }) => {
                 teamA: classA.classNumber,
                 teamB: classB.classNumber,
                 sportName: sports.name,
-                sportId: sports.id
+                sportId: sports.id,
+                winnerClassId: matches.winnerClassId,
+                isVerified: matches.isVerified
             })
                 .from(matches)
                 .leftJoin(schedules, eq(matches.scheduleId, schedules.id))
@@ -172,7 +174,15 @@ export const load: PageServerLoad = async ({ locals }) => {
             // Map status enum to Korean string
             let statusKo = "예정";
             if (match.status === "ONGOING") statusKo = "진행";
-            else if (match.status === "FINISHED") statusKo = "종료";
+            else if (match.status === "FINISHED") {
+                if (match.isVerified && match.winnerClassId) {
+                    statusKo = match.winnerClassId === userProfile.classId ? "승리" : "패배";
+                } else if (match.isVerified && !match.winnerClassId) {
+                    statusKo = "패배"; // 양 팀 동시 탈락 시 결과적으로 해당 반은 패배/탈락이므로
+                } else {
+                    statusKo = "종료";
+                }
+            }
             else if (match.status === "CANCELED") statusKo = "취소";
             else if (match.status === "PENDING_SCHEDULE") statusKo = "일정 조율 필요";
 

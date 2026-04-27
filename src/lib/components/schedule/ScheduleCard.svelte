@@ -32,7 +32,19 @@
             borderClass: "border border-zinc-100 dark:border-zinc-800",
             badgeBgClass: "bg-zinc-400",
             badgeTextClass: "text-zinc-100 dark:text-zinc-300",
-            opacityClass: "opacity-30",
+            opacityClass: "opacity-50",
+        },
+        승리: {
+            borderClass: "border-2 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.15)]",
+            badgeBgClass: "bg-emerald-500",
+            badgeTextClass: "text-emerald-50",
+            opacityClass: "opacity-100",
+        },
+        패배: {
+            borderClass: "border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50",
+            badgeBgClass: "bg-zinc-500 dark:bg-zinc-600",
+            badgeTextClass: "text-zinc-100",
+            opacityClass: "opacity-50",
         },
     };
 
@@ -94,9 +106,13 @@
                     ? i18n.t({ ko: "진행", en: "Ongoing" })
                     : status === "예정"
                       ? i18n.t({ ko: "예정", en: "Scheduled" })
-                      : status === "종료"
-                        ? i18n.t({ ko: "종료", en: "Ended" })
-                        : status}
+                      : status === "승리"
+                        ? i18n.t({ ko: "승리", en: "Win" })
+                        : status === "패배"
+                          ? i18n.t({ ko: "패배", en: "Loss" })
+                          : status === "종료"
+                            ? i18n.t({ ko: "종료", en: "Ended" })
+                            : status}
             </p>
         </div>
     </div>
