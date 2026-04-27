@@ -126,13 +126,11 @@
                     class="content-stretch flex flex-col gap-[0.625rem] items-start relative shrink-0"
                 >
                     <p
-                        class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.5rem] whitespace-nowrap"
+                        class="font-['Pretendard_Variable'] font-semibold leading-[normal] relative shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.0rem] whitespace-nowrap"
                     >
                         {i18n.decode(match.sportName)}
                         {#if match.name}
-                            <span
-                                class="text-lg text-zinc-500 dark:text-zinc-400 ml-2"
-                            >
+                            <span class="text-zinc-500 dark:text-zinc-400 ml-2">
                                 {i18n.decode(match.name)}
                             </span>
                         {/if}
