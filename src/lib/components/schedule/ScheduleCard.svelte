@@ -63,7 +63,7 @@
     >
         <div class="flex flex-col gap-[0.5rem] items-start shrink-0 relative">
             <h3
-                class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.0rem] m-0"
+                class="font-pretendard font-semibold leading-tight shrink-0 text-zinc-800 dark:text-zinc-100 text-[1.25rem] m-0"
             >
                 {i18n.decode(title)}
             </h3>
