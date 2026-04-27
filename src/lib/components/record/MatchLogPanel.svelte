@@ -142,16 +142,18 @@
         })(),
     );
 
-    // Initialize state when activeMatch changes
+    // Initialize state when activeMatch ID changes (i.e. user selects a different match)
+    let lastMatchId = $state<string | null>(null);
+
     $effect(() => {
-        // Track these to trigger re-run when relevant data changes
-        const _id = activeMatch.id;
+        const currentId = activeMatch.id;
         const _structure = recordStructure;
         const _parsed = parsedNotes;
-        const _attA = activeMatch.attendance.teamA.length;
-        const _attB = activeMatch.attendance.teamB.length;
 
         untrack(() => {
+            if (currentId === lastMatchId) return;
+            lastMatchId = currentId;
+
             const initialA = createDefaultScores();
             const initialB = createDefaultScores();
             let initialCardsA: Record<string, number> = {};
@@ -200,6 +202,34 @@
             cardsB = initialCardsB;
             approvedA = !!parsedNotes?.teamA?.approved;
             approvedB = !!parsedNotes?.teamB?.approved;
+        });
+    });
+
+    // Reactively add card entries for newly registered players WITHOUT resetting scores
+    $effect(() => {
+        const teamA = activeMatch.attendance.teamA;
+        const teamB = activeMatch.attendance.teamB;
+
+        untrack(() => {
+            let cardsAChanged = false;
+            const newCardsA = { ...cardsA };
+            teamA.forEach((u: any) => {
+                if (newCardsA[u.name] === undefined) {
+                    newCardsA[u.name] = 0;
+                    cardsAChanged = true;
+                }
+            });
+            if (cardsAChanged) cardsA = newCardsA;
+
+            let cardsBChanged = false;
+            const newCardsB = { ...cardsB };
+            teamB.forEach((u: any) => {
+                if (newCardsB[u.name] === undefined) {
+                    newCardsB[u.name] = 0;
+                    cardsBChanged = true;
+                }
+            });
+            if (cardsBChanged) cardsB = newCardsB;
         });
     });
 
@@ -487,8 +517,56 @@
         }
     }
 
+    // --- Debounced Auto-Save ---
+    let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+    let isSaving = $state(false);
+    let lastSavedJson = $state("");
+
+    function autoSave(notesJson: string, scoreA: number, scoreB: number) {
+        if (notesJson === lastSavedJson) return;
+        lastSavedJson = notesJson;
+        isSaving = true;
+
+        fetch(`/api/match/${activeMatch.id}/save-notes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scoreA, scoreB, matchNotes: notesJson })
+        })
+            .then(res => {
+                if (!res.ok) console.error('Auto-save failed:', res.status);
+            })
+            .catch(err => console.error('Auto-save error:', err))
+            .finally(() => { isSaving = false; });
+    }
+
+    // Watch for score/card/approval changes and debounce save (2s)
+    $effect(() => {
+        // Track all mutable recording state
+        const notesJson = matchNotesJson;
+        const scoreA = totalScoreA;
+        const scoreB = totalScoreB;
+
+        untrack(() => {
+            // Skip auto-save if match is not ongoing or is already verified
+            if (activeMatch.status !== "ONGOING" || activeMatch.isVerified) return;
+            // Skip the very first render (initial load from DB)
+            if (!lastSavedJson && notesJson) {
+                lastSavedJson = notesJson;
+                return;
+            }
+
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => autoSave(notesJson, scoreA, scoreB), 2000);
+        });
+    });
+
     onDestroy(() => {
         stopScanner();
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        // Flush any pending save immediately on destroy
+        if (lastSavedJson !== matchNotesJson && activeMatch.status === "ONGOING" && !activeMatch.isVerified) {
+            autoSave(matchNotesJson, totalScoreA, totalScoreB);
+        }
     });
 </script>
 
@@ -817,6 +895,23 @@
 <div
     class="bg-white dark:bg-zinc-900 flex flex-col gap-[0.625rem] items-start min-h-[25rem] overflow-clip p-[1.25rem] relative rounded-[1.25rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] w-full h-full border border-zinc-100 dark:border-zinc-800"
 >
+    <!-- Auto-save indicator -->
+    {#if activeMatch.status === "ONGOING" && !activeMatch.isVerified}
+        <div class="absolute top-3 right-4 flex items-center gap-1.5 text-[0.7rem] font-medium z-10">
+            {#if isSaving}
+                <svg class="animate-spin h-3 w-3 text-amber-500" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-amber-500">{i18n.t({ ko: '저장 중…', en: 'Saving…' })}</span>
+            {:else if lastSavedJson}
+                <svg class="h-3 w-3 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-emerald-500">{i18n.t({ ko: '자동 저장됨', en: 'Auto-saved' })}</span>
+            {/if}
+        </div>
+    {/if}
     <div
         class="content-stretch flex flex-col md:flex-row flex-[1_0_0] gap-[0.625rem] items-center min-h-px min-w-px relative w-full overflow-y-auto md:overflow-hidden"
     >

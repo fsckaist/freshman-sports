@@ -7,6 +7,7 @@
     import { slide } from "svelte/transition";
     import chevronDownIcon from "@gravity-ui/icons/svgs/chevron-down.svg?raw";
     import { i18n } from "$lib/i18n.svelte";
+    import { onDestroy } from "svelte";
 
     let { data }: { data: PageData } = $props();
 
@@ -31,6 +32,46 @@
             ? data.allMatches.filter((m) => m.sportId === activeSportId)
             : data.allMatches,
     );
+
+    // --- Polling for real-time match updates (10s interval) ---
+    let polledMatchDetails = $state<typeof data.activeMatchDetails>(null);
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+    // The actual displayed match details: polled data takes priority over initial load
+    let activeMatchDetails = $derived(polledMatchDetails ?? data.activeMatchDetails);
+
+    async function pollMatchDetails(matchId: string) {
+        try {
+            const res = await fetch(`/api/match/${matchId}/details`);
+            if (res.ok) {
+                polledMatchDetails = await res.json();
+            }
+        } catch {
+            // Silently ignore polling errors
+        }
+    }
+
+    $effect(() => {
+        const matchId = activeMatchId;
+
+        // Reset polled data when match changes
+        polledMatchDetails = null;
+
+        // Clear existing interval
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+
+        if (matchId) {
+            // Start polling every 10 seconds
+            pollInterval = setInterval(() => pollMatchDetails(matchId), 10000);
+        }
+    });
+
+    onDestroy(() => {
+        if (pollInterval) clearInterval(pollInterval);
+    });
 </script>
 
 <div
@@ -107,7 +148,7 @@
     <div
         class="flex-none lg:flex-1 flex flex-col lg:h-full min-h-0 relative lg:overflow-hidden gap-6"
     >
-        {#if data.activeMatchDetails}
+        {#if activeMatchDetails}
             <!-- Attendance Management Section -->
             <div class="flex flex-col shrink-0 min-w-0">
                 <button
@@ -137,7 +178,7 @@
                         class="bg-white dark:bg-zinc-900 rounded-[1.25rem] p-[1rem] shadow-[0px_0px_1.875rem_0px_rgba(0,0,0,0.05)] dark:shadow-none border border-zinc-200 dark:border-zinc-800"
                     >
                         <AttendanceTracker
-                            activeMatch={data.activeMatchDetails}
+                            activeMatch={activeMatchDetails}
                         />
                     </div>
                 {/if}
@@ -176,7 +217,7 @@
                     >
                         <div class="flex-none lg:flex-1 lg:overflow-y-auto hide-scrollbar">
                             <MatchLogPanel
-                                activeMatch={data.activeMatchDetails}
+                                activeMatch={activeMatchDetails}
                             />
                         </div>
                     </div>
