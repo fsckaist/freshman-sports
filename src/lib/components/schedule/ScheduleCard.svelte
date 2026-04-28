@@ -35,10 +35,10 @@
             opacityClass: "opacity-50",
         },
         승리: {
-            borderClass: "border-2 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.15)]",
+            borderClass: "border border-zinc-100 dark:border-zinc-800",
             badgeBgClass: "bg-emerald-500",
             badgeTextClass: "text-emerald-50",
-            opacityClass: "opacity-100",
+            opacityClass: "opacity-50",
         },
         패배: {
             borderClass: "border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50",
