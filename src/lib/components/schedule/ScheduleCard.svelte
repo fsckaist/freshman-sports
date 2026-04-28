@@ -67,11 +67,11 @@
 </script>
 
 <div
-    class="bg-white dark:bg-zinc-900 border-solid flex flex-col gap-[0.625rem] items-start justify-center overflow-clip p-[1.25rem] rounded-[1.25rem] shrink-0 w-full relative {currentConfig.borderClass}"
+    class="bg-white dark:bg-zinc-900 border-solid flex flex-col gap-[0.625rem] items-start justify-center overflow-clip p-[1.25rem] rounded-[1.25rem] shrink-0 w-full relative transition-all duration-200 {currentConfig.borderClass} {currentConfig.opacityClass}"
 >
     <!-- Header -->
     <div
-        class="flex items-start justify-between shrink-0 w-full relative {currentConfig.opacityClass}"
+        class="flex items-start justify-between shrink-0 w-full relative"
     >
         <div class="flex flex-col gap-[0.5rem] items-start shrink-0 relative">
             <h3
@@ -123,7 +123,7 @@
 
     <!-- Content Area -->
     <div
-        class="flex flex-col gap-[0.625rem] items-start shrink-0 w-full relative {currentConfig.opacityClass}"
+        class="flex flex-col gap-[0.625rem] items-start shrink-0 w-full relative"
     >
         <div class="flex items-start justify-between shrink-0 w-full relative">
             <!-- VS Score -->
