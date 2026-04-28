@@ -1,6 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import { users, matches, schedules, sports, classes, rosters } from '$lib/server/db/schema';
+import { users, matches, schedules, sports, classes, rosters, registers } from '$lib/server/db/schema';
 import { eq, or, and, asc, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import type { PageServerLoad } from './$types';
@@ -44,7 +44,8 @@ export const load: PageServerLoad = async ({ locals }) => {
             proctorsList,
             allSports,
             rawRosters,
-            userMatches
+            userMatches,
+            matchRegisters
         ] = await Promise.all([
             // 1. Fetch user's registered sports
             db.select({ name: sports.name })
@@ -117,7 +118,26 @@ export const load: PageServerLoad = async ({ locals }) => {
                         ELSE 5 
                     END`),
                     asc(schedules.startTime)
-                )
+                ),
+
+            // 7. Fetch Registers for those matches
+            userProfile.classId
+                ? db.select({
+                    matchId: matches.id,
+                    playerName: users.name,
+                    checkedInAt: registers.checkedInAt,
+                    isCheering: registers.isCheering,
+                    sportId: matches.sportId
+                })
+                .from(registers)
+                .innerJoin(users, eq(registers.userId, users.id))
+                .innerJoin(matches, eq(registers.scheduleId, matches.scheduleId))
+                .innerJoin(rosters, and(
+                    eq(rosters.userId, registers.userId),
+                    eq(rosters.sportId, matches.sportId)
+                ))
+                .where(eq(registers.classId, userProfile.classId))
+                : Promise.resolve([])
         ]);
 
         const userSportsString = userSports.length > 0
@@ -160,7 +180,24 @@ export const load: PageServerLoad = async ({ locals }) => {
         }
 
         const formattedAllMatches = userMatches.map((match) => {
-            const playersString = (rosterBySport.get(match.sportId) || []).join(', ');
+            let playersString = "";
+            if (match.status === "PENDING_SCHEDULE") {
+                playersString = (rosterBySport.get(match.sportId) || []).join(', ');
+            } else {
+                const regsForMatch = matchRegisters.filter(r => r.matchId === match.id);
+                if (match.status === "FINISHED" || match.status === "ONGOING") {
+                    playersString = regsForMatch
+                        .filter(r => r.checkedInAt && !r.isCheering)
+                        .map(r => r.playerName)
+                        .join(', ');
+                } else {
+                    playersString = regsForMatch
+                        .filter(r => !r.isCheering)
+                        .map(r => r.playerName)
+                        .join(', ');
+                }
+            }
+            if (!playersString) playersString = "선수 없음";
 
             // Format the startTime to "03월 15일 14시 00분" format
             const d = match.time ? new Date(match.time) : new Date();

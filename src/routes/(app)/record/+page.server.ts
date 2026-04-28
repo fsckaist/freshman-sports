@@ -77,6 +77,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         .innerJoin(users, eq(registers.userId, users.id))
         .innerJoin(schedules, eq(registers.scheduleId, schedules.id))
         .innerJoin(matches, eq(matches.scheduleId, schedules.id))
+        .innerJoin(rosters, and(
+            eq(rosters.userId, registers.userId),
+            eq(rosters.sportId, matches.sportId)
+        ))
         .where(
             and(
                 inArray(matches.id, allMatchIds),
@@ -87,16 +91,16 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     // Map registers back to matches
     const matchesWithAttendance = allMatches.map(m => {
         const matchRegs = allRegisters.filter(r => r.matchId === m.id);
-        const teamARegs = matchRegs.filter(r => r.classId === m.classAId);
-        const teamBRegs = matchRegs.filter(r => r.classId === m.classBId);
+        const teamARegs = matchRegs.filter(r => r.classId === m.classAId && !r.isCheering);
+        const teamBRegs = matchRegs.filter(r => r.classId === m.classBId && !r.isCheering);
 
         return {
             ...m,
             attendance: {
                 teamA: teamARegs.filter(r => r.checkedInAt).map(r => ({ name: r.userName })),
-                plannedTeamA: teamARegs.filter(r => !r.checkedInAt).map(r => ({ name: r.userName })),
+                plannedTeamA: m.status === 'FINISHED' ? [] : teamARegs.filter(r => !r.checkedInAt).map(r => ({ name: r.userName })),
                 teamB: teamBRegs.filter(r => r.checkedInAt).map(r => ({ name: r.userName })),
-                plannedTeamB: teamBRegs.filter(r => !r.checkedInAt).map(r => ({ name: r.userName }))
+                plannedTeamB: m.status === 'FINISHED' ? [] : teamBRegs.filter(r => !r.checkedInAt).map(r => ({ name: r.userName }))
             }
         };
     });
