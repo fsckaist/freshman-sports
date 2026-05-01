@@ -181,6 +181,14 @@ function computeWindowFromEnds(feederEndTimes: Date[])
     // Deadline is the end of the day AFTER the later date (ensuring a full day buffer)
     const deadline = new Date(laterDate);
     deadline.setDate(deadline.getDate() + 1);
+
+    // Skip weekends: if Saturday (6) move to Monday (+2), if Sunday (0) move to Monday (+1)
+    if (deadline.getDay() === 6) {
+        deadline.setDate(deadline.getDate() + 2);
+    } else if (deadline.getDay() === 0) {
+        deadline.setDate(deadline.getDate() + 1);
+    }
+
     deadline.setHours(18, 0, 0, 0);
 
     // Start is 4 weekdays after deadline
@@ -365,6 +373,13 @@ export async function propagateByeWindow(byeMatchId: string): Promise<void> {
                 const laterDate = new Date(Math.max(...validDates.map(d => d.getTime())));
                 candidateScheduledAt = new Date(laterDate);
                 candidateScheduledAt.setDate(candidateScheduledAt.getDate() + 1);
+
+                // Skip weekends: if Saturday (6) move to Monday (+2), if Sunday (0) move to Monday (+1)
+                if (candidateScheduledAt.getDay() === 6) {
+                    candidateScheduledAt.setDate(candidateScheduledAt.getDate() + 2);
+                } else if (candidateScheduledAt.getDay() === 0) {
+                    candidateScheduledAt.setDate(candidateScheduledAt.getDate() + 1);
+                }
             }
         }
     }
