@@ -5,8 +5,8 @@ import { eq, isNotNull } from 'drizzle-orm';
 import { addWeekdays, ensureScheduleSlots } from '$lib/server/scheduleWindowHelper';
 
 export async function GET({ locals }) {
-    // Check if the user is an admin (assuming there is an admin role check in locals)
-    if (locals.user?.role !== 'admin') {
+    // Check if the user is an admin
+    if (!locals.user?.isAdmin) {
         return json({ error: 'Unauthorized. Admin access required.' }, { status: 401 });
     }
 
