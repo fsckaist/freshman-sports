@@ -18,7 +18,7 @@
 
     let { data, form } = $props();
     const errorMessage = $derived(
-        form?.error || $page.url.searchParams.get("error"),
+        form?.error || data.cookieError || $page.url.searchParams.get("error"),
     );
 </script>
 

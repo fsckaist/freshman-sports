@@ -48,8 +48,8 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
     }
 
     const handleAuthError = (message: string) => {
+        cookies.set('login_error', message, { path: '/', httpOnly: true, secure: !dev, maxAge: 60 });
         const errorUrl = new URL('/login', url.origin);
-        errorUrl.searchParams.set('error', message);
         return redirect(303, ssoClient.getLogoutUrl(userData.sid, errorUrl.toString()));
     };
 

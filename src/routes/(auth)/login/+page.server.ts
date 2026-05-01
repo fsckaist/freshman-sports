@@ -6,9 +6,15 @@ import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { signToken } from '$lib/server/jwt';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ cookies }) => {
+    let cookieError = cookies.get('login_error') || null;
+    if (cookieError) {
+        cookies.delete('login_error', { path: '/' });
+    }
+
     return {
-        useSparcsSso: env.USE_SPARCS_SSO !== 'false'
+        useSparcsSso: env.USE_SPARCS_SSO !== 'false',
+        cookieError
     };
 };
 
