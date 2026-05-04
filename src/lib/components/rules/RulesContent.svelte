@@ -1119,4 +1119,81 @@
             </li>
         </ol>
     </section>
+
+    <h3 class="font-bold text-xl m-0 mt-4">
+        {i18n.t({ ko: "부칙", en: "ADDENDA" })}
+    </h3>
+    <section class="flex flex-col gap-2">
+        <p class="m-0">
+            <strong
+                >{i18n.t({
+                    ko: "제1조 (대리 선수 출전의 예외 허용)",
+                    en: "Article 1 (Exception for Substitute Player Participation)",
+                })}</strong
+            >
+        </p>
+        <ol class="list-decimal pl-6 m-0">
+            <li>
+                {i18n.t({
+                    ko: "규정에 의거하여 경기 일정이 확정된 후에는 선수 명단 수정이 일체 불가함이 원칙이나, 새내기들의 화합과 친목 도모라는 본 대회의 목적성에 따라 특정 경기에서 예외적으로 대리 선수 출전을 허용할 수 있다.",
+                    en: "As a rule, no modifications to the player roster are permitted once the match schedule has been finalized according to the regulations. However, in alignment with the tournament's purpose of promoting harmony and fellowship among freshmen, substitute player participation may be exceptionally allowed for specific matches.",
+                })}
+            </li>
+            <li>
+                {i18n.t({
+                    ko: "대리 선수 출전은 다음 각 호의 조건을 모두 충족하는 경우에 한하여 허용된다.",
+                    en: "Substitute player participation is allowed only when all of the following conditions are met:",
+                })}
+                <ul class="list-disc pl-6 m-0 mt-1">
+                    <li>
+                        {i18n.t({
+                            ko: "대리 선수는 해당 팀과 동일한 새터반 소속이어야 하며, 제9조의 참가 자격을 갖춘 자여야 한다.",
+                            en: "The substitute must belong to the same Saeter-ban as the team and meet the eligibility requirements of Article 9.",
+                        })}
+                    </li>
+                    <li>
+                        {i18n.t({
+                            ko: "해당 경기 진행 전까지 상대 팀의 명시적인 동의를 받아야 한다.",
+                            en: "Explicit consent from the opposing team must be obtained prior to the start of the match.",
+                        })}
+                    </li>
+                    <li>
+                        {i18n.t({
+                            ko: "결원의 사유가 불가피함을 인정받아 최종적으로 운영위원회에서 대리 출전을 승인하여야 한다.",
+                            en: "The Organizing Committee must acknowledge the unavoidable nature of the vacancy and grant final approval for the substitution.",
+                        })}
+                    </li>
+                </ul>
+            </li>
+            <li>
+                {i18n.t({
+                    ko: "경기 진행 전까지 상대측 동의 및 운영위원회의 최종 승인을 받지 못한 상태에서 결원이 발생하여 경기 진행이 불가할 경우, 본 규정 제19조에 의거하여 예외 없이 지각 및 결석(몰수패) 처리한다.",
+                    en: "If a match cannot proceed due to a vacancy without prior consent and final approval, it shall be treated as a forfeit (Tardiness/Absence) in accordance with Article 19 without exception.",
+                })}
+            </li>
+            <li>
+                {i18n.t({
+                    ko: "상대 팀의 요청이 있거나 운영위원회가 필요하다고 판단하는 경우, 해당 팀은 결원 사유에 대한 증빙 서류를 제출해야 할 의무가 있다.",
+                    en: "The team is obligated to submit evidentiary documents for the vacancy if requested by the opposing team or deemed necessary by the Organizing Committee.",
+                })}
+            </li>
+        </ol>
+    </section>
+
+    <section class="flex flex-col gap-2">
+        <p class="m-0">
+            <strong
+                >{i18n.t({
+                    ko: "제2조 (시행일)",
+                    en: "Article 2 (Enforcement Date)",
+                })}</strong
+            >
+        </p>
+        <p class="m-0">
+            {i18n.t({
+                ko: "본 부칙은 공지된 시점부터 예외 없이 즉시 적용된다.",
+                en: "These Addenda shall apply immediately and without exception from the time of announcement.",
+            })}
+        </p>
+    </section>
 </div>
