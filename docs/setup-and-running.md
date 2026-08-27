@@ -7,6 +7,24 @@
 - SPARCS SSO를 사용할 경우 SSO client id와 secret key가 필요합니다.
 - DB 시드를 실행하려면 프로젝트 루트의 상위 폴더에 `data` 디렉터리와 CSV 파일이 필요합니다.
 
+## 레포지토리와 시드 데이터 폴더
+
+시드 스크립트는 현재 작업 디렉터리를 기준으로 `../data`를 읽습니다. 따라서 앱 레포지토리와 실제 시드 데이터 폴더는 서로 독립적으로 존재해야 합니다. `data`는 Git으로 추적하지 않는 운영 데이터용 폴더이며, 이 레포지토리 안에 만들거나 `data/`에 파일을 추가해도 시드 스크립트의 입력 위치가 바뀌지 않습니다.
+
+권장 배치는 다음과 같습니다.
+
+```text
+<상위 폴더>/
+├─ freshman-sports/          # 이 레포지토리
+└─ data/                     # Git 미추적 시드 입력
+   ├─ user.csv
+   ├─ user_demo.csv
+   ├─ bracket.csv
+   └─ bracket_demo.csv
+```
+
+레포지토리에는 형식 확인과 초기 준비를 위한 예시 파일을 [examples/seed-data](../examples/seed-data)에 포함합니다. 이 폴더의 파일은 자동으로 읽지 않으므로, 시드에 사용할 CSV를 `../data`로 복사한 뒤 실행하세요. `.xlsx`는 사람이 편집·확인하기 위한 원본 예시이고, 시드 스크립트는 `.csv`만 읽습니다.
+
 ## 패키지 설치
 
 ```bash
@@ -37,7 +55,7 @@ DB_LOCK="false"
 - `SSO_CLIENT_ID`, `SSO_SECRET_KEY`, `SSO_IS_BETA`: SPARCS SSO V2 클라이언트 설정입니다.
 - `USE_SPARCS_SSO`: `false`이면 개발용 학번 로그인, 그 외 값이면 SSO 로그인을 사용합니다.
 - `JWT_SECRET`: JWT 세션 쿠키 서명에 사용합니다.
-- `IS_DEMO`: `true`이면 `../data/user_demo.csv`, `../data/bracket_demo.csv`를 사용합니다. 그 외에는 `user.csv`, `bracket.csv`를 사용합니다.
+- `IS_DEMO`: `true`이면 `../data/user_demo.csv`, `../data/bracket_demo.csv`를 사용합니다. 그 외에는 `../data/user.csv`, `../data/bracket.csv`를 사용합니다.
 - `DB_LOCK`: `true`이면 DB 초기화/시드 스크립트 실행을 막습니다.
 
 주의: [src/lib/server/sso.ts](../src/lib/server/sso.ts)와 [src/lib/server/jwt.ts](../src/lib/server/jwt.ts)는 `$env/static/private`를 사용하므로 프로덕션 빌드 시점에도 관련 환경 변수가 필요합니다.
@@ -72,6 +90,9 @@ pnpm exec tsx src/lib/server/db/seed_3_brackets.ts
 
 - `../data/user_demo.csv` 또는 `../data/user.csv`
 - `../data/bracket_demo.csv` 또는 `../data/bracket.csv`
+
+각 파일의 예시는 [examples/seed-data](../examples/seed-data)에 있습니다. 해당 폴더의 CSV를 `../data`에 복사해 사용할 수 있습니다.
+
 
 `seed_1_setup.ts`는 기존 핵심 테이블을 삭제한 뒤 기본 종목, 장소, 행사 설정을 넣습니다. 운영 DB에서 실행할 때는 `DB_LOCK=true`로 사고를 방지하세요.
 

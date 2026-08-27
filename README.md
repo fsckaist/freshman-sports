@@ -29,7 +29,7 @@ pnpm exec tsx src/lib/server/db/seed.ts
 pnpm dev
 ```
 
-실행 전에 루트에 `.env` 파일을 만들고 `DATABASE_URL`, `JWT_SECRET`, SSO 관련 환경 변수를 설정해야 합니다. 시드 스크립트는 루트 기준 `../data/user.csv`, `../data/user_demo.csv`, `../data/bracket.csv`, `../data/bracket_demo.csv`를 사용합니다.
+실행 전에 루트에 `.env` 파일을 만들고 `DATABASE_URL`, `JWT_SECRET`, SSO 관련 환경 변수를 설정해야 합니다. 시드 입력은 이 레포지토리와 별도로 관리되는 상위 경로의 `../data`에서 읽습니다. 즉, 이 레포지토리와 `data` 폴더는 나란히 있어야 하며, 시드 스크립트는 `../data/user.csv`, `../data/user_demo.csv`, `../data/bracket.csv`, `../data/bracket_demo.csv`를 사용합니다. 형식 예시는 [examples/seed-data](./examples/seed-data)에 포함되어 있습니다.
 
 ## 상세 문서
 

@@ -31,6 +31,8 @@ pnpm exec drizzle-kit push
 
 ## DB 시드
 
+시드 입력은 레포지토리 내부가 아닌 `../data`에서 읽습니다. 즉, 레포지토리와 Git 미추적 `data` 폴더를 같은 상위 폴더 아래에 따로 둬야 합니다. 파일 형식 예시는 [examples/seed-data](../examples/seed-data)에 포함되어 있지만, 시드 스크립트는 그 폴더를 자동으로 읽지 않습니다. 사용할 CSV를 `../data`에 복사하세요.
+
 ### 전체 실행
 
 ```bash
